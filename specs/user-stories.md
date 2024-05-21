@@ -20,3 +20,4 @@
 - As an admin, I want to be able to update any resource info including name, description and price
 - As an admin, I want to be able to update any user profile so that I change any user info that doesn't fit guidlines
 - As an admin, I want to be able to ban users so that I can punish ones that doesn't follow guidlines
+- As an admin, I want to be able to unban users so that I can appeal bans
