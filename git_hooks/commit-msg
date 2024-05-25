@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+if [[ "${TRACE-0}" == "1" ]]; then
+    set -o xtrace
+fi
+
+startsWith() {
+    string="$1"
+    substring="$2"
+    if [[ "$string" == "$substring "* ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+main() {
+    commit_message=$(cat "$1")
+    branch_name=$(git branch --show-current)
+    ticket=$(echo "$branch_name" | cut -d'-' -f 1,2)
+    if ! startsWith "$commit_message" "$ticket"; then
+      echo "Commit message must start with ticket id, appending it..."
+      echo "$ticket $commit_message" > "$1"
+    fi
+}
+
+main "$@"
