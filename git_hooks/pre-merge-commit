@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -o errexit
+set -o nounset
+set -o pipefail
+if [[ "${TRACE-0}" == "1" ]]; then
+    set -o xtrace
+fi
+
+main() {
+  current_branch=$(git branch --show-current)
+  if [[ $current_branch == 'main' ]]; then
+    echo "You are not allowed to merge into main branch !" >&2
+    exit 1
+  fi
+}
+
+main "$@"
