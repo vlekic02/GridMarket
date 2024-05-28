@@ -3,10 +3,9 @@
 ## Installation guide
 
 1. Clone a repository: `git clone https://github.com/vlekic02/GridMarket.git`
-2. Unzip folder: `unzip GridMarket.zip`
-3. Cd into Grid market folder
-4. Run docker using `docker-compose up -d`
-5. Go to `http://localhost:8080/v1/application/health` to check if everything is working correctly
+2. Cd into GridMarket folder
+3. Run docker using `docker-compose up -d`
+4. Go to `http://localhost:8080/v1/application/health` to check if everything is working correctly
 
 ## Contribution guide
 
@@ -15,9 +14,8 @@
 Hooks are container inside of `git_hooks` directory and should not be skipped. Since hooks are
 contained in directory which is not tracked by version control system, we have to do one time setup.
 
-- Remove existing hooks directory: `rm -rf .git/hooks`
 - If not set already, give all hooks execute permission: `cd git_hooks/; chmod +x *`
-- Create symbolic link pointing to our git_hooks directory: `ln -s $PWD/git_hooks .git/hooks`
+- Create symbolic link pointing to our git_hooks directory: `ln -s $PWD/git_hooks/* .git/hooks/`
 
 ### 2. Tickets
 
@@ -50,9 +48,6 @@ HTTP 200 OK
 GET /<version>/applications/
 ```
 
-**Request headers:**  
-`Authorization: Bearer <API_KEY>`
-
 **Example response:**
 
 ```json
@@ -82,9 +77,6 @@ GET /<version>/applications/
 GET /<version>/applications/<application_id>
 ```
 
-**Request headers:**  
-`Authorization: Bearer <API_KEY>`
-
 **Example responses:**
 
 ```json
@@ -110,9 +102,6 @@ GET /<version>/applications/<application_id>
 ```
 GET /<version>/applications/<application_id>/reviews
 ```
-
-**Request headers:**  
-`Authorization: Bearer <API_KEY>`
 
 **Example responses:**
 
@@ -145,9 +134,6 @@ GET /<version>/applications/<application_id>/reviews
 ```
 POST /<version>/applications/<application_id>/reviews
 ```
-
-**Request headers:**  
-`Authorization: Bearer <API_KEY>`
 
 **Request body example:**
 
