@@ -9,7 +9,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class InMemorySetApplicationRepositoryTest {
+class InMemorySetApplicationRepositoryTest {
 
   private static ApplicationRepository applicationRepository;
 

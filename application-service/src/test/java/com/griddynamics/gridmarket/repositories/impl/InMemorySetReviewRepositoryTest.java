@@ -8,7 +8,7 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class InMemorySetReviewRepositoryTest {
+class InMemorySetReviewRepositoryTest {
 
   private static ReviewRepository reviewRepository;
 
