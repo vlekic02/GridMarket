@@ -2,6 +2,7 @@ plugins {
     java
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
+    id("org.sonarqube") version "5.0.0.4638"
 }
 
 group = "com.griddynamics"
@@ -9,6 +10,14 @@ version = "1.0-SNAPSHOT"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "GridMarket")
+        property("sonar.sources", "src/main")
+        property("sonar.tests", "src/test")
+    }
 }
 
 repositories {
