@@ -1,32 +1,51 @@
 package com.griddynamics.gridmarket.services;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.when;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
-import com.griddynamics.gridmarket.repositories.ApplicationRepository;
-import java.util.Optional;
+import com.griddynamics.gridmarket.models.Application;
+import com.griddynamics.gridmarket.models.Review;
+import com.griddynamics.gridmarket.repositories.impl.InMemorySetApplicationRepository;
+import java.util.Collection;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-@ExtendWith(MockitoExtension.class)
 class ApplicationServiceTest {
 
   private static ApplicationService applicationService;
-  @Mock
-  private static ApplicationRepository applicationRepository;
 
   @BeforeEach
   void setup() {
-    applicationService = new ApplicationService(applicationRepository);
+    applicationService = new ApplicationService(new InMemorySetApplicationRepository());
   }
 
   @Test
   void shouldThrowIfNoApplicationIsPresent() {
-    when(applicationRepository.findById(1)).thenReturn(Optional.empty());
-    assertThrows(NotFoundException.class, () -> applicationService.getApplicationById(1));
+    assertThrows(NotFoundException.class, () -> applicationService.getApplicationById(10));
+  }
+
+  @Test
+  void shouldThrowIfNoApplicationPresentWhenRequestingReview() {
+    assertThrows(NotFoundException.class, () -> applicationService.getAllReviewForApplication(10));
+  }
+
+  @Test
+  void shouldReturnReviewForApplication() {
+    Collection<Review> reviews = applicationService.getAllReviewForApplication(1);
+    assertFalse(reviews.isEmpty());
+  }
+
+  @Test
+  void shouldReturnApplicationIfExist() {
+    Application application = applicationService.getApplicationById(1);
+    assertEquals(1, application.id());
+  }
+
+  @Test
+  void shouldReturnAllApplications() {
+    Collection<Application> applications = applicationService.getAllApplications();
+    assertFalse(applications.isEmpty());
   }
 }
