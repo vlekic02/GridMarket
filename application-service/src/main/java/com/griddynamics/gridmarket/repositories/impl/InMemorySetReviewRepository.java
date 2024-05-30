@@ -16,13 +16,13 @@ public class InMemorySetReviewRepository implements ReviewRepository {
         new Review(1, 1, 2, "Nice application", 5),
         new Review(2, 1, 4, "Meh... don't like it", 2),
         new Review(3, 3, 5, "OK", 4),
-        new Review(4, 4, 8, 4)
+        new Review(4, 4, 8, null, 4)
     );
   }
 
   @Override
   public Set<Review> findByApplication(long applicationId) {
-    return reviews.stream().filter(review -> review.getApplicationId() == applicationId).collect(
+    return reviews.stream().filter(review -> review.applicationId() == applicationId).collect(
         Collectors.toUnmodifiableSet());
   }
 }

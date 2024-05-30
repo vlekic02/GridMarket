@@ -9,6 +9,6 @@ public interface ReviewRepository {
   Set<Review> findByApplication(long applicationId);
 
   default Set<Review> findByApplication(Application application) {
-    return findByApplication(application.getId());
+    return findByApplication(application.id());
   }
 }
