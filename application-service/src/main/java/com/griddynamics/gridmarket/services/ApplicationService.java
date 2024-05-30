@@ -3,7 +3,7 @@ package com.griddynamics.gridmarket.services;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
-import java.util.Set;
+import java.util.Collection;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,7 +15,7 @@ public class ApplicationService {
     this.applicationRepository = applicationRepository;
   }
 
-  public Set<Application> getAllApplications() {
+  public Collection<Application> getAllApplications() {
     return applicationRepository.findAll();
   }
 

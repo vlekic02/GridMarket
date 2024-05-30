@@ -4,6 +4,7 @@ import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.services.ApplicationService;
 import com.griddynamics.gridmarket.services.ReviewService;
+import java.util.Collection;
 import java.util.Set;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,7 +24,7 @@ public class ApplicationController {
   }
 
   @GetMapping(value = {"/", ""}, produces = "application/json")
-  public Set<Application> getAllApplications() {
+  public Collection<Application> getAllApplications() {
     return applicationService.getAllApplications();
   }
 
