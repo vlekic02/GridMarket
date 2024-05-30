@@ -1,5 +1,6 @@
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
     id("org.sonarqube") version "5.0.0.4638"
@@ -17,6 +18,7 @@ sonar {
         property("sonar.projectKey", "GridMarket")
         property("sonar.sources", "src/main")
         property("sonar.tests", "src/test")
+        property("sonar.coverage.exclusions", "**/models/*")
     }
 }
 
@@ -35,4 +37,41 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestCoverageVerification {
+
+    violationRules {
+        rule {
+            classDirectories.setFrom(tasks.jacocoTestReport.get().classDirectories)
+            limit {
+                minimum = 0.7.toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.sonar {
+
+    dependsOn(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    reports {
+        csv.required = false
+        xml.required = true
+        html.outputLocation = layout.buildDirectory.dir("jacocoHtmlReport")
+    }
+    dependsOn(tasks.test)
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+    classDirectories.setFrom(classDirectories.files.map {
+        fileTree(it).apply {
+            exclude("**/models/*")
+        }
+    })
 }
