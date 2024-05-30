@@ -23,19 +23,17 @@ public class ApplicationController {
     this.reviewService = reviewService;
   }
 
-  @GetMapping(value = {"/", ""}, produces = "application/json")
+  @GetMapping(produces = "application/json")
   public Collection<Application> getAllApplications() {
     return applicationService.getAllApplications();
   }
 
-  @GetMapping(value = {"/{id}/",
-      "/{id}"}, produces = "application/json")
+  @GetMapping(value = "/{id}", produces = "application/json")
   public Application getApplicationById(@PathVariable long id) {
     return applicationService.getApplicationById(id);
   }
 
-  @GetMapping(value = {"/{applicationId}/reviews/",
-      "/{applicationId}/reviews"}, produces = "application/json")
+  @GetMapping(value = "/{applicationId}/reviews", produces = "application/json")
   public Set<Review> getReviewByApplication(@PathVariable long applicationId) {
     Application application = applicationService.getApplicationById(applicationId);
     return reviewService.getReviewByApplication(application);
