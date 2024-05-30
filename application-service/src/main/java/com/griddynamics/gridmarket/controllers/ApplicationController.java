@@ -3,9 +3,7 @@ package com.griddynamics.gridmarket.controllers;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.services.ApplicationService;
-import com.griddynamics.gridmarket.services.ReviewService;
 import java.util.Collection;
-import java.util.Set;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,11 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApplicationController {
 
   private final ApplicationService applicationService;
-  private final ReviewService reviewService;
 
-  public ApplicationController(ApplicationService applicationService, ReviewService reviewService) {
+  public ApplicationController(ApplicationService applicationService) {
     this.applicationService = applicationService;
-    this.reviewService = reviewService;
   }
 
   @GetMapping(produces = "application/json")
@@ -34,8 +30,7 @@ public class ApplicationController {
   }
 
   @GetMapping(value = "/{applicationId}/reviews", produces = "application/json")
-  public Set<Review> getReviewByApplication(@PathVariable long applicationId) {
-    Application application = applicationService.getApplicationById(applicationId);
-    return reviewService.getReviewByApplication(application);
+  public Collection<Review> getReviewByApplication(@PathVariable long applicationId) {
+    return applicationService.getAllReviewForApplication(applicationId);
   }
 }
