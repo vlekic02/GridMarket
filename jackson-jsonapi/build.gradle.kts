@@ -1,12 +1,25 @@
 plugins {
     java
+    `maven-publish`
 }
 
 group = "com.griddynamics"
-version = "1.0-SNAPSHOT"
+version = "1.0"
 
 repositories {
     mavenCentral()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            groupId = "com.griddynamics"
+            artifactId = "jackson-jsonapi"
+            version = version
+
+            from(components["java"])
+        }
+    }
 }
 
 dependencies {
