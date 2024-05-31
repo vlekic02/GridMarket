@@ -2,6 +2,8 @@ package com.griddynamics.jacksonjsonapi;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 
 @JsonAppend(props = {
     @JsonAppend.Prop(value = VirtualAttributesPropertyWriter.class, name = "attributes")
@@ -12,6 +14,7 @@ import com.fasterxml.jackson.databind.annotation.JsonAppend;
     visible = true)
 public abstract class Model {
 
+  @JsonSerialize(using = ToStringSerializer.class)
   private final long id;
   private final String type;
 
