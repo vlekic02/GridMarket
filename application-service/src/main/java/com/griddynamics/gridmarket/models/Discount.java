@@ -1,19 +1,49 @@
 package com.griddynamics.gridmarket.models;
 
+import com.griddynamics.jacksonjsonapi.models.Resource;
 import java.time.LocalDateTime;
 import java.util.function.DoubleBinaryOperator;
 
-public record Discount(
-    long id,
-    String name,
-    Type type,
-    double value,
-    LocalDateTime startTime,
-    LocalDateTime endTime
-) {
+public class Discount extends Resource {
+
+  private final String name;
+  private final Type type;
+  private final double value;
+  private final LocalDateTime startTime;
+  private final LocalDateTime endTime;
 
   public Discount(long id, String name, Type type, double value) {
     this(id, name, type, value, null, null);
+  }
+
+  public Discount(long id, String name, Type type, double value, LocalDateTime startTime,
+      LocalDateTime endTime) {
+    super(id, "discount");
+    this.name = name;
+    this.type = type;
+    this.value = value;
+    this.startTime = startTime;
+    this.endTime = endTime;
+  }
+
+  public Type getDiscountType() {
+    return type;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public double getValue() {
+    return value;
+  }
+
+  public LocalDateTime getStartTime() {
+    return startTime;
+  }
+
+  public LocalDateTime getEndTime() {
+    return endTime;
   }
 
   public double getRealPrice(double price) {
