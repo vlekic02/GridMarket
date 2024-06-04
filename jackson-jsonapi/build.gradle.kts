@@ -10,6 +10,12 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    testImplementation.get().apply {
+        extendsFrom(compileOnly.get())
+    }
+}
+
 publishing {
     publications {
         create<MavenPublication>("maven") {
