@@ -29,7 +29,7 @@ class InMemorySetApplicationRepositoryTest {
   @Test
   void shouldReturnApplicationIfIdIsValid() {
     Optional<Application> applicationOptional = applicationRepository.findById(1);
-    assertEquals(1, applicationOptional.get().id());
+    assertEquals(1, applicationOptional.get().getId());
   }
 
   @Test
