@@ -30,12 +30,6 @@ contained in directory which is not tracked by version control system, we have t
 
 ## Interface definition
 
-### Health check
-
-```
-GET /<version>/application/health
-```
-
 **Example response:**
 
 ```
@@ -45,7 +39,7 @@ HTTP 200 OK
 ### List all applications
 
 ```
-GET /<version>/applications/
+GET /<version>/applications
 ```
 
 **Example response:**
@@ -53,20 +47,53 @@ GET /<version>/applications/
 ```json
 [
   {
-    "id": 1,
-    "name": "Example 1",
-    "description": "Example description",
-    "publisher": 2,
-    "price": 20,
-    "discount": null
+    "type": "application",
+    "id": "1",
+    "attributes": {
+      "name": "Example",
+      "originalPrice": 25,
+      "path": "/system/path",
+      "realPrice": 20
+    },
+    "relationships": {
+      "discount": {
+        "data": {
+          "type": "discount",
+          "id": "1",
+          "attributes": {
+            "discountType": "PERCENTAGE",
+            "name": "Black friday",
+            "valid": true,
+            "value": 20
+          }
+        }
+      },
+      "publisher": {
+        "data": {
+          "type": "user",
+          "id": "1"
+        }
+      }
+    }
   },
   {
-    "id": 2,
-    "name": "Example 2",
-    "description": null,
-    "publisher": 1,
-    "price": 25,
-    "discount": 3
+    "type": "application",
+    "id": "2",
+    "attributes": {
+      "description": "Some description",
+      "name": "Application 2",
+      "originalPrice": 15,
+      "path": "/system/path2",
+      "realPrice": 15
+    },
+    "relationships": {
+      "publisher": {
+        "data": {
+          "type": "user",
+          "id": "3"
+        }
+      }
+    }
   }
 ]
 ```
@@ -80,13 +107,35 @@ GET /<version>/applications/<application_id>
 **Example responses:**
 
 ```json
-  {
-  "id": 25,
-  "name": "Example 25",
-  "description": null,
-  "publisher": 10,
-  "price": 35,
-  "discount": null
+ {
+  "type": "application",
+  "id": "1",
+  "attributes": {
+    "name": "Test",
+    "originalPrice": 25,
+    "path": "/system/path",
+    "realPrice": 20
+  },
+  "relationships": {
+    "discount": {
+      "data": {
+        "type": "discount",
+        "id": "1",
+        "attributes": {
+          "discountType": "PERCENTAGE",
+          "name": "Black friday",
+          "valid": true,
+          "value": 20
+        }
+      }
+    },
+    "publisher": {
+      "data": {
+        "type": "user",
+        "id": "1"
+      }
+    }
+  }
 }
 ```
 
@@ -108,16 +157,48 @@ GET /<version>/applications/<application_id>/reviews
 ```json
 [
   {
-    "id": 1,
-    "author": 2,
-    "message": "Awesome application !",
-    "stars": 5
+    "type": "review",
+    "id": "1",
+    "attributes": {
+      "message": "Nice application",
+      "stars": 5
+    },
+    "relationships": {
+      "application": {
+        "data": {
+          "type": "application",
+          "id": "1"
+        }
+      },
+      "author": {
+        "data": {
+          "type": "user",
+          "id": "2"
+        }
+      }
+    }
   },
   {
-    "id": 4,
-    "author": 1,
-    "message": "I don't like this one !",
-    "stars": 1
+    "type": "review",
+    "id": "2",
+    "attributes": {
+      "message": "Meh... don't like it",
+      "stars": 2
+    },
+    "relationships": {
+      "application": {
+        "data": {
+          "type": "application",
+          "id": "1"
+        }
+      },
+      "author": {
+        "data": {
+          "type": "user",
+          "id": "4"
+        }
+      }
+    }
   }
 ]
 ```
