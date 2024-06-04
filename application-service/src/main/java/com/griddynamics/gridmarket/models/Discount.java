@@ -12,11 +12,7 @@ public class Discount extends Resource {
   private final LocalDateTime startTime;
   private final LocalDateTime endTime;
 
-  public Discount(long id, String name, Type type, double value) {
-    this(id, name, type, value, null, null);
-  }
-
-  public Discount(long id, String name, Type type, double value, LocalDateTime startTime,
+  private Discount(long id, String name, Type type, double value, LocalDateTime startTime,
       LocalDateTime endTime) {
     super(id, "discount");
     this.name = name;
@@ -24,6 +20,15 @@ public class Discount extends Resource {
     this.value = value;
     this.startTime = startTime;
     this.endTime = endTime;
+  }
+  
+  public static Discount unlimited(long id, String name, Type type, double value) {
+    return new Discount(id, name, type, value, null, null);
+  }
+
+  public static Discount withTimeFrame(long id, String name, Type type, double value,
+      LocalDateTime startTime, LocalDateTime endTime) {
+    return new Discount(id, name, type, value, startTime, endTime);
   }
 
   public Type getDiscountType() {

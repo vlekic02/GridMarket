@@ -18,7 +18,7 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   public InMemorySetApplicationRepository() {
     this.applications = List.of(
         new Application(1, "Test", null, "/system/path",
-            new Discount(1, "Black friday", Type.PERCENTAGE, 20),
+            Discount.unlimited(1, "Black friday", Type.PERCENTAGE, 20),
             25, 1),
         new Application(2, "Application 2", "Some description",
             "/system/path2", null, 15, 3),
