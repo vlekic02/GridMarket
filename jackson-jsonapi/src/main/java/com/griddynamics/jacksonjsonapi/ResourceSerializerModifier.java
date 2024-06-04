@@ -20,7 +20,7 @@ public class ResourceSerializerModifier extends BeanSerializerModifier {
   @Override
   public List<BeanPropertyWriter> changeProperties(SerializationConfig config,
       BeanDescription beanDesc, List<BeanPropertyWriter> beanProperties) {
-    if (isModel(beanDesc.getBeanClass())) {
+    if (isResource(beanDesc.getBeanClass())) {
       List<BeanPropertyWriter> attributes = new ArrayList<>();
       VirtualAttributesPropertyWriter attributesPropertyWriter = null;
       List<BeanPropertyWriter> relationships = new ArrayList<>();
@@ -60,7 +60,7 @@ public class ResourceSerializerModifier extends BeanSerializerModifier {
   @Override
   public List<BeanPropertyWriter> orderProperties(SerializationConfig config,
       BeanDescription beanDesc, List<BeanPropertyWriter> beanProperties) {
-    if (isModel(beanDesc.getBeanClass())) {
+    if (isResource(beanDesc.getBeanClass())) {
       BeanPropertyWriter[] orderedList = new BeanPropertyWriter[API_SPEC_FIELDS.size()];
       for (BeanPropertyWriter property : beanProperties) {
         int index = API_SPEC_FIELDS.indexOf(property.getName());
@@ -72,7 +72,7 @@ public class ResourceSerializerModifier extends BeanSerializerModifier {
     return super.orderProperties(config, beanDesc, beanProperties);
   }
 
-  public boolean isModel(Class<?> clazz) {
+  public boolean isResource(Class<?> clazz) {
     return Resource.class.isAssignableFrom(clazz);
   }
 }
