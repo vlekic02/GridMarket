@@ -11,6 +11,6 @@ public class JsonApiModule extends SimpleModule {
   @Override
   public void setupModule(SetupContext context) {
     super.setupModule(context);
-    context.addBeanSerializerModifier(new ModelSerializerModifier());
+    context.addBeanSerializerModifier(new ResourceSerializerModifier());
   }
 }
