@@ -4,13 +4,18 @@ import com.fasterxml.jackson.databind.BeanDescription;
 import com.fasterxml.jackson.databind.SerializationConfig;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.BeanSerializerModifier;
+import com.griddynamics.jacksonjsonapi.annotations.JsonRelation;
+import com.griddynamics.jacksonjsonapi.models.Resource;
+import com.griddynamics.jacksonjsonapi.writers.VirtualAttributesPropertyWriter;
+import com.griddynamics.jacksonjsonapi.writers.VirtualRelationshipPropertyWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class ModelSerializerModifier extends BeanSerializerModifier {
+public class ResourceSerializerModifier extends BeanSerializerModifier {
 
-  private static final List<String> API_SPEC_FIELDS = List.of("type", "id", "attributes");
+  private static final List<String> API_SPEC_FIELDS = List.of("type", "id", "attributes",
+      "relationships");
 
   @Override
   public List<BeanPropertyWriter> changeProperties(SerializationConfig config,
@@ -18,6 +23,8 @@ public class ModelSerializerModifier extends BeanSerializerModifier {
     if (isModel(beanDesc.getBeanClass())) {
       List<BeanPropertyWriter> attributes = new ArrayList<>();
       VirtualAttributesPropertyWriter attributesPropertyWriter = null;
+      List<BeanPropertyWriter> relationships = new ArrayList<>();
+      VirtualRelationshipPropertyWriter relationshipPropertyWriter = null;
       Iterator<BeanPropertyWriter> iterator = beanProperties.iterator();
       while (iterator.hasNext()) {
         BeanPropertyWriter beanProperty = iterator.next();
@@ -26,14 +33,24 @@ public class ModelSerializerModifier extends BeanSerializerModifier {
           if ("attributes".equals(propertyName)
               && beanProperty instanceof VirtualAttributesPropertyWriter) {
             attributesPropertyWriter = (VirtualAttributesPropertyWriter) beanProperty;
+          } else if ("relationships".equals(propertyName)
+              && beanProperty instanceof VirtualRelationshipPropertyWriter) {
+            relationshipPropertyWriter = (VirtualRelationshipPropertyWriter) beanProperty;
           }
         } else {
-          attributes.add(beanProperty);
+          if (beanProperty.getAnnotation(JsonRelation.class) != null) {
+            relationships.add(beanProperty);
+          } else {
+            attributes.add(beanProperty);
+          }
           iterator.remove();
         }
       }
       if (attributesPropertyWriter != null) {
         attributesPropertyWriter.setAttributeProperties(attributes);
+      }
+      if (relationshipPropertyWriter != null) {
+        relationshipPropertyWriter.setRelationshipProperties(relationships);
       }
       return beanProperties;
     }
@@ -56,6 +73,6 @@ public class ModelSerializerModifier extends BeanSerializerModifier {
   }
 
   public boolean isModel(Class<?> clazz) {
-    return Model.class.isAssignableFrom(clazz);
+    return Resource.class.isAssignableFrom(clazz);
   }
 }

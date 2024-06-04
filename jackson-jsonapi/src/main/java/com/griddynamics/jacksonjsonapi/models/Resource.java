@@ -1,27 +1,30 @@
-package com.griddynamics.jacksonjsonapi;
+package com.griddynamics.jacksonjsonapi.models;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.griddynamics.jacksonjsonapi.writers.VirtualAttributesPropertyWriter;
+import com.griddynamics.jacksonjsonapi.writers.VirtualRelationshipPropertyWriter;
 
 @JsonAppend(props = {
-    @JsonAppend.Prop(value = VirtualAttributesPropertyWriter.class, name = "attributes")
+    @JsonAppend.Prop(value = VirtualAttributesPropertyWriter.class, name = "attributes"),
+    @JsonAppend.Prop(value = VirtualRelationshipPropertyWriter.class, name = "relationships")
 })
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME,
     property = "type",
     include = JsonTypeInfo.As.EXISTING_PROPERTY,
     visible = true)
-public abstract class Model {
+public class Resource {
 
   @JsonSerialize(using = ToStringSerializer.class)
   private final long id;
   private final String type;
 
-  public Model(long id, String type) {
+  public Resource(long id, String type) {
     this.id = id;
     if (type == null || type.isEmpty()) {
-      throw new IllegalArgumentException("Model must contain type ! "
+      throw new IllegalArgumentException("Resource must contain type ! "
           + "https://jsonapi.org/format/#document-resource-objects");
     }
     this.type = type;

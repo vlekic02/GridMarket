@@ -1,4 +1,4 @@
-package com.griddynamics.jacksonjsonapi;
+package com.griddynamics.jacksonjsonapi.writers;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JavaType;
@@ -9,14 +9,13 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.VirtualBeanPropertyWriter;
 import com.fasterxml.jackson.databind.util.Annotations;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class VirtualAttributesPropertyWriter extends VirtualBeanPropertyWriter {
 
-  private final List<BeanPropertyWriter> attributeProperties = new ArrayList<>();
+  private List<BeanPropertyWriter> attributeProperties;
 
   private VirtualAttributesPropertyWriter() {
   }
@@ -36,7 +35,7 @@ public class VirtualAttributesPropertyWriter extends VirtualBeanPropertyWriter {
         attributes.put(property.getName(), value);
       }
     }
-    return attributes;
+    return attributes.isEmpty() ? null : attributes;
   }
 
   @Override
@@ -48,7 +47,6 @@ public class VirtualAttributesPropertyWriter extends VirtualBeanPropertyWriter {
   }
 
   public void setAttributeProperties(List<BeanPropertyWriter> attributeProperties) {
-    this.attributeProperties.clear();
-    this.attributeProperties.addAll(attributeProperties);
+    this.attributeProperties = attributeProperties;
   }
 }
