@@ -22,7 +22,9 @@ class JsonApiModuleTest {
   @Test
   void shouldCorrectlySerializePojo() throws JsonProcessingException {
     PojoDummy pojoDummy = new PojoDummy(1, "pojo", "TestName", 10, 5);
-    String expected = "{\"type\":\"pojo\",\"id\":\"1\",\"attributes\":{\"age\":10,\"name\":\"TestName\"},\"relationships\":{\"owner\":{\"data\":{\"type\":\"person\",\"id\":\"5\"}}}}";
+    String expected = "{\"type\":\"pojo\",\"id\":\"1\",\"attributes\":{"
+        + "\"age\":10,\"name\":\"TestName\"},\"relationships\":{\""
+        + "owner\":{\"data\":{\"type\":\"person\",\"id\":\"5\"}}}}";
     String actual = objectMapper.writeValueAsString(pojoDummy);
     assertEquals(expected, actual);
   }
@@ -30,7 +32,8 @@ class JsonApiModuleTest {
   @Test
   void shouldCorrectlySerializePojoIfNoRelationship() throws JsonProcessingException {
     NoRelationshipPojo pojoDummy = new NoRelationshipPojo(1, "noRelPojo", "Test", 5);
-    String expected = "{\"type\":\"noRelPojo\",\"id\":\"1\",\"attributes\":{\"age\":5,\"name\":\"Test\"}}";
+    String expected = "{\"type\":\"noRelPojo\",\"id\":\"1\",\"attributes\":{"
+        + "\"age\":5,\"name\":\"Test\"}}";
     String actual = objectMapper.writeValueAsString(pojoDummy);
     assertEquals(expected, actual);
   }
@@ -38,70 +41,71 @@ class JsonApiModuleTest {
   @Test
   void shouldCorrectlySerializePojoIfNoAttributes() throws JsonProcessingException {
     NoAttributesPojo pojoDummy = new NoAttributesPojo(1, "noAttPojo", 5);
-    String expected = "{\"type\":\"noAttPojo\",\"id\":\"1\",\"relationships\":{\"owner\":{\"data\":{\"type\":\"person\",\"id\":\"5\"}}}}";
+    String expected = "{\"type\":\"noAttPojo\",\"id\":\"1\",\"relationships\":{"
+        + "\"owner\":{\"data\":{\"type\":\"person\",\"id\":\"5\"}}}}";
     String actual = objectMapper.writeValueAsString(pojoDummy);
     assertEquals(expected, actual);
   }
-}
 
-class PojoDummy extends Resource {
+  private static class PojoDummy extends Resource {
 
-  private final String name;
-  private final int age;
-  private final Resource owner;
+    private final String name;
+    private final int age;
+    private final Resource owner;
 
-  public PojoDummy(long id, String type, String name, int age, int ownerId) {
-    super(id, type);
-    this.name = name;
-    this.age = age;
-    this.owner = new Resource(ownerId, "person");
+    public PojoDummy(long id, String type, String name, int age, int ownerId) {
+      super(id, type);
+      this.name = name;
+      this.age = age;
+      this.owner = new Resource(ownerId, "person");
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public int getAge() {
+      return age;
+    }
+
+    @JsonRelation
+    public Resource getOwner() {
+      return owner;
+    }
   }
 
-  public String getName() {
-    return name;
+  private static class NoRelationshipPojo extends Resource {
+
+    private final String name;
+    private final int age;
+
+    public NoRelationshipPojo(long id, String type, String name, int age) {
+      super(id, type);
+      this.name = name;
+      this.age = age;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public int getAge() {
+      return age;
+    }
   }
 
-  public int getAge() {
-    return age;
-  }
+  private static class NoAttributesPojo extends Resource {
 
-  @JsonRelation
-  public Resource getOwner() {
-    return owner;
-  }
-}
+    private final Resource owner;
 
-class NoRelationshipPojo extends Resource {
+    public NoAttributesPojo(long id, String type, int ownerId) {
+      super(id, type);
+      this.owner = new Resource(ownerId, "person");
+    }
 
-  private final String name;
-  private final int age;
-
-  public NoRelationshipPojo(long id, String type, String name, int age) {
-    super(id, type);
-    this.name = name;
-    this.age = age;
-  }
-
-  public String getName() {
-    return name;
-  }
-
-  public int getAge() {
-    return age;
-  }
-}
-
-class NoAttributesPojo extends Resource {
-
-  private final Resource owner;
-
-  public NoAttributesPojo(long id, String type, int ownerId) {
-    super(id, type);
-    this.owner = new Resource(ownerId, "person");
-  }
-
-  @JsonRelation
-  public Resource getOwner() {
-    return owner;
+    @JsonRelation
+    public Resource getOwner() {
+      return owner;
+    }
   }
 }
