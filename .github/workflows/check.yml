@@ -3,13 +3,13 @@ name: GridMarket pull request check
 on:
   pull_request:
 
+permissions:
+  pull-requests: read
+
 jobs:
   check:
     name: Run gradle check
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4.1.6
