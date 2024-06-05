@@ -19,17 +19,17 @@ public class ApplicationController {
     this.applicationService = applicationService;
   }
 
-  @GetMapping(produces = "application/json")
+  @GetMapping(produces = "application/vnd.api+json")
   public Collection<Application> getAllApplications() {
     return applicationService.getAllApplications();
   }
 
-  @GetMapping(value = "/{id}", produces = "application/json")
+  @GetMapping(value = "/{id}", produces = "application/vnd.api+json")
   public Application getApplicationById(@PathVariable long id) {
     return applicationService.getApplicationById(id);
   }
 
-  @GetMapping(value = "/{applicationId}/reviews", produces = "application/json")
+  @GetMapping(value = "/{applicationId}/reviews", produces = "application/vnd.api+json")
   public Collection<Review> getReviewByApplication(@PathVariable long applicationId) {
     return applicationService.getAllReviewForApplication(applicationId);
   }

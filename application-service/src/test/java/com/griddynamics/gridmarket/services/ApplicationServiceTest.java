@@ -40,7 +40,7 @@ class ApplicationServiceTest {
   @Test
   void shouldReturnApplicationIfExist() {
     Application application = applicationService.getApplicationById(1);
-    assertEquals(1, application.id());
+    assertEquals(1, application.getId());
   }
 
   @Test

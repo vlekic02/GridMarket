@@ -23,6 +23,7 @@ sonar {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
@@ -33,6 +34,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("com.griddynamics:jackson-jsonapi:1.0")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 }

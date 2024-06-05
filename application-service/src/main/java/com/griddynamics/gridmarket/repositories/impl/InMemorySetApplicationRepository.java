@@ -42,11 +42,12 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
 
   @Override
   public Optional<Application> findById(long id) {
-    return applications.stream().filter(app -> app.id() == id).findFirst();
+    return applications.stream().filter(app -> app.getId() == id).findFirst();
   }
 
   @Override
   public List<Review> findReviewsByApplication(Application application) {
-    return reviews.stream().filter(review -> review.applicationId() == application.id()).toList();
+    return reviews.stream().filter(review -> review.getApplication().getId() == application.getId())
+        .toList();
   }
 }
