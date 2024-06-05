@@ -3,6 +3,7 @@ package com.griddynamics.gridmarket.controllers;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.services.ApplicationService;
+import io.swagger.v3.oas.annotations.Operation;
 import java.util.Collection;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -19,16 +20,19 @@ public class ApplicationController {
     this.applicationService = applicationService;
   }
 
+  @Operation(summary = "Get all available applications")
   @GetMapping(produces = "application/vnd.api+json")
   public Collection<Application> getAllApplications() {
     return applicationService.getAllApplications();
   }
 
+  @Operation(summary = "Get specific application by id")
   @GetMapping(value = "/{id}", produces = "application/vnd.api+json")
   public Application getApplicationById(@PathVariable long id) {
     return applicationService.getApplicationById(id);
   }
 
+  @Operation(summary = "Get all reviews for specific application")
   @GetMapping(value = "/{applicationId}/reviews", produces = "application/vnd.api+json")
   public Collection<Review> getReviewByApplication(@PathVariable long applicationId) {
     return applicationService.getAllReviewForApplication(applicationId);
