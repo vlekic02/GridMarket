@@ -9,13 +9,14 @@ import com.fasterxml.jackson.databind.introspect.BeanPropertyDefinition;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.VirtualBeanPropertyWriter;
 import com.fasterxml.jackson.databind.util.Annotations;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
 public class VirtualAttributesPropertyWriter extends VirtualBeanPropertyWriter {
 
-  private List<BeanPropertyWriter> attributeProperties;
+  private List<BeanPropertyWriter> attributeProperties = Collections.emptyList();
 
   private VirtualAttributesPropertyWriter() {
   }
