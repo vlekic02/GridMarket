@@ -1,0 +1,42 @@
+name: GridMarket pull request check
+
+on:
+  pull_request:
+
+jobs:
+  check:
+    name: Run gradle check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.6
+        
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            application:
+              - 'application-service/**'
+            jsonapi:
+              - 'jackson-jsonapi/**'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4.2.1
+        with:
+          distribution: 'temurin'
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3.3.2
+
+      - name: Application service check
+        if: steps.filter.outputs.application == 'true'
+        working-directory: ./application-service
+        run: ./gradlew check
+
+      - name: Jackson JsonApi check
+        if: steps.filter.outputs.jsonapi == 'true'
+        working-directory: ./jackson-jsonapi
+        run: ./gradlew check
