@@ -38,3 +38,7 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
+
+tasks.publishToMavenLocal {
+    dependsOn(tasks.check)
+}
