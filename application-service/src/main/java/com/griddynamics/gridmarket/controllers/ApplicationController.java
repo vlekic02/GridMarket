@@ -33,8 +33,8 @@ public class ApplicationController {
   }
 
   @Operation(summary = "Get all reviews for specific application")
-  @GetMapping(value = "/{applicationId}/reviews", produces = "application/vnd.api+json")
-  public Collection<Review> getReviewByApplication(@PathVariable long applicationId) {
-    return applicationService.getAllReviewForApplication(applicationId);
+  @GetMapping(value = "/{id}/reviews", produces = "application/vnd.api+json")
+  public Collection<Review> getReviewByApplication(@PathVariable long id) {
+    return applicationService.getAllReviewForApplication(id);
   }
 }
