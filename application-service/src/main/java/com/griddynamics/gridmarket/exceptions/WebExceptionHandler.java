@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.exceptions;
 
+import com.griddynamics.gridmarket.http.response.ExceptionResponse;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
