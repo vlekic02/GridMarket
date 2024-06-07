@@ -1,0 +1,44 @@
+name: GridMarket pull request check
+
+on:
+  pull_request:
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  check:
+    name: Run gradle check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.6
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            application:
+              - 'application-service/**'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4.2.1
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'gradle'
+            
+      - name: Setup local dependencies
+        working-directory: ./jackson-jsonapi
+        run: |
+          chmod +x ./gradlew
+          ./gradlew publishToMavenLocal
+
+      - name: Application service check
+        if: steps.filter.outputs.application == 'true'
+        working-directory: ./application-service
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
