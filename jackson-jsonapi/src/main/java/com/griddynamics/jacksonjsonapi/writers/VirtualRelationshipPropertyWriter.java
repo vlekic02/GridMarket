@@ -33,8 +33,7 @@ public class VirtualRelationshipPropertyWriter extends VirtualBeanPropertyWriter
       property.getMember().fixAccess(true);
       Object value = property.get(bean);
       if (value != null) {
-        Map<String, Object> data = Map.of("data", value);
-        relationships.put(property.getName(), data);
+        relationships.put(property.getName(), value);
       }
     }
     return relationships.isEmpty() ? null : relationships;

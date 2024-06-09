@@ -2,6 +2,7 @@ package com.griddynamics.gridmarket.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.griddynamics.jacksonjsonapi.JsonApiModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +18,7 @@ public class JacksonConfiguration {
         .propertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
         .defaultViewInclusion(false)
         .failOnUnknownProperties(false)
+        .featuresToEnable(SerializationFeature.WRAP_ROOT_VALUE)
         .build();
   }
 }

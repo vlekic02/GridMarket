@@ -22,7 +22,7 @@ class JsonApiModuleTest {
   @Test
   void shouldCorrectlySerializePojo() throws JsonProcessingException {
     PojoDummy pojoDummy = new PojoDummy(1, "pojo", "TestName", 10, 5);
-    String expected = "{\"type\":\"pojo\",\"id\":\"1\",\"attributes\":{\"age\":10,\"name\":\"TestName\"},\"relationships\":{\"owner\":{\"data\":{\"type\":\"person\",\"id\":\"5\"}}}}";
+    String expected = "{\"type\":\"pojo\",\"id\":\"1\",\"attributes\":{\"age\":10,\"name\":\"TestName\"},\"relationships\":{\"owner\":{\"type\":\"person\",\"id\":\"5\"}}}";
     String actual = objectMapper.writeValueAsString(pojoDummy);
     assertEquals(expected, actual);
   }
@@ -38,7 +38,7 @@ class JsonApiModuleTest {
   @Test
   void shouldCorrectlySerializePojoIfNoAttributes() throws JsonProcessingException {
     NoAttributesPojo pojoDummy = new NoAttributesPojo(1, "noAttPojo", 5);
-    String expected = "{\"type\":\"noAttPojo\",\"id\":\"1\",\"relationships\":{\"owner\":{\"data\":{\"type\":\"person\",\"id\":\"5\"}}}}";
+    String expected = "{\"type\":\"noAttPojo\",\"id\":\"1\",\"relationships\":{\"owner\":{\"type\":\"person\",\"id\":\"5\"}}}";
     String actual = objectMapper.writeValueAsString(pojoDummy);
     assertEquals(expected, actual);
   }
