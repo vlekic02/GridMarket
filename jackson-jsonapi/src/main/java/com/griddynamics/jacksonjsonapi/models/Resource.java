@@ -1,6 +1,5 @@
 package com.griddynamics.jacksonjsonapi.models;
 
-import com.fasterxml.jackson.annotation.JsonRootName;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -16,7 +15,6 @@ import com.griddynamics.jacksonjsonapi.writers.VirtualRelationshipPropertyWriter
     property = "type",
     include = JsonTypeInfo.As.EXISTING_PROPERTY,
     visible = true)
-@JsonRootName("data")
 public class Resource {
 
   @JsonSerialize(using = ToStringSerializer.class)
