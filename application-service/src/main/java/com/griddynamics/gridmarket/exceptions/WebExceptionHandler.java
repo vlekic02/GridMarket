@@ -1,9 +1,7 @@
 package com.griddynamics.gridmarket.exceptions;
 
 import com.griddynamics.gridmarket.http.response.ExceptionResponse;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+import com.griddynamics.gridmarket.models.RestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -14,10 +12,11 @@ public class WebExceptionHandler {
 
   @ExceptionHandler(NotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
-  public Map<String, Collection<ExceptionResponse>> handleNotFoundException(
+  public ExceptionResponse handleNotFoundException(
       NotFoundException exception) {
-    return Map.of("errors", Collections.singletonList(
-        new ExceptionResponse(exception.getRequestedResource(), "Not found", 404,
-            exception.getMessage())));
+    return ExceptionResponse.of(
+        new RestException(exception.getRequestedResource(), "Not found", 404,
+            exception.getMessage())
+    );
   }
 }

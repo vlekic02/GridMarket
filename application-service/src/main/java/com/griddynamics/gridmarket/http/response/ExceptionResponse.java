@@ -1,32 +1,20 @@
 package com.griddynamics.gridmarket.http.response;
 
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.griddynamics.jacksonjsonapi.models.Resource;
+import com.griddynamics.gridmarket.models.RestException;
 
-public class ExceptionResponse extends Resource {
+public class ExceptionResponse {
 
-  private final String title;
-  @JsonSerialize(using = ToStringSerializer.class)
-  private final int status;
-  private final String detail;
+  private final RestException[] errors;
 
-  public ExceptionResponse(long id, String title, int status, String detail) {
-    super(id, "error");
-    this.title = title;
-    this.status = status;
-    this.detail = detail;
+  private ExceptionResponse(RestException... errors) {
+    this.errors = errors;
   }
 
-  public String getTitle() {
-    return title;
+  public static ExceptionResponse of(RestException... errors) {
+    return new ExceptionResponse(errors);
   }
 
-  public int getStatus() {
-    return status;
-  }
-
-  public String getDetail() {
-    return detail;
+  public RestException[] getErrors() {
+    return errors;
   }
 }
