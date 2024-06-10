@@ -22,9 +22,22 @@ class JsonApiModuleTest {
   @Test
   void shouldCorrectlySerializePojo() throws JsonProcessingException {
     PojoDummy pojoDummy = new PojoDummy(1, "pojo", "TestName", 10, 5);
-    String expected = "{\"type\":\"pojo\",\"id\":\"1\",\""
-        + "attributes\":{\"age\":10,\"name\":\"TestName\"},\""
-        + "relationships\":{\"owner\":{\"type\":\"person\",\"id\":\"5\"}}}";
+    String expected = """
+        {
+            "type": "pojo",
+            "id": "1",
+            "attributes": {
+                "age": 10,
+                "name": "TestName"
+            },
+            "relationships": {
+                "owner": {
+                    "type": "person",
+                    "id": "5"
+                }
+            }
+        }
+        """.replaceAll("[\\n\\r\\s]+", "");
     String actual = objectMapper.writeValueAsString(pojoDummy);
     assertEquals(expected, actual);
   }
@@ -33,8 +46,16 @@ class JsonApiModuleTest {
   void shouldCorrectlySerializePojoIfNoRelationship() throws JsonProcessingException {
     NoRelationshipPojo pojoDummy = new NoRelationshipPojo(1,
         "noRelPojo", "Test", 5);
-    String expected = "{\"type\":\"noRelPojo\",\"id\":\"1\",\""
-        + "attributes\":{\"age\":5,\"name\":\"Test\"}}";
+    String expected = """
+        {
+            "type": "noRelPojo",
+            "id": "1",
+            "attributes": {
+                "age": 5,
+                "name": "Test"
+            }
+        }
+        """.replaceAll("[\\n\\r\\s]+", "");
     String actual = objectMapper.writeValueAsString(pojoDummy);
     assertEquals(expected, actual);
   }
@@ -42,8 +63,18 @@ class JsonApiModuleTest {
   @Test
   void shouldCorrectlySerializePojoIfNoAttributes() throws JsonProcessingException {
     NoAttributesPojo pojoDummy = new NoAttributesPojo(1, "noAttPojo", 5);
-    String expected = "{\"type\":\"noAttPojo\",\"id\":\"1\",\""
-        + "relationships\":{\"owner\":{\"type\":\"person\",\"id\":\"5\"}}}";
+    String expected = """
+        {
+            "type": "noAttPojo",
+            "id": "1",
+            "relationships": {
+                "owner": {
+                    "type": "person",
+                    "id": "5"
+                }
+            }
+        }
+        """.replaceAll("[\\n\\r\\s]+", "");
     String actual = objectMapper.writeValueAsString(pojoDummy);
     assertEquals(expected, actual);
   }
