@@ -1,10 +1,18 @@
 plugins {
     java
+    checkstyle
     `maven-publish`
 }
 
 group = "com.griddynamics"
 version = "1.0"
+
+checkstyle {
+    toolVersion = "10.14.2"
+    isIgnoreFailures = false
+    maxWarnings = 0
+    configFile = File("../config/checkstyle/checkstyle.xml")
+}
 
 repositories {
     mavenCentral()
@@ -37,4 +45,8 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.publishToMavenLocal {
+    dependsOn(tasks.check)
 }
