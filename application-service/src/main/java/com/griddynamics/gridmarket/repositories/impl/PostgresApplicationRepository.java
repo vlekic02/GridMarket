@@ -23,7 +23,8 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   public List<Application> findAll() {
     return template.query(
         """
-            SELECT discount_id, discount.name as discount_name, type, value, start_date, end_date, \
+            SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
+            end_date, \
             application.*
             FROM application
             LEFT JOIN discount on discount.discount_id = application.discount
@@ -36,7 +37,8 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   public Optional<Application> findById(long id) {
     return template.queryForStream(
         """
-             SELECT discount_id, discount.name as discount_name, type, value, start_date, end_date, \
+             SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
+             end_date, \
              application.*
              FROM application
              LEFT JOIN discount on discount.discount_id = application.discount

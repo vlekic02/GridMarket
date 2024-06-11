@@ -18,7 +18,7 @@ public class ApplicationRowMapper implements RowMapper<Application> {
     String description = resultSet.getString("description");
     String path = resultSet.getString("path");
     Discount discount = null;
-    long discount_id = resultSet.getLong("discount_id");
+    long discountId = resultSet.getLong("discount_id");
     if (!resultSet.wasNull()) {
       String discountName = resultSet.getString("discount_name");
       Discount.Type discountType = Discount.Type.valueOf(resultSet.getString("type"));
@@ -28,9 +28,9 @@ public class ApplicationRowMapper implements RowMapper<Application> {
       Timestamp endTimestamp = resultSet.getTimestamp("end_date");
       LocalDateTime endTime = endTimestamp == null ? null : endTimestamp.toLocalDateTime();
       if (startTime == null || endTime == null) {
-        discount = Discount.unlimited(discount_id, discountName, discountType, value);
+        discount = Discount.unlimited(discountId, discountName, discountType, value);
       } else {
-        discount = Discount.withTimeFrame(discount_id, discountName, discountType, value, startTime,
+        discount = Discount.withTimeFrame(discountId, discountName, discountType, value, startTime,
             endTime);
       }
     }
