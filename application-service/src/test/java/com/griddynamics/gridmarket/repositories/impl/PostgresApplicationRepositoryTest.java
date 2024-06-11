@@ -26,7 +26,7 @@ import org.springframework.test.jdbc.JdbcTestUtils;
 @ActiveProfiles("test")
 class PostgresApplicationRepositoryTest {
 
-  private static ApplicationRepository applicationRepository;
+  private ApplicationRepository applicationRepository;
 
   @Autowired
   private JdbcTemplate template;
