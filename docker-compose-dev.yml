@@ -1,0 +1,18 @@
+name: gridmarket-dev
+services:
+  application-service:
+    image: eclipse-temurin:21
+    volumes:
+      - ./application-service:/app
+      - ${HOME}/.m2:/root/.m2
+    ports:
+      - 8080:8080
+    working_dir: /app
+    networks:
+      - service-net
+      - application-net
+    command: ./gradlew bootRun --args=--spring.profiles.active=dev
+
+networks:
+  service-net:
+  application-net:
