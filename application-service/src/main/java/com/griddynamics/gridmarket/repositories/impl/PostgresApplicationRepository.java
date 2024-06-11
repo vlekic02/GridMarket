@@ -26,7 +26,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             SELECT discount_id, discount.name as discount_name, type, value, start_date, end_date, \
             application.*
             FROM application
-            INNER JOIN discount on discount.discount_id = application.discount
+            LEFT JOIN discount on discount.discount_id = application.discount
             """,
         new ApplicationRowMapper()
     );
