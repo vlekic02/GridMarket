@@ -2,6 +2,7 @@ package com.griddynamics.gridmarket.repositories.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.models.Application;
@@ -81,5 +82,15 @@ class PostgresApplicationRepositoryTest {
     Application application = applicationRepository.findById(1).get();
     List<Review> reviews = applicationRepository.findReviewsByApplication(application);
     assertThat(reviews).hasSize(2);
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null)",
+      "insert into application values (1, 'Test', null, 'path', 1, 20, 1)"
+  })
+  void shouldCorrectlyReturnApplicationWithDiscount() {
+    Application application = applicationRepository.findById(1).get();
+    assertNotNull(application.getDiscount());
   }
 }
