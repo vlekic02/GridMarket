@@ -1,3 +1,10 @@
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'discount_type') THEN
+        CREATE TYPE discount_type AS ENUM ('FLAT', 'PERCENTAGE');
+    END IF;
+END$$@@
+
 CREATE TABLE IF NOT EXISTS discount (
   discount_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL UNIQUE,
@@ -5,7 +12,7 @@ CREATE TABLE IF NOT EXISTS discount (
   value DECIMAL NOT NULL CHECK (value > 0),
   start_date TIMESTAMP,
   end_date TIMESTAMP
-);
+)@@
 
 CREATE TABLE IF NOT EXISTS application (
   application_id SERIAL PRIMARY KEY,
@@ -16,20 +23,20 @@ CREATE TABLE IF NOT EXISTS application (
   price DECIMAL NOT NULL CHECK (price >= 0),
   discount INTEGER,
   FOREIGN KEY (discount) REFERENCES discount(discount_id)
-);
+)@@
 
 CREATE TABLE IF NOT EXISTS sellable_application (
   application INTEGER PRIMARY KEY,
   start_date TIMESTAMP,
   end_date TIMESTAMP,
   FOREIGN KEY (application) REFERENCES application(application_id)
-);
+)@@
 
 CREATE TABLE IF NOT EXISTS ownership (
   "user" INTEGER,
   application INTEGER,
   PRIMARY KEY ("user", application)
-);
+)@@
 
 CREATE TABLE IF NOT EXISTS review (
   review_id SERIAL PRIMARY KEY,
@@ -39,6 +46,6 @@ CREATE TABLE IF NOT EXISTS review (
   application INTEGER NOT NULL,
   UNIQUE (author, application),
   FOREIGN KEY (application) REFERENCES application(application_id)
-)
+)@@
 
--- TODO: add indexes and enum creation script
+-- TODO: add indexes

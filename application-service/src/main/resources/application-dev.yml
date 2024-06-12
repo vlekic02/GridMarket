@@ -1,6 +1,7 @@
 spring:
   sql:
     init:
+      separator: "@@"
       mode: always
   datasource:
     url: jdbc:postgresql://application-db:5432/gridmarket
