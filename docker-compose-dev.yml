@@ -8,10 +8,23 @@ services:
     ports:
       - 8080:8080
     working_dir: /app
+    depends_on:
+      - application-db
     networks:
       - service-net
       - application-net
     command: ./gradlew bootRun --args=--spring.profiles.active=dev
+  application-db:
+    image: postgres:16.3-alpine
+    restart: always
+    volumes:
+      - "./.data/postgres:/var/lib/postgresql/data"
+    environment:
+      POSTGRES_DB: gridmarket
+      POSTGRES_USER: grid
+      POSTGRES_PASSWORD: grid
+    networks:
+      - application-net
 
 networks:
   service-net:

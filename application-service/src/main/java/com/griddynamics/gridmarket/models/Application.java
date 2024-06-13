@@ -55,4 +55,54 @@ public class Application extends Resource {
     }
     return originalPrice;
   }
+
+  public static class Builder {
+
+    private long id;
+    private String name;
+    private String description;
+    private String path;
+    private Discount discount;
+    private double originalPrice;
+    private long publisherId;
+
+    public Builder setId(long id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder setName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder setDescription(String description) {
+      this.description = description;
+      return this;
+    }
+
+    public Builder setPath(String path) {
+      this.path = path;
+      return this;
+    }
+
+    public Builder setDiscount(Discount discount) {
+      this.discount = discount;
+      return this;
+    }
+
+    public Builder setOriginalPrice(double originalPrice) {
+      this.originalPrice = originalPrice;
+      return this;
+    }
+
+    public Builder setPublisher(long publisherId) {
+      this.publisherId = publisherId;
+      return this;
+    }
+
+    public Application build() {
+      return new Application(id, name, description, path, discount, originalPrice, publisherId);
+    }
+  }
 }
