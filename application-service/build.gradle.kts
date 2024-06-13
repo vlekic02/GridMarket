@@ -26,7 +26,7 @@ sonar {
         property("sonar.projectKey", "GridMarket")
         property("sonar.sources", "src/main")
         property("sonar.tests", "src/test")
-        property("sonar.coverage.exclusions", "**/models/*")
+        property("sonar.coverage.exclusions", "**/models/*,**/configuration/*")
     }
 }
 
@@ -84,6 +84,7 @@ tasks.jacocoTestReport {
     classDirectories.setFrom(classDirectories.files.map {
         fileTree(it).apply {
             exclude("**/models/*")
+            exclude("**/configuration/*")
         }
     })
 }

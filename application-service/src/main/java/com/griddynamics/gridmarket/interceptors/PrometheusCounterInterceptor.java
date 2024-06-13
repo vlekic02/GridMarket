@@ -1,10 +1,10 @@
 package com.griddynamics.gridmarket.interceptors;
 
 import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.method.HandlerMethod;
@@ -15,19 +15,8 @@ public class PrometheusCounterInterceptor implements HandlerInterceptor {
 
   private final Map<String, Counter> requestCounters;
 
-  public PrometheusCounterInterceptor(MeterRegistry registry) {
-    this.requestCounters = Map.of(
-        "/:GET", Counter.builder("http_request_counter")
-            .tags("uri", "/", "method", "GET")
-            .register(registry),
-        "/{id}:GET", Counter.builder("http_request_counter")
-            .tags("uri", "/{id}", "method", "GET")
-            .register(registry),
-        "/{id}/reviews:GET",
-        Counter.builder("http_request_counter")
-            .tags("uri", "/{id}/reviews", "method", "GET")
-            .register(registry)
-    );
+  public PrometheusCounterInterceptor(Map<String, Counter> requestCounters) {
+    this.requestCounters = requestCounters;
   }
 
   @Override
@@ -36,7 +25,7 @@ public class PrometheusCounterInterceptor implements HandlerInterceptor {
       @NonNull Object handler,
       ModelAndView modelAndView) {
     int status = response.getStatus();
-    if (status < 200 || status >= 300) {
+    if (status < HttpStatus.OK.value() || status >= HttpStatus.MULTIPLE_CHOICES.value()) {
       return;
     }
     if (!(handler instanceof HandlerMethod handlerMethod)) {
