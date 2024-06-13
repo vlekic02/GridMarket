@@ -17,9 +17,16 @@ public class PrometheusCounterInterceptor implements HandlerInterceptor {
 
   public PrometheusCounterInterceptor(MeterRegistry registry) {
     this.requestCounters = Map.of(
-        "/:GET", Counter.builder("application_all_get_count").register(registry),
-        "/{id}:GET", Counter.builder("application_by_id_get_count").register(registry),
-        "/{id}/reviews:GET", Counter.builder("review_by_app_get_count").register(registry)
+        "/:GET", Counter.builder("http_request_counter")
+            .tags("uri", "/", "method", "GET")
+            .register(registry),
+        "/{id}:GET", Counter.builder("http_request_counter")
+            .tags("uri", "/{id}", "method", "GET")
+            .register(registry),
+        "/{id}/reviews:GET",
+        Counter.builder("http_request_counter")
+            .tags("uri", "/{id}/reviews", "method", "GET")
+            .register(registry)
     );
   }
 
