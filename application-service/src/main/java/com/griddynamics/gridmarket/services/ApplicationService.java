@@ -22,7 +22,7 @@ public class ApplicationService {
 
   public Application getApplicationById(long id) {
     return applicationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException("Specified application not found !"));
+        .orElseThrow(() -> new NotFoundException(id, "Specified application not found !"));
   }
 
   public Collection<Review> getAllReviewForApplication(long applicationId) {
