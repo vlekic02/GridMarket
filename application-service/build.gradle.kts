@@ -1,3 +1,5 @@
+import org.springframework.boot.buildpack.platform.build.PullPolicy
+
 plugins {
     java
     jacoco
@@ -75,6 +77,10 @@ tasks.check {
 
 tasks.sonar {
     dependsOn(tasks.jacocoTestReport)
+}
+
+tasks.bootBuildImage {
+    pullPolicy = PullPolicy.IF_NOT_PRESENT
 }
 
 tasks.jacocoTestReport {
