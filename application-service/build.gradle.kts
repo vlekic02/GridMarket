@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.griddynamics"
-version = System.getenv("GM_VERSION") ?: "dev"
+version = "v1.0.0"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -57,6 +57,14 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
     finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.register("printVersion") {
+    group = "documentation"
+    description = "Prints current project version"
+    doLast {
+        println(project.version)
+    }
 }
 
 tasks.jacocoTestCoverageVerification {
