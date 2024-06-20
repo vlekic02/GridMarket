@@ -1,0 +1,16 @@
+name: GridMarket GCP deploy
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: self-hosted
+    env:
+      GM_VERSION: $(echo ${{ github.ref }} | cut -c 11-)
+    steps:
+      - name: test
+        run: echo $GM_VERSION
