@@ -9,8 +9,9 @@ jobs:
   deploy:
     name: Deploy
     runs-on: self-hosted
-    env:
-      GM_VERSION: $(echo ${{ github.ref }} | cut -c 11-)
     steps:
-      - name: test
+      - name: Setup version
+        run: echo "GM_VERSION=$(echo ${{ github.ref }} | cut -c 11-)" >> $GITHUB_ENV
+
+      - name: Test
         run: echo $GM_VERSION
