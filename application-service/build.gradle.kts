@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.griddynamics"
-version = "v1.0.0"
+version = "vtest"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
