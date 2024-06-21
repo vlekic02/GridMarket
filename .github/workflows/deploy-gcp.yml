@@ -38,10 +38,10 @@ jobs:
         run: |
           cd jackson-jsonapi/
           chmod +x ./gradlew
-          ./gradlew publishToMavenLocal --no-daemon
+          ./gradlew publishToMavenLocal
           cd ../test-utils/
           chmod +x ./gradlew
-          ./gradlew publishToMavenLocal --no-daemon
+          ./gradlew publishToMavenLocal
 
       - name: Build Application Service Image
         #if: steps.filter.outputs.application == 'true'
@@ -52,18 +52,6 @@ jobs:
           VERSION=$(./gradlew printVersion -q)
           ./gradlew bootBuildImage --imageName=${{ vars.REPOSITORY_URL }}/${{ vars.PROJECT_ID }}/gridmarket/application-service:$VERSION
           echo "image-name=${{ vars.REPOSITORY_URL }}/${{ vars.PROJECT_ID }}/gridmarket/application-service:$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Authenticate to Google Cloud
-        uses: google-github-actions/auth@v2.1.3
-        #if: fromJson(steps.filter.outputs.changes)[0] != null
-        with:
-          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
-
-      - name: Setup CloudSDK
-        #if: fromJson(steps.filter.outputs.changes)[0] != null
-        uses: google-github-actions/setup-gcloud@v2.1.0
-        with:
-          project_id: ${{ vars.PROJECT_ID }}
 
       - name: Configure docker client for GCP
         #if: fromJson(steps.filter.outputs.changes)[0] != null
