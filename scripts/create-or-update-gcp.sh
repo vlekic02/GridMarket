@@ -20,7 +20,7 @@ instanceExist() {
 }
 
 updateInstance() {
-  gcloud compute instances update-container "$INSTANCE_NAME" --container-image="$IMAGE"
+  gcloud compute instances update-container "$INSTANCE_NAME" --container-image="$IMAGE" --zone="$ZONE"
   echo "Existing instance updated"
 }
 
