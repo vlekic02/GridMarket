@@ -46,7 +46,7 @@ createInstance() {
       --no-shielded-secure-boot \
       --shielded-vtpm \
       --shielded-integrity-monitoring \
-      --labels=goog-ec-src=vm_add-gcloud,container-vm=cos-stable-113-18244-85-36
+      --labels=goog-ec-src=vm_add-gcloud,container-vm=cos-stable-113-18244-85-36 > /dev/null 2>&1
   echo "New instance created"
 }
 
