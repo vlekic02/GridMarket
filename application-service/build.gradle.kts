@@ -23,7 +23,7 @@ checkstyle {
 
 sonar {
     properties {
-        property("sonar.projectKey", "GridMarket")
+        property("sonar.projectKey", "GidMarket-ApplicationService")
         property("sonar.sources", "src/main")
         property("sonar.tests", "src/test")
         property("sonar.coverage.exclusions", "**/models/*,**/configuration/*")
