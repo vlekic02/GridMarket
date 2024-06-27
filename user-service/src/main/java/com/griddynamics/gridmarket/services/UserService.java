@@ -1,6 +1,7 @@
 package com.griddynamics.gridmarket.services;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.Collection;
@@ -22,5 +23,10 @@ public class UserService {
   public User getUserById(long id) {
     return userRepository.findById(id)
         .orElseThrow(() -> new NotFoundException(id, "Specified user not found !"));
+  }
+
+  public Balance getUserBalance(long id) {
+    User user = getUserById(id);
+    return user.getBalance();
   }
 }

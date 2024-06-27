@@ -1,6 +1,7 @@
 package com.griddynamics.gridmarket.controllers;
 
 import com.griddynamics.gridmarket.http.response.DataResponse;
+import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.services.UserService;
 import java.util.Collection;
@@ -27,5 +28,10 @@ public class UserController {
   @GetMapping(value = "/{id}", produces = "application/vnd.api+json")
   public DataResponse<User> getUserById(@PathVariable long id) {
     return DataResponse.of(userService.getUserById(id));
+  }
+
+  @GetMapping(value = "/{id}/balance", produces = "application/vnd.api+json")
+  public DataResponse<Balance> getUserBalance(@PathVariable long id) {
+    return DataResponse.of(userService.getUserBalance(id));
   }
 }

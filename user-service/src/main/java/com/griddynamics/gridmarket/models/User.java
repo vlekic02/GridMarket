@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.griddynamics.jacksonjsonapi.annotations.JsonRelation;
 import com.griddynamics.jacksonjsonapi.models.Resource;
 
@@ -10,7 +11,7 @@ public class User extends Resource {
   private final String username;
   private final Role role;
   private final Ban ban;
-  private final double balance;
+  private final Balance balance;
 
   public User(long id, String name, String surname, String username, Role role, Ban ban,
       double balance) {
@@ -20,7 +21,7 @@ public class User extends Resource {
     this.username = username;
     this.role = role;
     this.ban = ban;
-    this.balance = balance;
+    this.balance = new Balance(id, balance);
   }
 
   public String getName() {
@@ -45,7 +46,8 @@ public class User extends Resource {
     return ban;
   }
 
-  public double getBalance() {
+  @JsonIgnore
+  public Balance getBalance() {
     return balance;
   }
 }
