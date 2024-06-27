@@ -6,19 +6,19 @@ import java.time.LocalDateTime;
 
 public class Ban extends Resource {
 
-  private final User issuer;
+  private final Resource issuer;
   private final LocalDateTime date;
   private final String reason;
 
-  public Ban(long id, User issuer, LocalDateTime date, String reason) {
+  public Ban(long id, long issuerId, LocalDateTime date, String reason) {
     super(id, "ban");
-    this.issuer = issuer;
+    this.issuer = new Resource(issuerId, "user");
     this.date = date;
     this.reason = reason;
   }
 
   @JsonRelation
-  public User getIssuer() {
+  public Resource getIssuer() {
     return issuer;
   }
 
