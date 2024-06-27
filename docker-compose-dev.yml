@@ -16,7 +16,6 @@ services:
     command: ./gradlew bootRun --args=--spring.profiles.active=dev
   application-db:
     image: postgres:16.3-alpine
-    restart: always
     volumes:
       - "./.data/postgres:/var/lib/postgresql/data"
     environment:
@@ -25,7 +24,20 @@ services:
       POSTGRES_PASSWORD: grid
     networks:
       - application-net
+  user-service:
+    image: eclipse-temurin:21
+    volumes:
+      - ./user-service:/app
+      - ${HOME}/.m2:/root/.m2
+    ports:
+      - 8180:8080
+    working_dir: /app
+    networks:
+      - service-net
+      - user-net
+    command: ./gradlew bootRun --args=--spring.profiles.active=dev
 
 networks:
   service-net:
   application-net:
+  user-net:
