@@ -35,7 +35,7 @@ public class SwaggerConfiguration {
   private Info apiInfo() {
     return new Info()
         .title("GridMarket")
-        .description("E-commerce for applications");
+        .description("Application-service api documentation");
   }
 
   @PostConstruct
