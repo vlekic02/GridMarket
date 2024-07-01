@@ -61,6 +61,7 @@ public class SwaggerUtils {
         continue;
       }
       Class<?> returnType = getterMethod.getReturnType();
+
       Schema<?> returnSchema;
       if (numericTypes.contains(returnType)) {
         returnSchema = new NumberSchema();
@@ -71,6 +72,7 @@ public class SwaggerUtils {
       } else {
         returnSchema = new StringSchema();
       }
+
       if (getterMethod.isAnnotationPresent(JsonRelation.class)) {
         relationshipsSchema.addProperty(propertyDescriptor.getName(), returnSchema);
         haveRelationship = true;
@@ -79,6 +81,7 @@ public class SwaggerUtils {
         haveAttribute = true;
       }
     }
+
     if (haveAttribute) {
       resourceSchema.addProperty("attributes", attributesSchema);
     }
