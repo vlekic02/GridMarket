@@ -7,7 +7,11 @@ import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
+@Profile("cloud")
+@Repository
 public class InMemorySetApplicationRepository implements ApplicationRepository {
 
   private final List<Application> applications;

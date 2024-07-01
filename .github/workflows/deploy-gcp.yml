@@ -1,0 +1,54 @@
+name: GridMarket GCP deploy
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+    types:
+      - 'closed'
+
+jobs:
+  deploy:
+    if: ${{ github.event.pull_request.merged == true }}
+    name: Deploy
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.6
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            application:
+              - 'application-service/**'
+
+      - name: Setup local dependencies
+        run: |
+          cd jackson-jsonapi/
+          chmod +x ./gradlew
+          ./gradlew publishToMavenLocal
+          cd ../test-utils/
+          chmod +x ./gradlew
+          ./gradlew publishToMavenLocal
+
+      - name: Build Application Service Image
+        if: steps.filter.outputs.application == 'true'
+        id: application-image
+        run: |
+          cd application-service/
+          chmod +x ./gradlew
+          VERSION=$(./gradlew printVersion -q)
+          ./gradlew bootBuildImage --imageName=${{ vars.REPOSITORY_URL }}/${{ vars.PROJECT_ID }}/gridmarket/application-service:$VERSION
+          echo "image-name=${{ vars.REPOSITORY_URL }}/${{ vars.PROJECT_ID }}/gridmarket/application-service:$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Push application image to registry
+        if: steps.filter.outputs.application == 'true'
+        run: |
+          docker push ${{ steps.application-image.outputs.image-name }}
+
+      - name: Deploy application service
+        if: steps.filter.outputs.application == 'true'
+        working-directory: scripts
+        run: ./create-or-update-gcp.sh gm-application-service ${{ steps.application-image.outputs.image-name }} ${{ vars.GCP_ZONE }}
