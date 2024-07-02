@@ -7,7 +7,11 @@ import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Repository;
 
+@Profile("cloud")
+@Repository
 public class InMemoryUserRepository implements UserRepository {
 
   private final List<User> users;

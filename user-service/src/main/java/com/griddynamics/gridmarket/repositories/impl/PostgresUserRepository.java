@@ -5,9 +5,11 @@ import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+@Profile("!cloud")
 @Repository
 public class PostgresUserRepository implements UserRepository {
 
