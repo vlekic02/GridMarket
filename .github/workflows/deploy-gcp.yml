@@ -60,12 +60,10 @@ jobs:
         run: |
           docker push ${{ steps.application-image.outputs.image-name }}
 
-
       - name: Push user image to registry
         if: steps.filter.outputs.user == 'true'
         run: |
           docker push ${{ steps.user-image.outputs.image-name }}
-
 
       - name: Deploy application service
         if: steps.filter.outputs.application == 'true'
