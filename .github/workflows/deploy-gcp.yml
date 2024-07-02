@@ -74,6 +74,6 @@ jobs:
         run: ./create-or-update-gcp.sh gm-application-service ${{ steps.application-image.outputs.image-name }} ${{ vars.GCP_ZONE }}
 
       - name: Deploy user service
-        if: steps.filter.outputs.user == true
+        if: steps.filter.outputs.user == 'true'
         working-directory: scripts
         run: ./create-or-update-gcp.sh gm-user-service ${{ steps.user-image.outputs.image-name }} ${{ vars.GCP_ZONE }}
