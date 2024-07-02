@@ -1,11 +1,12 @@
 name: GridMarket GCP deploy
 
 on:
-  pull_request:
-    branches:
-      - 'main'
-    types:
-      - 'closed'
+  push:
+#  pull_request:
+#    branches:
+#      - 'main'
+#    types:
+#      - 'closed'
 
 jobs:
   deploy:
