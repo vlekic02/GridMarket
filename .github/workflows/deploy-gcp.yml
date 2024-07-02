@@ -63,7 +63,7 @@ jobs:
 
 
       - name: Push user image to registry
-        if: steps.filter.outputs.user == 'true
+        if: steps.filter.outputs.user == 'true'
         run: |
           docker push ${{ steps.user-image.outputs.image-name }}
 
