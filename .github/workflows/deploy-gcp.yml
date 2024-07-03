@@ -23,6 +23,8 @@ jobs:
           filters: |
             application:
               - 'application-service/**'
+            user:
+              - 'user-service/**'
 
       - name: Setup local dependencies
         run: |
@@ -43,12 +45,32 @@ jobs:
           ./gradlew bootBuildImage --imageName=${{ vars.REPOSITORY_URL }}/${{ vars.PROJECT_ID }}/gridmarket/application-service:$VERSION
           echo "image-name=${{ vars.REPOSITORY_URL }}/${{ vars.PROJECT_ID }}/gridmarket/application-service:$VERSION" >> $GITHUB_OUTPUT
 
+      - name: Build User Service Image
+        if: steps.filter.outputs.user == 'true'
+        id: user-image
+        run: |
+          cd user-service/
+          chmod +x ./gradlew
+          VERSION=$(./gradlew printVersion -q)
+          ./gradlew bootBuildImage --imageName=${{ vars.REPOSITORY_URL }}/${{ vars.PROJECT_ID }}/gridmarket/user-service:$VERSION
+          echo "image-name=${{ vars.REPOSITORY_URL }}/${{ vars.PROJECT_ID }}/gridmarket/user-service:$VERSION" >> $GITHUB_OUTPUT
+
       - name: Push application image to registry
         if: steps.filter.outputs.application == 'true'
         run: |
           docker push ${{ steps.application-image.outputs.image-name }}
 
+      - name: Push user image to registry
+        if: steps.filter.outputs.user == 'true'
+        run: |
+          docker push ${{ steps.user-image.outputs.image-name }}
+
       - name: Deploy application service
         if: steps.filter.outputs.application == 'true'
         working-directory: scripts
         run: ./create-or-update-gcp.sh gm-application-service ${{ steps.application-image.outputs.image-name }} ${{ vars.GCP_ZONE }}
+
+      - name: Deploy user service
+        if: steps.filter.outputs.user == 'true'
+        working-directory: scripts
+        run: ./create-or-update-gcp.sh gm-user-service ${{ steps.user-image.outputs.image-name }} ${{ vars.GCP_ZONE }}

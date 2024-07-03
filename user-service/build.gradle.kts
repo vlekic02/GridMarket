@@ -1,5 +1,3 @@
-import org.springframework.boot.buildpack.platform.build.PullPolicy
-
 plugins {
     java
     jacoco
@@ -25,10 +23,10 @@ checkstyle {
 
 sonar {
     properties {
-        property("sonar.projectKey", "GidMarket-ApplicationService")
+        property("sonar.projectKey", "GidMarket-UserService")
         property("sonar.sources", "src/main")
         property("sonar.tests", "src/test")
-        property("sonar.coverage.exclusions", "**/models/*,**/configuration/*")
+        property("sonar.coverage.exclusions", "**/configuration/*")
     }
 }
 
@@ -42,15 +40,18 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("com.griddynamics:test-utils:1.0")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    testImplementation("org.testcontainers:junit-jupiter")
+    testImplementation("org.testcontainers:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testRuntimeOnly("com.h2database:h2")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
-    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("com.griddynamics:jackson-jsonapi:1.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
-    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
@@ -87,10 +88,6 @@ tasks.sonar {
     dependsOn(tasks.jacocoTestReport)
 }
 
-tasks.bootBuildImage {
-    pullPolicy = PullPolicy.IF_NOT_PRESENT
-}
-
 tasks.jacocoTestReport {
     reports {
         csv.required = false
@@ -101,7 +98,7 @@ tasks.jacocoTestReport {
     finalizedBy(tasks.jacocoTestCoverageVerification)
     classDirectories.setFrom(classDirectories.files.map {
         fileTree(it).apply {
-            exclude("**/models/*", "**/configuration/*")
+            exclude("**/configuration/*")
         }
     })
 }

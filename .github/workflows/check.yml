@@ -22,6 +22,8 @@ jobs:
           filters: |
             application:
               - 'application-service/**'
+            user:
+              - 'user-service/**'
 
       - name: Setup Java
         uses: actions/setup-java@v4.2.1
@@ -42,6 +44,13 @@ jobs:
       - name: Application service check
         if: steps.filter.outputs.application == 'true'
         working-directory: ./application-service
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+
+      - name: User service check
+        if: steps.filter.outputs.user == 'true'
+        working-directory: ./user-service
         run: |
           chmod +x ./gradlew
           ./gradlew build

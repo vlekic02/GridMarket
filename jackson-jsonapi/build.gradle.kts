@@ -41,6 +41,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     compileOnly("com.fasterxml.jackson.core:jackson-core:2.17.1")
     compileOnly("com.fasterxml.jackson.core:jackson-databind:2.17.1")
+    compileOnly("io.swagger.core.v3:swagger-models:2.2.22")
+    compileOnly("org.slf4j:slf4j-api:2.0.13")
 }
 
 tasks.test {
