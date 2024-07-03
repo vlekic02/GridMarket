@@ -8,8 +8,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Repository;
 
 @Profile("cloud")
 @Repository
