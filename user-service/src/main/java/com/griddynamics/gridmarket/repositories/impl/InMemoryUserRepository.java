@@ -7,6 +7,7 @@ import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 
 public class InMemoryUserRepository implements UserRepository {
 
@@ -28,8 +29,11 @@ public class InMemoryUserRepository implements UserRepository {
   }
 
   @Override
-  public List<User> findAll() {
-    return users;
+  public List<User> findAll(Pageable pageable) {
+    return users.stream()
+        .skip(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .toList();
   }
 
   @Override

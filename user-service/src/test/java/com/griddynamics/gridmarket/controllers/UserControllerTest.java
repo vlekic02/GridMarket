@@ -18,6 +18,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -55,7 +57,7 @@ class UserControllerTest {
 
   @Test
   void shouldReturnEmptyDataIfNoUser() {
-    assertThat(userController.getAllUsers().getData()).isEmpty();
+    assertThat(userController.getAllUsers(PageRequest.of(0, 15)).getData()).isEmpty();
   }
 
   @Test
@@ -86,8 +88,26 @@ class UserControllerTest {
       "insert into \"user\" values (3, 'test', 'test', 'test3', 1, 0)"
   })
   void shouldReturnAllUsers() {
-    Collection<User> users = userController.getAllUsers().getData();
+    Collection<User> users = userController.getAllUsers(PageRequest.of(0, 30)).getData();
     assertThat(users).hasSize(3);
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 0)",
+      "insert into \"user\" values (2, 'test', 'test', 'test2', 1, 0)",
+      "insert into \"user\" values (3, 'test', 'test', 'test3', 1, 0)",
+      "insert into \"user\" values (4, 'test', 'test', 'test4', 1, 0)",
+      "insert into \"user\" values (5, 'test', 'test', 'test5', 1, 0)"
+  })
+  void shouldReturnCorrectlyPaginatedResult() {
+    Pageable pageable = PageRequest.of(3, 1);
+    Collection<User> users = userController.getAllUsers(pageable).getData();
+    assertThat(users).hasSize(1).satisfies(usersCollection -> {
+      User user = usersCollection.iterator().next();
+      assertEquals(4, user.getId());
+    });
   }
 
   @Test
