@@ -11,6 +11,7 @@ import com.griddynamics.gridmarket.repositories.impl.InMemoryUserRepository;
 import java.util.Collection;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Pageable;
 
 class UserServiceTest {
 
@@ -34,7 +35,7 @@ class UserServiceTest {
 
   @Test
   void shouldReturnAllUsers() {
-    Collection<User> users = userService.getAllUsers();
+    Collection<User> users = userService.getAllUsers(Pageable.unpaged());
     assertThat(users).hasSize(4);
   }
 
