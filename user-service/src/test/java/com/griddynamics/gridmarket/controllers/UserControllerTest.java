@@ -1,13 +1,16 @@
-package com.griddynamics.gridmarket.repositories.impl;
+package com.griddynamics.gridmarket.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
-import com.griddynamics.gridmarket.repositories.UserRepository;
-import java.util.List;
-import java.util.Optional;
+import com.griddynamics.gridmarket.repositories.impl.PostgresUserRepository;
+import com.griddynamics.gridmarket.services.UserService;
+import java.util.Collection;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,43 +30,37 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 @DataJdbcTest
 @Sql(value = "/schema.sql", executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-class PostgresUserRepositoryTest {
+class UserControllerTest {
 
   @Container
   @ServiceConnection
   static PostgreSQLContainer<?> postgres =
       new PostgreSQLContainer<>("postgres:16.3-alpine");
 
-  private UserRepository userRepository;
-
   @Autowired
-  private JdbcTemplate template;
+  private JdbcTemplate jdbcTemplate;
+
+  private UserController userController;
 
   @BeforeEach
   void setup() {
-    userRepository = new PostgresUserRepository(template);
+    UserService userService = new UserService(new PostgresUserRepository(jdbcTemplate));
+    userController = new UserController(userService);
   }
 
   @AfterEach
   void cleanup() {
-    JdbcTestUtils.deleteFromTables(template, "ban", "\"user\"", "role");
+    JdbcTestUtils.deleteFromTables(jdbcTemplate, "ban", "\"user\"", "role");
   }
 
   @Test
-  void shouldReturnEmptyOptionalIfNoUser() {
-    Optional<User> userOptional = userRepository.findById(1);
-    assertTrue(userOptional.isEmpty());
+  void shouldReturnEmptyDataIfNoUser() {
+    assertThat(userController.getAllUsers().getData()).isEmpty();
   }
 
   @Test
-  @Sql(statements = {
-      "insert into role values (1, 'MEMBER')",
-      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 0)"
-  })
-  void shouldReturnUserIfCorrectId() {
-    Optional<User> userOptional = userRepository.findById(1);
-    User user = userOptional.get();
-    assertTrue(user.getId() == 1 && user.getRole().getName().equals("MEMBER"));
+  void shouldThrowIfUserDoesntExist() {
+    assertThrows(NotFoundException.class, () -> userController.getUserById(1));
   }
 
   @Test
@@ -72,15 +69,13 @@ class PostgresUserRepositoryTest {
       "insert into \"user\" values (1, 'test', 'test', 'test', 1, 0)",
       "insert into ban values (1, 1, 1, '2024-01-08 04:05:06', 'testReason')"
   })
-  void shouldReturnCorrectBanDataForUser() {
-    User user = userRepository.findById(1).get();
-    assertEquals("testReason", user.getBan().getReason());
-  }
-
-  @Test
-  void shouldReturnEmptyListIfNoUsers() {
-    List<User> users = userRepository.findAll();
-    assertThat(users).isEmpty();
+  void shouldReturnUserIfExist() {
+    User user = userController.getUserById(1).getData();
+    assertTrue(
+        user.getId() == 1
+            && user.getRole().getName().equals("MEMBER")
+            && user.getBan().getReason().equals("testReason")
+    );
   }
 
   @Test
@@ -91,7 +86,17 @@ class PostgresUserRepositoryTest {
       "insert into \"user\" values (3, 'test', 'test', 'test3', 1, 0)"
   })
   void shouldReturnAllUsers() {
-    List<User> users = userRepository.findAll();
+    Collection<User> users = userController.getAllUsers().getData();
     assertThat(users).hasSize(3);
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 150.25)"
+  })
+  void shouldReturnCorrectBalanceForUser() {
+    Balance balance = userController.getUserBalance(1).getData();
+    assertEquals(150.25, balance.getAmount());
   }
 }
