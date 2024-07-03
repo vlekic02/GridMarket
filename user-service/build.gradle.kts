@@ -60,6 +60,14 @@ tasks.test {
     finalizedBy(tasks.jacocoTestReport)
 }
 
+tasks.register("printVersion") {
+    group = "documentation"
+    description = "Prints current project version"
+    doLast {
+        println(project.version)
+    }
+}
+
 tasks.jacocoTestCoverageVerification {
 
     violationRules {
