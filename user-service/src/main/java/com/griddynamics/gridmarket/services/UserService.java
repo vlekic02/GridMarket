@@ -5,6 +5,7 @@ import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.Collection;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -16,8 +17,8 @@ public class UserService {
     this.userRepository = userRepository;
   }
 
-  public Collection<User> getAllUsers() {
-    return userRepository.findAll();
+  public Collection<User> getAllUsers(Pageable pageable) {
+    return userRepository.findAll(pageable);
   }
 
   public User getUserById(long id) {

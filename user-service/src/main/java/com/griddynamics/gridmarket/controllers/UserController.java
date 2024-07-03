@@ -7,6 +7,7 @@ import com.griddynamics.gridmarket.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Collection;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,8 +25,8 @@ public class UserController {
 
   @Operation(summary = "Get all users")
   @GetMapping(produces = "application/vnd.api+json")
-  public DataResponse<Collection<User>> getAllUsers() {
-    return DataResponse.of(userService.getAllUsers());
+  public DataResponse<Collection<User>> getAllUsers(Pageable pageable) {
+    return DataResponse.of(userService.getAllUsers(pageable));
   }
 
   @Operation(summary = "Get specific user by id")

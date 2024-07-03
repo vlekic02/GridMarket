@@ -26,7 +26,7 @@ sonar {
         property("sonar.projectKey", "GidMarket-UserService")
         property("sonar.sources", "src/main")
         property("sonar.tests", "src/test")
-        property("sonar.coverage.exclusions", "**/models/*,**/configuration/*")
+        property("sonar.coverage.exclusions", "**/configuration/*")
     }
 }
 
@@ -98,7 +98,7 @@ tasks.jacocoTestReport {
     finalizedBy(tasks.jacocoTestCoverageVerification)
     classDirectories.setFrom(classDirectories.files.map {
         fileTree(it).apply {
-            exclude("**/models/*", "**/configuration/*")
+            exclude("**/configuration/*")
         }
     })
 }

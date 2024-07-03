@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 
 @Profile("cloud")
 @Repository
@@ -32,8 +33,11 @@ public class InMemoryUserRepository implements UserRepository {
   }
 
   @Override
-  public List<User> findAll() {
-    return users;
+  public List<User> findAll(Pageable pageable) {
+    return users.stream()
+        .skip(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .toList();
   }
 
   @Override
