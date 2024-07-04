@@ -1,8 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"order-service/api"
+)
 
 func main() {
-	name := "Go Developers"
-	fmt.Println("Azure for", name)
+	router := api.InitRouter()
+
+	if err := router.Run(":8080"); err != nil {
+		log.Fatal("Failed to initialize web server !", err)
+	}
 }
