@@ -24,6 +24,8 @@ jobs:
               - 'application-service/**'
             user:
               - 'user-service/**'
+            order:
+              - 'order-service/**'
 
       - name: Setup Java
         uses: actions/setup-java@v4.2.1
@@ -47,6 +49,16 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew build
+
+      - name: Setup GO
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.4'
+
+      - name: Order service check
+        if: steps.filter.outputs.order == 'true'
+        working-directory: ./order-service
+        run: go test
 
       - name: User service check
         if: steps.filter.outputs.user == 'true'
