@@ -1,0 +1,24 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Order-service api documentation",
+        "title": "GridMarket",
+        "contact": {},
+        "version": "1.0"
+    },
+    "paths": {
+        "/v1/orders/": {
+            "get": {
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Returns hello",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    }
+                }
+            }
+        }
+    }
+}

@@ -5,6 +5,9 @@ import (
 	"order-service/api"
 )
 
+// @title			GridMarket
+// @version		1.0
+// @description	Order-service api documentation
 func main() {
 	router := api.InitRouter()
 

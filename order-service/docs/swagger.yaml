@@ -1,0 +1,15 @@
+info:
+  contact: {}
+  description: Order-service api documentation
+  title: GridMarket
+  version: "1.0"
+paths:
+  /v1/orders/:
+    get:
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: OK
+      summary: Returns hello
+swagger: "2.0"
