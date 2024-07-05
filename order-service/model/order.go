@@ -9,3 +9,8 @@ type Order struct {
 	Date        time.Time
 	Method      PaymentMethod
 }
+
+type PaymentMethod struct {
+	ID   uint64
+	Name string
+}
