@@ -58,7 +58,16 @@ jobs:
       - name: Order service check
         if: steps.filter.outputs.order == 'true'
         working-directory: ./order-service
-        run: go test
+        run: |
+          test -z $(gofmt -l .)
+          go test ./... -coverprofile=../coverage.out -covermode=atomic -coverpkg=./...
+
+      - name: Check order-service test coverage
+        if: steps.filter.outputs.order == 'true'
+        uses: vladopajic/go-test-coverage@v2.10
+        with:
+          local-prefix: order-service
+          threshold-total: 80
 
       - name: User service check
         if: steps.filter.outputs.user == 'true'
