@@ -48,7 +48,18 @@ services:
       POSTGRES_PASSWORD: grid
     networks:
       - user-net
+  order-service:
+    image: cosmtrek/air
+    volumes:
+      - ./order-service:/app
+    ports:
+      - 8280:8080
+    working_dir: /app
+    networks:
+      - service-net
+      - order-net
 networks:
   service-net:
   application-net:
   user-net:
+  order-net:
