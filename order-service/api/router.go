@@ -31,6 +31,6 @@ func InitRouter() *gin.Engine {
 	{
 		v1.GET("/", order.Get)
 	}
-	app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	app.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return app
 }
