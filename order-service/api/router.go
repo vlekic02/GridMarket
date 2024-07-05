@@ -1,7 +1,11 @@
 package api
 
 import (
+	"log/slog"
+
 	"order-service/controller/order"
+
+	"order-service/logging"
 
 	"order-service/docs"
 
@@ -13,7 +17,14 @@ import (
 )
 
 func InitRouter() *gin.Engine {
-	app := gin.Default()
+	app := gin.New()
+
+	app.Use(gin.Recovery())
+	app.Use(JsonLogger())
+
+	if gin.Mode() == "debug" {
+		logging.SetLevel(slog.LevelDebug)
+	}
 
 	docs.SwaggerInfo.BasePath = "/v1/orders"
 	v1 := app.Group("v1/orders")
