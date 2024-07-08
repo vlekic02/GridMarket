@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	log "order-service/logging"
-
 	"order-service/model"
 
 	"github.com/gin-gonic/gin"
@@ -39,5 +38,6 @@ func ValidateOrder() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
+		ctx.Set("OrderRequest", orderRequest)
 	}
 }
