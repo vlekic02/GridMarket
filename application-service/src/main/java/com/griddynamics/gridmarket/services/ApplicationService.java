@@ -2,6 +2,7 @@ package com.griddynamics.gridmarket.services;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.models.Application;
+import com.griddynamics.gridmarket.models.Price;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.util.Collection;
@@ -28,5 +29,11 @@ public class ApplicationService {
   public Collection<Review> getAllReviewForApplication(long applicationId) {
     Application application = getApplicationById(applicationId);
     return applicationRepository.findReviewsByApplication(application);
+  }
+
+  public Price getApplicationPriceById(long id) {
+    Application application = getApplicationById(id);
+    double price = application.getRealPrice();
+    return new Price(id, price);
   }
 }
