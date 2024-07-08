@@ -66,6 +66,7 @@ jobs:
         if: steps.filter.outputs.order == 'true'
         uses: vladopajic/go-test-coverage@v2.10.1
         with:
+          profile: coverage.out
           local-prefix: order-service
           threshold-total: 80
 
