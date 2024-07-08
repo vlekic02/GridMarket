@@ -1,13 +1,12 @@
 package api
 
 import (
+	"net/http"
+
 	log "order-service/logging"
 
 	"github.com/gin-gonic/gin"
 )
-
-const serverError = 500
-const clientError = 400
 
 func JsonLogger() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -18,9 +17,9 @@ func JsonLogger() gin.HandlerFunc {
 			"path", ctx.Request.RequestURI,
 			"client_ip", ctx.ClientIP(),
 		}
-		if status >= serverError {
+		if status >= http.StatusInternalServerError {
 			log.Error("Server error encountered while executing request !", args...)
-		} else if status >= clientError {
+		} else if status >= http.StatusBadRequest {
 			log.Warn("Client error encountered while executing request !", args...)
 		} else {
 			log.Debug("Executed request", args...)
