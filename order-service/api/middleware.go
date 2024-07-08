@@ -38,6 +38,6 @@ func ValidateOrder() gin.HandlerFunc {
 			ctx.Abort()
 			return
 		}
-		ctx.Set("OrderRequest", orderRequest)
+		ctx.Set("orderRequest", orderRequest)
 	}
 }
