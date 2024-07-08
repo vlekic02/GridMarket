@@ -64,7 +64,7 @@ jobs:
 
       - name: Check order-service test coverage
         if: steps.filter.outputs.order == 'true'
-        uses: vladopajic/go-test-coverage@v2.10
+        uses: vladopajic/go-test-coverage@v2.10.1
         with:
           local-prefix: order-service
           threshold-total: 80
