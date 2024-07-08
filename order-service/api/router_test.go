@@ -21,7 +21,7 @@ func TestGetAllOrdersRoute(t *testing.T) {
 	body, _ := io.ReadAll(w.Result().Body)
 	response := string(body)
 	if strings.TrimSpace(string(response)) != expectedResponse {
-		t.Errorf("Unexpected bodu: got %v want %v", response, expectedResponse)
+		t.Errorf("Unexpected body: got %v want %v", response, expectedResponse)
 	}
 
 }
