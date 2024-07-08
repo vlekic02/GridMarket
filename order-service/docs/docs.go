@@ -20,11 +20,65 @@ const docTemplate = `{
                 "produces": [
                     "text/plain"
                 ],
+                "tags": [
+                    "Order"
+                ],
                 "summary": "Returns hello",
                 "responses": {
                     "200": {
                         "description": "OK"
                     }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Order"
+                ],
+                "summary": "Create a new order",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/model.OrderRequest"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "model.OrderRequest": {
+            "type": "object",
+            "required": [
+                "application",
+                "method",
+                "user"
+            ],
+            "properties": {
+                "application": {
+                    "type": "integer"
+                },
+                "method": {
+                    "type": "integer",
+                    "enum": [
+                        0,
+                        1
+                    ]
+                },
+                "user": {
+                    "type": "integer"
                 }
             }
         }
