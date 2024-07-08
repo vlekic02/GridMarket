@@ -6,6 +6,6 @@ import "github.com/gin-gonic/gin"
 // @Produce	plain
 // @Success	200
 // @Router		/v1/orders/ [get]
-func Get(context *gin.Context) {
+func GetAllOrders(context *gin.Context) {
 	context.String(200, "Hello !")
 }

@@ -29,7 +29,7 @@ func InitRouter() *gin.Engine {
 	docs.SwaggerInfo.BasePath = "/v1/orders"
 	v1 := app.Group("v1/orders")
 	{
-		v1.GET("/", order.Get)
+		v1.GET("/", order.GetAllOrders)
 	}
 	app.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return app
