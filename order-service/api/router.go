@@ -29,6 +29,7 @@ func InitRouter() *gin.Engine {
 	v1 := app.Group("v1/orders")
 	{
 		v1.GET("/", order.GetAllOrders)
+		v1.POST("/", ValidateOrder(), order.CreateOrder)
 	}
 	app.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return app
