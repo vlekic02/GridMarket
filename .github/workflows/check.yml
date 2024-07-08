@@ -60,13 +60,13 @@ jobs:
         working-directory: ./order-service
         run: |
           test -z $(gofmt -l .)
-          go test ./... -coverprofile=../coverage.out -covermode=atomic -coverpkg=./...
+          go test ./... -coverprofile=coverage.out -covermode=atomic -coverpkg=./...
 
       - name: Check order-service test coverage
         if: steps.filter.outputs.order == 'true'
         uses: vladopajic/go-test-coverage@v2.10.1
         with:
-          profile: coverage.out
+          profile: ./order-service/coverage.out
           local-prefix: order-service
           threshold-total: 80
 
