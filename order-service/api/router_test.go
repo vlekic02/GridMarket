@@ -71,18 +71,6 @@ func constructJsonReader(in interface{}) (io.Reader, error) {
 	return buf, nil
 }
 
-func getMockPriceResponse() map[string]any {
-	return map[string]any{
-		"data": map[string]any{
-			"id":   "3",
-			"type": "price",
-			"attributes": map[string]any{
-				"price": 40,
-			},
-		},
-	}
-}
-
 func setupPostOrdersRouter(request map[string]any, t *testing.T) (*gin.Engine, *httptest.ResponseRecorder, *http.Request) {
 	router := api.InitRouter(testApplicationClient)
 	w := httptest.NewRecorder()
@@ -101,8 +89,8 @@ type TestApplicationHttpClient struct {
 
 func (tahc *TestApplicationHttpClient) Get(url string) (resp *http.Response, err error) {
 	if url == "http://application-service:8080/internal/3/price" {
-		mockResponse := getMockPriceResponse()
-		reader, _ := constructJsonReader(mockResponse)
+		response := `{"data":{"type":"price","id":"3","attributes":{"price":40.0}}}`
+		var reader io.Reader = strings.NewReader(response)
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(reader)}, nil
 	}
 	if url == "http://application-service:8080/internal/10/price" {
