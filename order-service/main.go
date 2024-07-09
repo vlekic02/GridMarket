@@ -1,8 +1,9 @@
 package main
 
 import (
-	"log"
 	"order-service/api"
+
+	log "order-service/logging"
 )
 
 // @title			GridMarket
@@ -10,7 +11,6 @@ import (
 // @description	Order-service api documentation
 func main() {
 	router := api.InitRouter()
-
 	if err := router.Run(":8080"); err != nil {
 		log.Fatal("Failed to initialize web server !", err)
 	}
