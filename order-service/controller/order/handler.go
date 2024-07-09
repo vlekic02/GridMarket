@@ -23,7 +23,10 @@ func GetAllOrders(ctx *gin.Context) {
 // @Accept application/json
 // @Produce application/json
 // @Success 200 {object} model.OrderRequest
-// @Failure 400 {string} string "Bad Request"
+// @Failure 400 {object} model.RestError
+// @Failure 404 {object} model.RestError
+// @Failure 504 {object} model.RestError
+// @Failure 500 {object} model.RestError
 // @Router /v1/orders/ [post]
 func CreateOrder(ctx *gin.Context) {
 	request, _ := ctx.Get("orderRequest")

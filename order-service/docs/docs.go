@@ -51,7 +51,25 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/model.RestError"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/model.RestError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/model.RestError"
+                        }
+                    },
+                    "504": {
+                        "description": "Gateway Timeout",
+                        "schema": {
+                            "$ref": "#/definitions/model.RestError"
                         }
                     }
                 }
@@ -79,6 +97,20 @@ const docTemplate = `{
                 },
                 "user": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.RestError": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
                 }
             }
         }
