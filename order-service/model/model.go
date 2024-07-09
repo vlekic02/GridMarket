@@ -8,7 +8,7 @@ import (
 type PaymentMethod int
 
 const (
-	Balance = iota
+	Balance PaymentMethod = iota
 	Paypal
 )
 
