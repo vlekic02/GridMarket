@@ -3,6 +3,7 @@ package api
 import (
 	"log/slog"
 
+	"order-service/client"
 	"order-service/controller/order"
 
 	"order-service/logging"
@@ -16,7 +17,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func InitRouter() *gin.Engine {
+func InitRouter(cApp client.ApplicationClient) *gin.Engine {
 	app := gin.New()
 
 	app.Use(gin.Recovery(), ErrorHandler(), JsonLogger())
@@ -29,7 +30,7 @@ func InitRouter() *gin.Engine {
 	v1 := app.Group("v1/orders")
 	{
 		v1.GET("/", order.GetAllOrders)
-		v1.POST("/", ValidateOrder(), order.CreateOrder)
+		v1.POST("/", ValidateOrder(), order.CreateOrder(cApp))
 	}
 	app.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return app

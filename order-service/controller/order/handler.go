@@ -28,14 +28,16 @@ func GetAllOrders(ctx *gin.Context) {
 // @Failure 504 {object} model.RestError
 // @Failure 500 {object} model.RestError
 // @Router /v1/orders/ [post]
-func CreateOrder(ctx *gin.Context) {
-	request, _ := ctx.Get("orderRequest")
-	orderRequest := request.(*model.OrderRequest)
-	applicationPrice, err := client.GetApplicationPrice(orderRequest.Application)
-	if err != nil {
-		log.Error("Error while fetching application service", err)
-		ctx.Error(err)
-		return
+func CreateOrder(app client.ApplicationClient) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		request, _ := ctx.Get("orderRequest")
+		orderRequest := request.(*model.OrderRequest)
+		applicationPrice, err := app.GetApplicationPrice(orderRequest.Application)
+		if err != nil {
+			log.Error("Error while fetching application service", err)
+			ctx.Error(err)
+			return
+		}
+		ctx.String(200, fmt.Sprintf("%v", applicationPrice))
 	}
-	ctx.String(200, fmt.Sprintf("%v", applicationPrice))
 }

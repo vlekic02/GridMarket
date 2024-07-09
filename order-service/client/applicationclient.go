@@ -9,6 +9,12 @@ import (
 	"order-service/model"
 )
 
+var DefaultApplicationClient = ApplicationClient{http.DefaultClient}
+
+type ApplicationClient struct {
+	HttpClient
+}
+
 type ApplicationPriceResponse struct {
 	Data struct {
 		Id         string `json:"id"`
@@ -19,9 +25,9 @@ type ApplicationPriceResponse struct {
 	} `json:"data"`
 }
 
-func GetApplicationPrice(id uint64) (ApplicationPriceResponse, error) {
+func (app *ApplicationClient) GetApplicationPrice(id uint64) (ApplicationPriceResponse, error) {
 	log.Debug(fmt.Sprintf("Calling application service /internal/%d/price", id))
-	response, err := http.Get(fmt.Sprintf("http://application-service:8080/internal/%d/price", id))
+	response, err := app.Get(fmt.Sprintf("http://application-service:8080/internal/%d/price", id))
 	applicationResponse := ApplicationPriceResponse{}
 	if err != nil {
 		return applicationResponse, &model.RestError{Title: "Gateway Timeout", Status: 504, Detail: "Application service did not respond ! Error: " + err.Error()}
