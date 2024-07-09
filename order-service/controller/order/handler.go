@@ -1,7 +1,6 @@
 package order
 
 import (
-	"fmt"
 	"order-service/client"
 	log "order-service/logging"
 	"order-service/model"
@@ -38,6 +37,6 @@ func CreateOrder(app client.ApplicationClient) gin.HandlerFunc {
 			ctx.Error(err)
 			return
 		}
-		ctx.String(200, fmt.Sprintf("%v", applicationPrice))
+		ctx.JSON(200, applicationPrice)
 	}
 }
