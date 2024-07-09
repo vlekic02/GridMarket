@@ -15,25 +15,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var testApplicationClient = client.ApplicationClient{HttpClient: &TestApplicationHttpClient{}}
-
-type TestApplicationHttpClient struct {
-}
-
-func (tahc *TestApplicationHttpClient) Get(url string) (resp *http.Response, err error) {
-	if url == "http://application-service:8080/internal/3/price" {
-		mockResponse := getMockPriceResponse()
-		reader, _ := constructJsonReader(mockResponse)
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(reader)}, nil
-	}
-	if url == "http://application-service:8080/internal/10/price" {
-		response := `{"errors":[{"type":"error","id":"10","attributes":{"detail":"Specified application not found !","status":404,"title":"Not found"}}]}`
-		var reader io.Reader = strings.NewReader(response)
-		return &http.Response{StatusCode: 404, Body: io.NopCloser(reader)}, nil
-	}
-	return nil, nil
-}
-
 func TestGetAllOrdersRoute(t *testing.T) {
 	router := api.InitRouter(client.DefaultApplicationClient)
 	w := httptest.NewRecorder()
@@ -111,4 +92,23 @@ func setupPostOrdersRouter(request map[string]any, t *testing.T) (*gin.Engine, *
 	}
 	req, _ := http.NewRequest("POST", "/v1/orders/", body)
 	return router, w, req
+}
+
+var testApplicationClient = client.ApplicationClient{HttpClient: &TestApplicationHttpClient{}}
+
+type TestApplicationHttpClient struct {
+}
+
+func (tahc *TestApplicationHttpClient) Get(url string) (resp *http.Response, err error) {
+	if url == "http://application-service:8080/internal/3/price" {
+		mockResponse := getMockPriceResponse()
+		reader, _ := constructJsonReader(mockResponse)
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(reader)}, nil
+	}
+	if url == "http://application-service:8080/internal/10/price" {
+		response := `{"errors":[{"type":"error","id":"10","attributes":{"detail":"Specified application not found !","status":404,"title":"Not found"}}]}`
+		var reader io.Reader = strings.NewReader(response)
+		return &http.Response{StatusCode: 404, Body: io.NopCloser(reader)}, nil
+	}
+	return nil, nil
 }
