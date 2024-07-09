@@ -2,6 +2,9 @@ package order
 
 import (
 	"fmt"
+	"order-service/client"
+	log "order-service/logging"
+	"order-service/model"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +26,13 @@ func GetAllOrders(ctx *gin.Context) {
 // @Failure 400 {string} string "Bad Request"
 // @Router /v1/orders/ [post]
 func CreateOrder(ctx *gin.Context) {
-	orderRequest, _ := ctx.Get("body")
-	ctx.String(200, fmt.Sprintf("%v", orderRequest))
+	request, _ := ctx.Get("orderRequest")
+	orderRequest := request.(*model.OrderRequest)
+	applicationPrice, err := client.GetApplicationPrice(orderRequest.Application)
+	if err != nil {
+		log.Error("Error while fetching application service", err)
+		ctx.Error(err)
+		return
+	}
+	ctx.String(200, fmt.Sprintf("%v", applicationPrice))
 }
