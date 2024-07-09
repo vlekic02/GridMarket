@@ -1,3 +1,29 @@
+definitions:
+  model.OrderRequest:
+    properties:
+      application:
+        type: integer
+      method:
+        enum:
+        - 0
+        - 1
+        type: integer
+      user:
+        type: integer
+    required:
+    - application
+    - method
+    - user
+    type: object
+  model.RestError:
+    properties:
+      detail:
+        type: string
+      status:
+        type: integer
+      title:
+        type: string
+    type: object
 info:
   contact: {}
   description: Order-service api documentation
@@ -12,4 +38,35 @@ paths:
         "200":
           description: OK
       summary: Returns hello
+      tags:
+      - Order
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.OrderRequest'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/model.RestError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/model.RestError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/model.RestError'
+        "504":
+          description: Gateway Timeout
+          schema:
+            $ref: '#/definitions/model.RestError'
+      summary: Create a new order
+      tags:
+      - Order
 swagger: "2.0"
