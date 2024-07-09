@@ -9,7 +9,7 @@ import (
 	"order-service/model"
 )
 
-var DefaultApplicationClient = ApplicationClient{http.DefaultClient}
+var DefaultApplicationClient = ApplicationClient{HttpClient: http.DefaultClient}
 
 type ApplicationClient struct {
 	HttpClient
