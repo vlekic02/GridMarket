@@ -30,22 +30,22 @@ func (app *ApplicationClient) GetApplicationPrice(id uint64) (ApplicationPriceRe
 	response, err := app.Get(fmt.Sprintf("http://application-service:8080/internal/%d/price", id))
 	applicationResponse := ApplicationPriceResponse{}
 	if err != nil {
-		return applicationResponse, &model.RestError{Title: "Gateway Timeout", Status: 504, Detail: "Application service did not respond ! Error: " + err.Error()}
+		return applicationResponse, model.NewRestError(504, "Gateway Timeout", "Application service did not respond ! Error: "+err.Error())
 	}
 	defer response.Body.Close()
 	body, err := io.ReadAll(response.Body)
 	if err != nil {
-		return applicationResponse, &model.RestError{Title: "Internal Server Error", Status: 500, Detail: "Application service response does not contains body ! Error: " + err.Error()}
+		return applicationResponse, model.NewRestError(500, "Internal Server Error", "Application service response does not contains body ! Error: "+err.Error())
 	}
 	if response.StatusCode != http.StatusOK {
 		errorResponse := new(model.ErrorsResponse)
 		if err := json.Unmarshal(body, &errorResponse); err != nil {
-			return applicationResponse, &model.RestError{Title: "Internal Server Error", Status: 500, Detail: "Failed to unmarshal application service response ! Error: " + err.Error()}
+			return applicationResponse, model.NewRestError(500, "Internal Server Error", "Failed to unmarshal application service response ! Error: "+err.Error())
 		}
 		return applicationResponse, &errorResponse.Errors[0].Attributes
 	}
 	if err := json.Unmarshal(body, &applicationResponse); err != nil {
-		return applicationResponse, &model.RestError{Title: "Internal Server Error", Status: 500, Detail: "Failed to unmarshal application service response ! Error: " + err.Error()}
+		return applicationResponse, model.NewRestError(500, "Internal Server Error", "Failed to unmarshal application service response ! Error: "+err.Error())
 	}
 	return applicationResponse, nil
 }

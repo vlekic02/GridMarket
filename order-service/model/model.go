@@ -45,6 +45,10 @@ func (re *RestError) Error() string {
 	return fmt.Sprintf("Status: %d; Title: %s; Detail: %s", re.Status, re.Title, re.Detail)
 }
 
+func NewRestError(status uint16, title string, detail string) *RestError {
+	return &RestError{Title: title, Status: status, Detail: detail}
+}
+
 type ErrorItem struct {
 	Type       string    `json:"type"`
 	ID         string    `json:"id"`
