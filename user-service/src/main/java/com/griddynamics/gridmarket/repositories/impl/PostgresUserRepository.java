@@ -5,6 +5,7 @@ import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -40,7 +41,7 @@ public class PostgresUserRepository implements UserRepository {
 
   @Override
   public Optional<User> findById(long id) {
-    return template.queryForStream(
+    Stream<User> userStream = template.queryForStream(
         """
             SELECT "user".*, role_id, role.name as role_name, ban.* \
             FROM "user" \
@@ -50,6 +51,9 @@ public class PostgresUserRepository implements UserRepository {
             """,
         new UserRowMapper(),
         id
-    ).findFirst();
+    );
+    Optional<User> userOptional = userStream.findFirst();
+    userStream.close();
+    return userOptional;
   }
 }

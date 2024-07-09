@@ -7,6 +7,7 @@ import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -37,7 +38,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
 
   @Override
   public Optional<Application> findById(long id) {
-    return template.queryForStream(
+    Stream<Application> applicationStream = template.queryForStream(
         """
              SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
              end_date, \
@@ -48,7 +49,10 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             """,
         new ApplicationRowMapper(),
         id
-    ).findFirst();
+    );
+    Optional<Application> applicationOptional = applicationStream.findFirst();
+    applicationStream.close();
+    return applicationOptional;
   }
 
   @Override
