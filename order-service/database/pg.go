@@ -39,7 +39,7 @@ func (pg *postgres) InsertOrder(or model.OrderRequest) error {
 	return err
 }
 
-func (pg *postgres) GetByUser(userId uint64) ([]model.Order, error) {
+func (pg *postgres) GetOrdersByUser(userId uint64) ([]model.Order, error) {
 	query := `SELECT * FROM "order" where "user" = @user`
 	args := pgx.NamedArgs{
 		"user": userId,
