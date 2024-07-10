@@ -17,8 +17,17 @@ var methodNames = map[PaymentMethod]string{
 	Paypal:  "PAYPAL",
 }
 
+var reverseMethodMapping = map[string]PaymentMethod{
+	"BALANCE": Balance,
+	"PAYPAL":  Paypal,
+}
+
 func (pm PaymentMethod) String() string {
 	return methodNames[pm]
+}
+
+func GetPaymentMethodByName(name string) PaymentMethod {
+	return reverseMethodMapping[name]
 }
 
 type Order struct {
