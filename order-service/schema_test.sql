@@ -3,7 +3,7 @@ BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'payment_method') THEN
         CREATE TYPE payment_method AS ENUM ('BALANCE', 'PAYPAL');
     END IF;
-END$$@@
+END$$;
 
 CREATE TABLE IF NOT EXISTS "order" (
     order_id SERIAL PRIMARY KEY,
@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS "order" (
     application INTEGER NOT NULL,
     date TIMESTAMP NOT NULL,
     method payment_method NOT NULL
-)
+);
