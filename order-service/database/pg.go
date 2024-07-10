@@ -15,7 +15,7 @@ type postgres struct {
 }
 
 func (pg *postgres) GetAllOrders() ([]model.Order, error) {
-	query := `SELECT * FROM order`
+	query := `SELECT * FROM "order"`
 	rows, err := pg.db.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func (pg *postgres) GetAllOrders() ([]model.Order, error) {
 }
 
 func (pg *postgres) InsertOrder(or model.OrderRequest) error {
-	query := `INSERT INTO order VALUES (default, @user, @application, @date, @method)`
+	query := `INSERT INTO "order" VALUES (default, @user, @application, @date, @method)`
 	args := pgx.NamedArgs{
 		"user":        or.User,
 		"application": or.Application,
