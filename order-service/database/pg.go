@@ -20,7 +20,7 @@ func (pg *postgres) GetAllOrders() ([]model.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	orders, err := pgx.CollectRows[model.Order](rows, pgx.RowToStructByPos[model.Order])
+	orders, err := pgx.CollectRows[model.Order](rows, rowToOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func (pg *postgres) GetByUser(userId uint64) ([]model.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	orders, err := pgx.CollectRows[model.Order](rows, pgx.RowToStructByPos[model.Order])
+	orders, err := pgx.CollectRows[model.Order](rows, rowToOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -57,6 +57,19 @@ func (pg *postgres) GetByUser(userId uint64) ([]model.Order, error) {
 
 func (pg *postgres) Close() {
 	pg.db.Close()
+}
+func rowToOrder(row pgx.CollectableRow) (model.Order, error) {
+	order := model.Order{}
+	values, err := row.Values()
+	if err != nil {
+		return order, err
+	}
+	order.ID = uint64(values[0].(int32))
+	order.User = uint64(values[1].(int32))
+	order.Application = uint64(values[2].(int32))
+	order.Date = values[3].(time.Time)
+	order.Method = model.GetPaymentMethodByName(values[4].(string))
+	return order, nil
 }
 
 func InitPgDatabase() (*postgres, error) {
