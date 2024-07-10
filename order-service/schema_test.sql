@@ -12,3 +12,35 @@ CREATE TABLE IF NOT EXISTS "order" (
     date TIMESTAMP NOT NULL,
     method payment_method NOT NULL
 );
+
+INSERT INTO "order" VALUES (
+    DEFAULT,
+    2,
+    2,
+    '2024-01-08 04:05:06',
+    'BALANCE'
+);
+
+INSERT INTO "order" VALUES (
+    DEFAULT,
+    1,
+    2,
+    '2024-01-08 04:05:06',
+    'BALANCE'
+);
+
+INSERT INTO "order" VALUES (
+    DEFAULT,
+    3,
+    3,
+    '2024-01-08 04:05:06',
+    'PAYPAL'
+);
+
+INSERT INTO "order" VALUES (
+    DEFAULT,
+    5,
+    5,
+    '2024-01-08 04:05:06',
+    'PAYPAL'
+);
