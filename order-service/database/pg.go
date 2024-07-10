@@ -33,10 +33,26 @@ func (pg *postgres) InsertOrder(or model.OrderRequest) error {
 		"user":        or.User,
 		"application": or.Application,
 		"date":        time.Now(),
-		"method":      or.Method,
+		"method":      or.Method.String(),
 	}
 	_, err := pg.db.Exec(context.Background(), query, args)
 	return err
+}
+
+func (pg *postgres) GetByUser(userId uint64) ([]model.Order, error) {
+	query := `SELECT * FROM "order" where "user" = @user`
+	args := pgx.NamedArgs{
+		"user": userId,
+	}
+	rows, err := pg.db.Query(context.Background(), query, args)
+	if err != nil {
+		return nil, err
+	}
+	orders, err := pgx.CollectRows[model.Order](rows, pgx.RowToStructByPos[model.Order])
+	if err != nil {
+		return nil, err
+	}
+	return orders, nil
 }
 
 func (pg *postgres) Close() {
