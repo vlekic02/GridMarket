@@ -51,7 +51,7 @@ func ErrorHandler() gin.HandlerFunc {
 				ctx.AbortWithStatusJSON(int(e.Status), e)
 			default:
 				log.Error("Unexpected error in gin context !", e)
-				ctx.AbortWithStatus(500)
+				ctx.AbortWithStatusJSON(500, model.NewRestError(500, "Internal Server Error", "Internal error"))
 			}
 		}
 	}
