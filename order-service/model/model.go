@@ -13,8 +13,8 @@ const (
 )
 
 var methodNames = map[PaymentMethod]string{
-	Balance: "Balance",
-	Paypal:  "Paypal",
+	Balance: "BALANCE",
+	Paypal:  "PAYPAL",
 }
 
 func (pm PaymentMethod) String() string {
