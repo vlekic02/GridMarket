@@ -16,6 +16,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Failed to initialize connection with database !", err)
 	}
+	defer postgres.Close()
 	database.InitDb(postgres)
 	router := api.InitRouter(client.DefaultApplicationClient)
 	if err := router.Run(":8080"); err != nil {
