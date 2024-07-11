@@ -39,7 +39,7 @@ func (pg *postgres) InsertOrder(or model.OrderRequest) error {
 	return err
 }
 
-func (pg *postgres) GetOrdersByUser(userId uint64) ([]model.Order, error) {
+func (pg *postgres) GetOrdersByUser(userId int32) ([]model.Order, error) {
 	query := `SELECT * FROM "order" where "user" = @user`
 	args := pgx.NamedArgs{
 		"user": userId,
@@ -64,9 +64,9 @@ func rowToOrder(row pgx.CollectableRow) (model.Order, error) {
 	if err != nil {
 		return order, err
 	}
-	order.ID = uint64(values[0].(int32))
-	order.User = uint64(values[1].(int32))
-	order.Application = uint64(values[2].(int32))
+	order.ID = values[0].(int32)
+	order.User = values[1].(int32)
+	order.Application = values[2].(int32)
 	order.Date = values[3].(time.Time)
 	order.Method = model.GetPaymentMethodByName(values[4].(string))
 	return order, nil

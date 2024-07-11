@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS "order" (
 );
 
 INSERT INTO "order" VALUES (
-    1,
+    DEFAULT,
     2,
     2,
     '2024-01-08 04:05:06',
@@ -22,7 +22,7 @@ INSERT INTO "order" VALUES (
 );
 
 INSERT INTO "order" VALUES (
-    2,
+    DEFAULT,
     1,
     2,
     '2024-01-08 04:05:06',
@@ -30,7 +30,7 @@ INSERT INTO "order" VALUES (
 );
 
 INSERT INTO "order" VALUES (
-    3,
+    DEFAULT,
     3,
     3,
     '2024-01-08 04:05:06',
@@ -38,7 +38,7 @@ INSERT INTO "order" VALUES (
 );
 
 INSERT INTO "order" VALUES (
-    4,
+    DEFAULT,
     5,
     5,
     '2024-01-08 04:05:06',

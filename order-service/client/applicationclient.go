@@ -25,7 +25,7 @@ type ApplicationPriceResponse struct {
 	} `json:"data"`
 }
 
-func (app *ApplicationClient) GetApplicationPrice(id uint64) (ApplicationPriceResponse, error) {
+func (app *ApplicationClient) GetApplicationPrice(id int32) (ApplicationPriceResponse, error) {
 	log.Debug(fmt.Sprintf("Calling application service /internal/%d/price", id))
 	response, err := app.Get(fmt.Sprintf("http://application-service:8080/internal/%d/price", id))
 	applicationResponse := ApplicationPriceResponse{}

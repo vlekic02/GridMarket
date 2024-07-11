@@ -31,16 +31,16 @@ func GetPaymentMethodByName(name string) PaymentMethod {
 }
 
 type Order struct {
-	ID          uint64
-	User        uint64
-	Application uint64
+	ID          int32
+	User        int32
+	Application int32
 	Date        time.Time
 	Method      PaymentMethod
 }
 
 type OrderRequest struct {
-	User        uint64        `json:"user" binding:"required"`
-	Application uint64        `json:"application" binding:"required"`
+	User        int32         `json:"user" binding:"required"`
+	Application int32         `json:"application" binding:"required"`
 	Method      PaymentMethod `json:"method" binding:"required,oneof=0 1"`
 }
 
