@@ -3,7 +3,6 @@ package database_test
 import (
 	"context"
 	"order-service/database"
-	"order-service/logging"
 	"order-service/model"
 	"os"
 	"testing"
@@ -13,8 +12,6 @@ import (
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
 )
-
-var pg database.Database
 
 func setupContainer() *postgres.PostgresContainer {
 	pgContainer, _ := postgres.Run(
@@ -36,19 +33,17 @@ func TestMain(m *testing.M) {
 	pgCon := setupContainer()
 	connStr, _ := pgCon.ConnectionString(context.Background())
 	os.Setenv("DATABASE_URL", connStr)
-	pg, _ = database.InitPgDatabase()
+	pg, _ := database.InitPgDatabase()
+	database.InitDb(pg)
 	code := m.Run()
-	pg.Close()
+	database.Db.Close()
 	pgCon.Terminate(context.Background())
 	os.Unsetenv("DATABASE_URL")
 	os.Exit(code)
 }
 
 func TestGetAllOrders(t *testing.T) {
-	orders, err := pg.GetAllOrders()
-	if err != nil {
-		logging.Info("", err)
-	}
+	orders, _ := database.Db.GetAllOrders()
 	expected := 4
 	actual := len(orders)
 	if actual != expected {
@@ -58,8 +53,8 @@ func TestGetAllOrders(t *testing.T) {
 
 func TestInsertOrder(t *testing.T) {
 	orderRequest := model.OrderRequest{User: 10, Application: 10, Method: model.Balance}
-	pg.InsertOrder(orderRequest)
-	byUser, _ := pg.GetOrdersByUser(10)
+	database.Db.InsertOrder(orderRequest)
+	byUser, _ := database.Db.GetOrdersByUser(10)
 	actual := len(byUser)
 	expected := 1
 	if actual != expected {
@@ -68,9 +63,9 @@ func TestInsertOrder(t *testing.T) {
 }
 
 func TestGeyByUser(t *testing.T) {
-	orders, _ := pg.GetOrdersByUser(1)
+	orders, _ := database.Db.GetOrdersByUser(5)
 	order := orders[0]
-	if order.ID != 1 && order.User != 2 && order.Application != 2 && order.Method != model.Balance {
+	if order.ID != 4 || order.User != 5 || order.Application != 5 || order.Method != model.Paypal {
 		t.Errorf("Unexpected struct returned ! got: %v", order)
 	}
 }
