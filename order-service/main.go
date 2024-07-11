@@ -14,12 +14,12 @@ import (
 func main() {
 	postgres, err := database.InitPgDatabase()
 	if err != nil {
-		log.Fatal("Failed to initialize connection with database !", err)
+		log.Fatal("Failed to initialize connection with database !", "error", err)
 	}
 	defer postgres.Close()
 	database.InitDb(postgres)
 	router := api.InitRouter(client.DefaultApplicationClient)
 	if err := router.Run(":8080"); err != nil {
-		log.Fatal("Failed to initialize web server !", err)
+		log.Fatal("Failed to initialize web server !", "error", err)
 	}
 }

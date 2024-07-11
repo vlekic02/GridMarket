@@ -33,7 +33,7 @@ func CreateOrder(app client.ApplicationClient) gin.HandlerFunc {
 		orderRequest := request.(*model.OrderRequest)
 		applicationPrice, err := app.GetApplicationPrice(orderRequest.Application)
 		if err != nil {
-			log.Error("Error while fetching application service", err)
+			log.Error("Error while fetching application service", "error", err)
 			ctx.Error(err)
 			return
 		}
