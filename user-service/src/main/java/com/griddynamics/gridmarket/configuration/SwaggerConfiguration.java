@@ -3,7 +3,6 @@ package com.griddynamics.gridmarket.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.Ban;
-import com.griddynamics.gridmarket.models.RestException;
 import com.griddynamics.gridmarket.models.Role;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.jacksonjsonapi.utils.SwaggerUtils;
@@ -37,10 +36,6 @@ public class SwaggerConfiguration {
 
   @PostConstruct
   public void injectSchemas() {
-    SpringDocUtils.getConfig().replaceWithSchema(
-        RestException.class,
-        SwaggerUtils.generateSchemaForType(RestException.class)
-    );
     SpringDocUtils.getConfig().replaceWithSchema(
         Balance.class,
         SwaggerUtils.generateSchemaForType(Balance.class)
