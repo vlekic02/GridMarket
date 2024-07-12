@@ -13,25 +13,34 @@ const (
 )
 
 var methodNames = map[PaymentMethod]string{
-	Balance: "Balance",
-	Paypal:  "Paypal",
+	Balance: "BALANCE",
+	Paypal:  "PAYPAL",
+}
+
+var reverseMethodMapping = map[string]PaymentMethod{
+	"BALANCE": Balance,
+	"PAYPAL":  Paypal,
 }
 
 func (pm PaymentMethod) String() string {
 	return methodNames[pm]
 }
 
+func GetPaymentMethodByName(name string) PaymentMethod {
+	return reverseMethodMapping[name]
+}
+
 type Order struct {
-	ID          uint64
-	User        uint64
-	Application uint64
+	ID          int32
+	User        int32
+	Application int32
 	Date        time.Time
 	Method      PaymentMethod
 }
 
 type OrderRequest struct {
-	User        uint64        `json:"user" binding:"required"`
-	Application uint64        `json:"application" binding:"required"`
+	User        int32         `json:"user" binding:"required"`
+	Application int32         `json:"application" binding:"required"`
 	Method      PaymentMethod `json:"method" binding:"required,oneof=0 1"`
 }
 

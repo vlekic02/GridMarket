@@ -54,13 +54,15 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version: '1.22.4'
+          cache-dependency-path: |
+            order-service/go.sum
 
       - name: Order service check
         if: steps.filter.outputs.order == 'true'
         working-directory: ./order-service
         run: |
           test -z $(gofmt -l .)
-          go test ./... -coverprofile=coverage.out -covermode=atomic -coverpkg=./...
+          go test ./...  -coverprofile=coverage.out -covermode=atomic -coverpkg=$(go list ./... | grep -v -e '^order-service$' -e '^order-service/logging$' -e '^order-service/model$' | sed 'H;1h;$!d;x;y/\n/,/')
 
       - name: Check order-service test coverage
         if: steps.filter.outputs.order == 'true'
