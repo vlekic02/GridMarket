@@ -31,11 +31,11 @@ func GetPaymentMethodByName(name string) PaymentMethod {
 }
 
 type Order struct {
-	ID          int32
-	User        int32
-	Application int32
-	Date        time.Time
-	Method      PaymentMethod
+	ID          int32         `jsonapi:"primary,order"`
+	User        int32         `jsonapi:"relation,user"`
+	Application int32         `jsonapi:"relation,application"`
+	Date        time.Time     `jsonapi:"attr,date"`
+	Method      PaymentMethod `jsonapi:"attr,method"`
 }
 
 type OrderRequest struct {
@@ -56,14 +56,4 @@ func (re *RestError) Error() string {
 
 func NewRestError(status uint16, title string, detail string) *RestError {
 	return &RestError{Title: title, Status: status, Detail: detail}
-}
-
-type ErrorItem struct {
-	Type       string    `json:"type"`
-	ID         string    `json:"id"`
-	Attributes RestError `json:"attributes"`
-}
-
-type ErrorsResponse struct {
-	Errors []ErrorItem `json:"errors"`
 }
