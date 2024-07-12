@@ -1,9 +1,10 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
-	"order-service/logging"
 	log "order-service/logging"
 	"order-service/model"
 
@@ -30,15 +31,24 @@ func (app *ApplicationClient) GetApplicationPrice(id int32) (ApplicationPriceRes
 	}
 	defer response.Body.Close()
 	if response.StatusCode != http.StatusOK {
-		errorResponse := new(model.ErrorResponse)
-		if err := jsonapi.UnmarshalPayload(response.Body, errorResponse); err != nil {
+		errorResponse, err := UnmarshalErrors(response.Body)
+		if err != nil {
 			return applicationResponse, model.NewRestError(500, "Internal Server Error", "Failed to unmarshal application service response ! Error: "+err.Error())
 		}
-		logging.Info("a", errorResponse)
-		return applicationResponse, &errorResponse.Errors[0]
+		return applicationResponse, errorResponse
 	}
 	if err := jsonapi.UnmarshalPayload(response.Body, &applicationResponse); err != nil {
 		return applicationResponse, model.NewRestError(500, "Internal Server Error", "Failed to unmarshal application service response ! Error: "+err.Error())
 	}
 	return applicationResponse, nil
+}
+
+func UnmarshalErrors(in io.Reader) (*model.ErrorResponse, error) {
+	payload := new(model.ErrorResponse)
+
+	if err := json.NewDecoder(in).Decode(payload); err != nil {
+		return nil, err
+	}
+
+	return payload, nil
 }
