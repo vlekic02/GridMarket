@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   check:
-    name: Run gradle check
+    name: Run checks
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,6 +26,8 @@ jobs:
               - 'user-service/**'
             order:
               - 'order-service/**'
+            gateway:
+              - 'gateway-service/**'
 
       - name: Setup Java
         uses: actions/setup-java@v4.2.1
@@ -51,6 +53,7 @@ jobs:
           ./gradlew build
 
       - name: Setup GO
+        if: steps.filter.outputs.order == 'true'
         uses: actions/setup-go@v5
         with:
           go-version: '1.22.4'
@@ -70,6 +73,13 @@ jobs:
         with:
           profile: ./order-service/coverage.out
           threshold-total: 80
+
+      - name: Gateway service check
+        if: steps.filter.outputs.gateway == 'true'
+        working-directory: ./gateway-service
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
 
       - name: User service check
         if: steps.filter.outputs.user == 'true'

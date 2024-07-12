@@ -1,12 +1,21 @@
 name: gridmarket-dev
 services:
+  gateway-service:
+    image: eclipse-temurin:21
+    volumes:
+      - ./gateway-service:/app
+      - ${HOME}/.m2:/root/.m2
+    ports:
+      - 8080:8080
+    working_dir: /app
+    networks:
+      - service-net
+    command: ./gradlew bootRun --args=--spring.profiles.active=dev
   application-service:
     image: eclipse-temurin:21
     volumes:
       - ./application-service:/app
       - ${HOME}/.m2:/root/.m2
-    ports:
-      - 8080:8080
     working_dir: /app
     depends_on:
       - application-db
@@ -29,8 +38,6 @@ services:
     volumes:
       - ./user-service:/app
       - ${HOME}/.m2:/root/.m2
-    ports:
-      - 8180:8080
     working_dir: /app
     depends_on:
       - user-db
@@ -54,8 +61,6 @@ services:
       - ./order-service:/app
     environment:
       DATABASE_URL: postgres://grid:grid@order-db:5432/gridmarket
-    ports:
-      - 8280:8080
     working_dir: /app
     depends_on:
       - order-db
