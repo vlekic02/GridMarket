@@ -1,13 +1,50 @@
 definitions:
+  jsonapi.ErrorObject:
+    properties:
+      code:
+        description: Code is an application-specific error code, expressed as a string
+          value.
+        type: string
+      detail:
+        description: Detail is a human-readable explanation specific to this occurrence
+          of the problem. Like title, this field’s value can be localized.
+        type: string
+      id:
+        description: ID is a unique identifier for this particular occurrence of a
+          problem.
+        type: string
+      meta:
+        additionalProperties: true
+        description: Meta is an object containing non-standard meta-information about
+          the error.
+        type: object
+      status:
+        description: Status is the HTTP status code applicable to this problem, expressed
+          as a string value.
+        type: string
+      title:
+        description: Title is a short, human-readable summary of the problem that
+          SHOULD NOT change from occurrence to occurrence of the problem, except for
+          purposes of localization.
+        type: string
+    type: object
+  model.ErrorResponse:
+    properties:
+      errors:
+        items:
+          $ref: '#/definitions/jsonapi.ErrorObject'
+        type: array
+    type: object
   model.OrderRequest:
     properties:
       application:
         type: integer
       method:
+        allOf:
+        - $ref: '#/definitions/model.PaymentMethod'
         enum:
         - 0
         - 1
-        type: integer
       user:
         type: integer
     required:
@@ -15,15 +52,14 @@ definitions:
     - method
     - user
     type: object
-  model.RestError:
-    properties:
-      detail:
-        type: string
-      status:
-        type: integer
-      title:
-        type: string
-    type: object
+  model.PaymentMethod:
+    enum:
+    - 0
+    - 1
+    type: integer
+    x-enum-varnames:
+    - Balance
+    - Paypal
 info:
   contact: {}
   description: Order-service api documentation
@@ -43,29 +79,34 @@ paths:
     post:
       consumes:
       - application/json
+      parameters:
+      - description: Order request
+        in: body
+        name: orderRequest
+        required: true
+        schema:
+          $ref: '#/definitions/model.OrderRequest'
       produces:
-      - application/json
+      - application/vnd.api+json
       responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/model.OrderRequest'
+        "201":
+          description: Created
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/model.RestError'
+            $ref: '#/definitions/model.ErrorResponse'
         "404":
           description: Not Found
           schema:
-            $ref: '#/definitions/model.RestError'
+            $ref: '#/definitions/model.ErrorResponse'
         "500":
           description: Internal Server Error
           schema:
-            $ref: '#/definitions/model.RestError'
+            $ref: '#/definitions/model.ErrorResponse'
         "504":
           description: Gateway Timeout
           schema:
-            $ref: '#/definitions/model.RestError'
+            $ref: '#/definitions/model.ErrorResponse'
       summary: Create a new order
       tags:
       - Order
