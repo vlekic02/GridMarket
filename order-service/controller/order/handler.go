@@ -6,6 +6,7 @@ import (
 	"order-service/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/jsonapi"
 )
 
 // @Summary	Returns hello
@@ -37,6 +38,7 @@ func CreateOrder(app client.ApplicationClient) gin.HandlerFunc {
 			ctx.Error(err)
 			return
 		}
-		ctx.JSON(200, applicationPrice)
+		payload, _ := jsonapi.Marshal(&applicationPrice)
+		ctx.JSON(200, payload)
 	}
 }

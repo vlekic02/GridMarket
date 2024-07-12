@@ -45,9 +45,14 @@ type OrderRequest struct {
 }
 
 type RestError struct {
-	Title  string `json:"title"`
-	Status uint16 `json:"status"`
-	Detail string `json:"detail"`
+	Id     string `jsonapi:"primary,error"`
+	Title  string `jsonapi:"attr,title"`
+	Status uint16 `jsonapi:"attr,status"`
+	Detail string `jsonapi:"attr,detail"`
+}
+
+type ErrorResponse struct {
+	Errors []RestError
 }
 
 func (re *RestError) Error() string {
