@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.griddynamics.jacksonjsonapi.annotations.JsonRelation;
+import com.griddynamics.jacksonjsonapi.models.ErrorResource;
 import com.griddynamics.jacksonjsonapi.models.Resource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -76,6 +77,24 @@ class JsonApiModuleTest {
         }
         """.replaceAll("[\\n\\r\\s]+", "");
     String actual = objectMapper.writeValueAsString(pojoDummy);
+    assertEquals(expected, actual);
+  }
+
+  @Test
+  void shouldReturnCorrectylSerializedError() throws JsonProcessingException {
+    ErrorResource errorResource = ErrorResource.of("TestTitle", 500, "TestDetails");
+    String expected = """
+        {
+          "errors": [
+            {
+              "title": "TestTitle",
+              "status": "500",
+              "detail": "TestDetails"
+            }
+          ]
+        }
+        """.replaceAll("[\\n\\r\\s]+", "");
+    String actual = objectMapper.writeValueAsString(errorResource);
     assertEquals(expected, actual);
   }
 
