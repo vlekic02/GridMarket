@@ -95,4 +95,4 @@ jobs:
         working-directory: ./auth-service
         run: |
           chmod +x ./gradlew
-          ./gradlew.build
+          ./gradlew build
