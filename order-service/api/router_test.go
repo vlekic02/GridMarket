@@ -45,7 +45,7 @@ func TestShouldReturnCorrectPriceForApplication(t *testing.T) {
 	if w.Code != http.StatusOK {
 		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
 	}
-	expectedResponse := `{"data":{"id":"3","type":"price","attributes":{"price":40}}}`
+	expectedResponse := `{"data":{"type":"price","id":"3","attributes":{"price":40}}}`
 	responseBody, _ := io.ReadAll(w.Result().Body)
 	response := string(responseBody)
 	if response != expectedResponse {
@@ -58,6 +58,12 @@ func TestShouldReturn404IfInvalidApplication(t *testing.T) {
 	router.ServeHTTP(w, req)
 	if w.Code != http.StatusNotFound {
 		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusNotFound)
+	}
+	expectedResponse := `{"errors":[{"title":"Not found","detail":"Specified application not found !","status":"404"}]}`
+	response, _ := io.ReadAll(w.Result().Body)
+	actualResponse := string(response)
+	if expectedResponse != actualResponse {
+		t.Errorf("Unexpected body: got %v want %v", actualResponse, expectedResponse)
 	}
 }
 
@@ -94,7 +100,7 @@ func (tahc *TestApplicationHttpClient) Get(url string) (resp *http.Response, err
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(reader)}, nil
 	}
 	if url == "http://application-service:8080/internal/10/price" {
-		response := `{"errors":[{"type":"error","id":"10","attributes":{"detail":"Specified application not found !","status":404,"title":"Not found"}}]}`
+		response := `{"errors":[{"title":"Not found","status":"404","detail":"Specified application not found !"}]}`
 		var reader io.Reader = strings.NewReader(response)
 		return &http.Response{StatusCode: 404, Body: io.NopCloser(reader)}, nil
 	}

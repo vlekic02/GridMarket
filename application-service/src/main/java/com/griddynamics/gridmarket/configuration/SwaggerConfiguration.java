@@ -3,7 +3,6 @@ package com.griddynamics.gridmarket.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.Discount;
-import com.griddynamics.gridmarket.models.RestException;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.jacksonjsonapi.utils.SwaggerUtils;
 import io.swagger.v3.core.jackson.ModelResolver;
@@ -47,10 +46,6 @@ public class SwaggerConfiguration {
     SpringDocUtils.getConfig().replaceWithSchema(
         Review.class,
         SwaggerUtils.generateSchemaForType(Review.class)
-    );
-    SpringDocUtils.getConfig().replaceWithSchema(
-        RestException.class,
-        SwaggerUtils.generateSchemaForType(RestException.class)
     );
   }
 }

@@ -7,6 +7,8 @@ import (
 	"net/http"
 	log "order-service/logging"
 	"order-service/model"
+
+	"github.com/google/jsonapi"
 )
 
 var DefaultApplicationClient = ApplicationClient{HttpClient: http.DefaultClient}
@@ -16,13 +18,8 @@ type ApplicationClient struct {
 }
 
 type ApplicationPriceResponse struct {
-	Data struct {
-		Id         string `json:"id"`
-		Type       string `json:"type"`
-		Attributes struct {
-			Price float64 `json:"price"`
-		} `json:"attributes"`
-	} `json:"data"`
+	ID    string  `jsonapi:"primary,price"`
+	Price float64 `jsonapi:"attr,price"`
 }
 
 func (app *ApplicationClient) GetApplicationPrice(id int32) (ApplicationPriceResponse, error) {
@@ -33,19 +30,25 @@ func (app *ApplicationClient) GetApplicationPrice(id int32) (ApplicationPriceRes
 		return applicationResponse, model.NewRestError(504, "Gateway Timeout", "Application service did not respond ! Error: "+err.Error())
 	}
 	defer response.Body.Close()
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return applicationResponse, model.NewRestError(500, "Internal Server Error", "Application service response does not contains body ! Error: "+err.Error())
-	}
 	if response.StatusCode != http.StatusOK {
-		errorResponse := new(model.ErrorsResponse)
-		if err := json.Unmarshal(body, &errorResponse); err != nil {
+		errorResponse, err := UnmarshalErrors(response.Body)
+		if err != nil {
 			return applicationResponse, model.NewRestError(500, "Internal Server Error", "Failed to unmarshal application service response ! Error: "+err.Error())
 		}
-		return applicationResponse, &errorResponse.Errors[0].Attributes
+		return applicationResponse, errorResponse
 	}
-	if err := json.Unmarshal(body, &applicationResponse); err != nil {
+	if err := jsonapi.UnmarshalPayload(response.Body, &applicationResponse); err != nil {
 		return applicationResponse, model.NewRestError(500, "Internal Server Error", "Failed to unmarshal application service response ! Error: "+err.Error())
 	}
 	return applicationResponse, nil
+}
+
+func UnmarshalErrors(in io.Reader) (*model.ErrorResponse, error) {
+	payload := new(model.ErrorResponse)
+
+	if err := json.NewDecoder(in).Decode(payload); err != nil {
+		return nil, err
+	}
+
+	return payload, nil
 }

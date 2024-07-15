@@ -72,7 +72,7 @@ public class ResourceSerializerModifier extends BeanSerializerModifier {
     return super.orderProperties(config, beanDesc, beanProperties);
   }
 
-  public boolean isResource(Class<?> clazz) {
+  private boolean isResource(Class<?> clazz) {
     return Resource.class.isAssignableFrom(clazz);
   }
 }

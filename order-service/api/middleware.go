@@ -2,6 +2,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 
 	log "order-service/logging"
 	"order-service/model"
@@ -34,7 +35,7 @@ func ValidateOrder() gin.HandlerFunc {
 		orderRequest := new(model.OrderRequest)
 
 		if err := ctx.ShouldBindBodyWithJSON(&orderRequest); err != nil {
-			errorResponse := model.RestError{Title: "Bad Request", Status: 400, Detail: "Failed to process order request data"}
+			errorResponse := model.NewRestError(400, "Bad Request", "Failed to process order request data")
 			ctx.AbortWithStatusJSON(400, errorResponse)
 			return
 		}
@@ -47,8 +48,9 @@ func ErrorHandler() gin.HandlerFunc {
 		ctx.Next()
 		for _, err := range ctx.Errors {
 			switch e := err.Err.(type) {
-			case *model.RestError:
-				ctx.AbortWithStatusJSON(int(e.Status), e)
+			case *model.ErrorResponse:
+				status, _ := strconv.Atoi(e.Errors[0].Status)
+				ctx.AbortWithStatusJSON(status, e)
 			default:
 				log.Error("Unexpected error in gin context !", "error", e)
 				ctx.AbortWithStatusJSON(500, model.NewRestError(500, "Internal Server Error", "Internal error"))

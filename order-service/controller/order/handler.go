@@ -6,10 +6,11 @@ import (
 	"order-service/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/jsonapi"
 )
 
 // @Summary	Returns hello
-// @Tags Order
+// @Tags		Order
 // @Produce	plain
 // @Success	200
 // @Router		/v1/orders/ [get]
@@ -17,16 +18,17 @@ func GetAllOrders(ctx *gin.Context) {
 	ctx.String(200, "Hello !")
 }
 
-// @Summary Create a new order
-// @Tags Order
-// @Accept application/json
-// @Produce application/json
-// @Success 200 {object} model.OrderRequest
-// @Failure 400 {object} model.RestError
-// @Failure 404 {object} model.RestError
-// @Failure 504 {object} model.RestError
-// @Failure 500 {object} model.RestError
-// @Router /v1/orders/ [post]
+// @Summary	Create a new order
+// @Tags		Order
+// @Accept		application/json
+// @Produce	application/vnd.api+json
+// @Param		orderRequest	body	model.OrderRequest	true	"Order request"
+// @Success	201
+// @Failure	400	{object}	model.ErrorResponse
+// @Failure	404	{object}	model.ErrorResponse
+// @Failure	504	{object}	model.ErrorResponse
+// @Failure	500	{object}	model.ErrorResponse
+// @Router		/v1/orders/ [post]
 func CreateOrder(app client.ApplicationClient) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		request, _ := ctx.Get("orderRequest")
@@ -37,6 +39,7 @@ func CreateOrder(app client.ApplicationClient) gin.HandlerFunc {
 			ctx.Error(err)
 			return
 		}
-		ctx.JSON(200, applicationPrice)
+		payload, _ := jsonapi.Marshal(&applicationPrice)
+		ctx.JSON(200, payload)
 	}
 }
