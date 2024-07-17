@@ -77,6 +77,17 @@ services:
       POSTGRES_PASSWORD: grid
     networks:
       - order-net
+  auth-service:
+    image: eclipse-temurin:21
+    volumes:
+      - ./auth-service:/app
+      - ${HOME}/.m2:/root/.m2
+    working_dir: /app
+    ports:
+      - 9000:9000
+    networks:
+      - service-net
+    command: ./gradlew bootRun --args=--spring.profiles.active=dev
 networks:
   service-net:
   application-net:
