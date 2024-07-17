@@ -1,7 +1,8 @@
 package com.griddynamics.gridmarket.client;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.griddynamics.gridmarket.models.UserInfo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
@@ -9,15 +10,16 @@ import org.springframework.web.client.RestClient;
 @Component
 public class InternalUserServiceClient {
 
-  private final RestClient userClient;
-  private final ObjectMapper objectMapper;
+  private static final Logger LOGGER = LoggerFactory.getLogger(InternalUserServiceClient.class);
 
-  public InternalUserServiceClient(ObjectMapper objectMapper) {
+  private final RestClient userClient;
+
+  public InternalUserServiceClient() {
     this.userClient = RestClient.create("http://user-service:8080/internal");
-    this.objectMapper = objectMapper;
   }
 
   public UserInfo getUserInfo(long id) {
+    LOGGER.debug("Calling user service with url /internal/users/{}", id);
     return userClient
         .get()
         .uri("/users/{id}", id)

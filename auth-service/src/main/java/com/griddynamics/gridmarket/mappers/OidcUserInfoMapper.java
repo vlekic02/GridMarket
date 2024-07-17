@@ -13,7 +13,14 @@ public class OidcUserInfoMapper implements
   @Override
   public OidcUserInfo apply(OidcUserInfoAuthenticationContext userInfoContext) {
     Token<OidcIdToken> idToken = userInfoContext.getAuthorization().getToken(OidcIdToken.class);
-    Map<String, Object> userClaims = (Map<String, Object>) idToken.getClaims().get("user");
+    if (idToken == null) {
+      return null;
+    }
+    var claims = idToken.getClaims();
+    if (claims == null) {
+      return null;
+    }
+    var userClaims = (Map<String, Object>) idToken.getClaims().get("user");
     return new OidcUserInfo(userClaims);
   }
 }

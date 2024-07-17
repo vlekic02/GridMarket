@@ -3,8 +3,6 @@ package com.griddynamics.gridmarket.configuration;
 import com.griddynamics.gridmarket.client.InternalUserServiceClient;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.models.UserInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
@@ -13,8 +11,6 @@ import org.springframework.security.oauth2.server.authorization.token.OAuth2Toke
 
 @Configuration
 public class OpenIdConfiguration {
-
-  private static final Logger logger = LoggerFactory.getLogger(OpenIdConfiguration.class);
 
   private final InternalUserServiceClient userServiceClient;
 

@@ -60,13 +60,17 @@ public class SecurityConfiguration {
         .oidc(oidc -> oidc.userInfoEndpoint(
             userInfo -> userInfo.userInfoMapper(new OidcUserInfoMapper())
         ));
+
     http.exceptionHandling((exceptions) -> exceptions
         .defaultAuthenticationEntryPointFor(
             new LoginUrlAuthenticationEntryPoint("/login"),
             new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
         )
-    ).oauth2ResourceServer((resourceServer) -> resourceServer
-        .jwt(Customizer.withDefaults()));
+    );
+
+    http.oauth2ResourceServer((resourceServer) -> resourceServer
+        .jwt(Customizer.withDefaults())
+    );
     return http.build();
   }
 
