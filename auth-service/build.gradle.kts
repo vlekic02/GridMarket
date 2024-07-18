@@ -38,12 +38,14 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
+    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
+    runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
