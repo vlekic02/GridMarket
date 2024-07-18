@@ -6,9 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.stereotype.Repository;
 
-@Repository
 public class InMemoryUserRepository implements UserRepository {
 
   private final Map<String, User> usersMap;
@@ -17,6 +15,7 @@ public class InMemoryUserRepository implements UserRepository {
     usersMap = new HashMap<>();
     List<User> users = List.of(
         new User(
+            1,
             1,
             "User",
             "$2a$12$HxWrdRqiBamt3NGyp7xoreXu2Ig7yVUbtySR1mfgrZSdYBQjOHniG"

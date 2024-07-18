@@ -25,7 +25,7 @@ public class OpenIdConfiguration {
         return;
       }
       User user = (User) context.getPrincipal().getPrincipal();
-      UserInfo userInfo = userServiceClient.getUserInfo(user.getId());
+      UserInfo userInfo = userServiceClient.getUserInfo(user.getUserId());
       context.getClaims().claims(claims -> claims.put("user", userInfo.getClaims()));
     };
   }
