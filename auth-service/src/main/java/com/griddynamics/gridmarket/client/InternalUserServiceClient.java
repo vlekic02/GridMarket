@@ -1,6 +1,6 @@
 package com.griddynamics.gridmarket.client;
 
-import com.griddynamics.gridmarket.models.UserInfo;
+import com.griddynamics.gridmarket.models.internal.UserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
@@ -14,8 +14,10 @@ public class InternalUserServiceClient {
 
   private final RestClient userClient;
 
-  public InternalUserServiceClient() {
-    this.userClient = RestClient.create("http://user-service:8080/internal");
+  public InternalUserServiceClient(RestClient.Builder builder) {
+    this.userClient = builder
+        .baseUrl("http://user-service:8080/internal")
+        .build();
   }
 
   public UserInfo getUserInfo(long id) {
