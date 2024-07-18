@@ -1,0 +1,4 @@
+oauth-redirect-uri: "https://oauth.pstmn.io/v1/callback"
+logging:
+  level:
+    root: DEBUG

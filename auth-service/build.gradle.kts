@@ -2,6 +2,7 @@ import org.springframework.boot.buildpack.platform.build.PullPolicy
 
 plugins {
     java
+    jacoco
     checkstyle
     id("org.springframework.boot") version "3.3.0"
     id("io.spring.dependency-management") version "1.1.5"
@@ -36,6 +37,7 @@ repositories {
 }
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
@@ -55,6 +57,42 @@ tasks.register("printVersion") {
 
 tasks.test {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestCoverageVerification {
+
+    violationRules {
+        rule {
+            classDirectories.setFrom(tasks.jacocoTestReport.get().classDirectories)
+            limit {
+                minimum = 0.7.toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
+}
+
+tasks.sonar {
+    dependsOn(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    reports {
+        csv.required = false
+        xml.required = true
+        html.outputLocation = layout.buildDirectory.dir("jacocoHtmlReport")
+    }
+    dependsOn(tasks.test)
+    finalizedBy(tasks.jacocoTestCoverageVerification)
+    classDirectories.setFrom(classDirectories.files.map {
+        fileTree(it).apply {
+            exclude("**/models/*", "**/configuration/*")
+        }
+    })
 }
 
 tasks.bootBuildImage {
