@@ -10,7 +10,6 @@ public class User implements UserDetails {
   private final long id;
   private final String username;
   private final String password;
-  ;
 
   public User(long id, String username, String password) {
     this.id = id;
