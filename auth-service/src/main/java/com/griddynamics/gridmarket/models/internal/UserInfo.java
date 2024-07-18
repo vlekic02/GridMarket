@@ -1,4 +1,4 @@
-package com.griddynamics.gridmarket.models;
+package com.griddynamics.gridmarket.models.internal;
 
 import java.util.Map;
 

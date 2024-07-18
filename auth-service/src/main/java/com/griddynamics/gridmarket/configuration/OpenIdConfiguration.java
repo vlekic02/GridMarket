@@ -2,7 +2,7 @@ package com.griddynamics.gridmarket.configuration;
 
 import com.griddynamics.gridmarket.client.InternalUserServiceClient;
 import com.griddynamics.gridmarket.models.User;
-import com.griddynamics.gridmarket.models.UserInfo;
+import com.griddynamics.gridmarket.models.internal.UserInfo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
