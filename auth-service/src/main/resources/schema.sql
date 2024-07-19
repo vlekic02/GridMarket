@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS "user" (
+CREATE TABLE IF NOT EXISTS grid_user (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL,
   username TEXT NOT NULL UNIQUE,
@@ -6,4 +6,4 @@ CREATE TABLE IF NOT EXISTS "user" (
 );
 
 CREATE INDEX user_username_idx
-ON "user" (username);
+ON grid_user (username);

@@ -43,12 +43,12 @@ class PostgresUserRepositoryTest {
 
   @AfterEach
   void cleanup() {
-    JdbcTestUtils.deleteFromTables(jdbcTemplate, "\"user\"");
+    JdbcTestUtils.deleteFromTables(jdbcTemplate, "grid_user");
   }
 
   @Test
   @Sql(statements = {
-      "INSERT INTO \"user\" VALUES (1, 2, 'testUsername', 'testPassword')"
+      "INSERT INTO grid_user VALUES (1, 2, 'testUsername', 'testPassword')"
   })
   void shouldReturnCorrectUserIfValidUsername() {
     Optional<User> userOptional = userRepository.findByUsername("testUsername");
@@ -63,7 +63,7 @@ class PostgresUserRepositoryTest {
 
   @Test
   @Sql(statements = {
-      "INSERT INTO \"user\" VALUES (1, 2, 'testUsername', 'testPassword')"
+      "INSERT INTO grid_user VALUES (1, 2, 'testUsername', 'testPassword')"
   })
   void shouldReturnEmptyOptionalIfInvalidUsername() {
     Optional<User> userOptional = userRepository.findByUsername("NonExistentUsername");

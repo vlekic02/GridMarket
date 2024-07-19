@@ -22,7 +22,7 @@ public class PostgresUserRepository implements UserRepository {
     Stream<User> userStream = template.queryForStream(
         """
             SELECT *
-            FROM "user"
+            FROM grid_user
             WHERE username = ?
             """,
         new UserRowMapper(),
