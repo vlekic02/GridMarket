@@ -1,4 +1,6 @@
 oauth-redirect-uri: "https://oauth.pstmn.io/v1/callback"
-logging:
-  level:
-    root: DEBUG
+spring:
+  datasource:
+    url: jdbc:postgresql://auth-db:5432/gridmarket
+    username: grid
+    password: grid
