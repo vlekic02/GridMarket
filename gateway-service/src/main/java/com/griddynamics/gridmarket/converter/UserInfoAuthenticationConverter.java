@@ -1,6 +1,6 @@
 package com.griddynamics.gridmarket.converter;
 
-import com.griddynamics.gridmarket.model.GridUser;
+import com.griddynamics.gridmarket.clients.UserInfoClient;
 import com.griddynamics.gridmarket.token.GridUserAuthenticationToken;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
@@ -10,8 +10,15 @@ import reactor.core.publisher.Mono;
 public class UserInfoAuthenticationConverter implements
     Converter<Jwt, Mono<GridUserAuthenticationToken>> {
 
+  private final UserInfoClient userInfoClient;
+
+  public UserInfoAuthenticationConverter(UserInfoClient userInfoClient) {
+    this.userInfoClient = userInfoClient;
+  }
+
   @Override
   public Mono<GridUserAuthenticationToken> convert(@NonNull Jwt source) {
-    return Mono.just(new GridUserAuthenticationToken(source, new GridUser(1, "", "", "", "", 10)));
+    return userInfoClient.getUserInfo(source)
+        .map(user -> new GridUserAuthenticationToken(source, user));
   }
 }
