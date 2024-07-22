@@ -8,8 +8,4 @@ public record GridUser(
     double balance
 ) {
 
-  @Override
-  public String role() {
-    return "ROLE_" + role;
-  }
 }
