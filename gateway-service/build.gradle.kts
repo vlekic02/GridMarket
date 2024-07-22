@@ -33,12 +33,14 @@ sonar {
 }
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
 extra["springCloudVersion"] = "2023.0.2"
 
 dependencies {
+    implementation("com.griddynamics:jackson-jsonapi:1.0")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
     implementation("org.springframework.cloud:spring-cloud-starter-gateway")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
