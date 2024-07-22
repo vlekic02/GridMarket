@@ -50,6 +50,9 @@ public class SecurityConfiguration {
   @Value("${oauth-redirect-uri}")
   private String redirectUri;
 
+  @Value("${oauth-issuer}")
+  private String issuer;
+
   @Bean
   @Order(1)
   public SecurityFilterChain authorizationServerSecurityFilterChain(HttpSecurity http)
@@ -130,7 +133,7 @@ public class SecurityConfiguration {
 
   @Bean
   public AuthorizationServerSettings authorizationServerSettings() {
-    return AuthorizationServerSettings.builder().build();
+    return AuthorizationServerSettings.builder().issuer(issuer).build();
   }
 
   private KeyPair generateRsaKeyPair() {
