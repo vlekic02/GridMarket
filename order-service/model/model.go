@@ -43,7 +43,7 @@ type Order struct {
 }
 
 type OrderRequest struct {
-	User        int32          `json:"-"`
+	User        int32          `json:"user"`
 	Application int32          `json:"application" binding:"required"`
 	Method      *PaymentMethod `json:"method" binding:"required,oneof=0 1"`
 }

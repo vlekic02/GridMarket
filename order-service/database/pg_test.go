@@ -52,7 +52,8 @@ func TestGetAllOrders(t *testing.T) {
 }
 
 func TestInsertOrder(t *testing.T) {
-	orderRequest := model.OrderRequest{User: 10, Application: 10, Method: model.Balance}
+	balance := model.Balance
+	orderRequest := model.OrderRequest{User: 10, Application: 10, Method: &balance}
 	database.Db.InsertOrder(orderRequest)
 	byUser, _ := database.Db.GetOrdersByUser(10)
 	actual := len(byUser)

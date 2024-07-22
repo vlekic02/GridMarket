@@ -40,7 +40,11 @@ func ValidateOrder() gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(400, errorResponse)
 			return
 		}
-		value, _ := ctx.Get("userInfo")
+		value, ok := ctx.Get("userInfo")
+		if !ok {
+			ctx.Set("orderRequest", orderRequest)
+			return
+		}
 		userInfo := value.(*model.UserInfo)
 		orderRequest.User = userInfo.Id
 		ctx.Set("orderRequest", orderRequest)
