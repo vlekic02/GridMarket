@@ -43,9 +43,18 @@ type Order struct {
 }
 
 type OrderRequest struct {
-	User        int32         `json:"user" binding:"required"`
-	Application int32         `json:"application" binding:"required"`
-	Method      PaymentMethod `json:"method" binding:"required,oneof=0 1"`
+	User        int32          `json:"-"`
+	Application int32          `json:"application" binding:"required"`
+	Method      *PaymentMethod `json:"method" binding:"required,oneof=0 1"`
+}
+
+type UserInfo struct {
+	Id       int32   `json:"id"`
+	Name     string  `json:"name"`
+	Surname  string  `json:"surname"`
+	Username string  `json:"username"`
+	Role     string  `json:"role"`
+	Balance  float64 `json:"balance"`
 }
 
 func NewRestError(status int, title string, detail string) *ErrorResponse {

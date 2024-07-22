@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -39,7 +40,23 @@ func ValidateOrder() gin.HandlerFunc {
 			ctx.AbortWithStatusJSON(400, errorResponse)
 			return
 		}
+		value, _ := ctx.Get("userInfo")
+		userInfo := value.(*model.UserInfo)
+		orderRequest.User = userInfo.Id
 		ctx.Set("orderRequest", orderRequest)
+	}
+}
+
+func ExtractUserInfo() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		jsonData := ctx.Request.Header.Get("grid-user")
+		userInfo := new(model.UserInfo)
+		err := json.Unmarshal([]byte(jsonData), userInfo)
+		if err != nil {
+			log.Error("Failed to unmarshal user info data !", "error", err)
+		} else {
+			ctx.Set("userInfo", userInfo)
+		}
 	}
 }
 
