@@ -1,4 +1,4 @@
-package com.griddynamics.gridmarket.model;
+package com.griddynamics.gridmarket.models;
 
 public record GridUser(
     long id, String name,

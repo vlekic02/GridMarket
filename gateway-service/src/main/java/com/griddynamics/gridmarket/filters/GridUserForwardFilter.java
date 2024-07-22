@@ -2,7 +2,7 @@ package com.griddynamics.gridmarket.filters;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.griddynamics.gridmarket.model.GridUser;
+import com.griddynamics.gridmarket.models.GridUser;
 import com.griddynamics.gridmarket.token.GridUserAuthenticationToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

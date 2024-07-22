@@ -1,6 +1,6 @@
 package com.griddynamics.gridmarket.clients;
 
-import com.griddynamics.gridmarket.model.GridUser;
+import com.griddynamics.gridmarket.models.GridUser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
