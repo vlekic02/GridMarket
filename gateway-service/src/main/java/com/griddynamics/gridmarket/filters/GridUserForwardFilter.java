@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 public class GridUserForwardFilter implements GlobalFilter {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(GridUserForwardFilter.class);
+  private static final String HEADER_KEY = "grid-user";
 
   private final ObjectMapper objectMapper;
 
@@ -50,7 +51,7 @@ public class GridUserForwardFilter implements GlobalFilter {
       return chain.filter(exchange);
     }
     ServerHttpRequest request = exchange.getRequest().mutate()
-        .header("Grid-User", userHeader)
+        .header(HEADER_KEY, userHeader)
         .build();
     return chain.filter(exchange.mutate().request(request).build());
   }
