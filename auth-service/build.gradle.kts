@@ -40,6 +40,7 @@ extra["springCloudGcpVersion"] = "5.5.0"
 extra["springCloudVersion"] = "2023.0.3"
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.google.cloud:spring-cloud-gcp-starter-pubsub")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")

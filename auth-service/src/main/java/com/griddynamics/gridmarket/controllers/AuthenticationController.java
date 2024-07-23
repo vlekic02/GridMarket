@@ -2,6 +2,7 @@ package com.griddynamics.gridmarket.controllers;
 
 import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
 import com.griddynamics.gridmarket.services.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -27,7 +28,7 @@ public class AuthenticationController {
   }
 
   @PostMapping(value = "/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  public String registerUser(UserRegistrationRequest registrationRequest) {
+  public String registerUser(@Valid UserRegistrationRequest registrationRequest) {
     userService.registerUser(registrationRequest);
     return "redirect:register?success";
   }
