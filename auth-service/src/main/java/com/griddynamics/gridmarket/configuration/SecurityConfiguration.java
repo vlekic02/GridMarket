@@ -82,9 +82,10 @@ public class SecurityConfiguration {
   public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http)
       throws Exception {
     http.authorizeHttpRequests((authorize) -> authorize
+            .requestMatchers("/img/**").permitAll()
             .anyRequest().authenticated()
         )
-        .formLogin(Customizer.withDefaults());
+        .formLogin(form -> form.loginPage("/login").permitAll());
     return http.build();
   }
 
