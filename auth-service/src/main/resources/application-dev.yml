@@ -10,3 +10,6 @@ spring:
     url: jdbc:postgresql://auth-db:5432/gridmarket
     username: grid
     password: grid
+logging:
+  level:
+    root: DEBUG

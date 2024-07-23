@@ -15,7 +15,7 @@ class UserServiceTest {
 
   @BeforeAll
   static void setup() {
-    userService = new UserService(new InMemoryUserRepository());
+    userService = new UserService(new InMemoryUserRepository(), null);
   }
 
   @Test
