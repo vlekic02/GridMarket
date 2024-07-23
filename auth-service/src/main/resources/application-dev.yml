@@ -1,6 +1,11 @@
 oauth-redirect-uri: "https://oauth.pstmn.io/v1/callback"
 oauth-issuer: http://auth-service:9000/
 spring:
+  cloud:
+    gcp:
+      pubsub:
+        project-id: gridmarket-dev
+        emulator-host: pub-sub:8085
   datasource:
     url: jdbc:postgresql://auth-db:5432/gridmarket
     username: grid

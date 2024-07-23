@@ -4,7 +4,7 @@ plugins {
     java
     jacoco
     checkstyle
-    id("org.springframework.boot") version "3.3.0"
+    id("org.springframework.boot") version "3.2.8"
     id("io.spring.dependency-management") version "1.1.5"
     id("org.sonarqube") version "5.0.0.4638"
 }
@@ -36,7 +36,11 @@ repositories {
     mavenCentral()
 }
 
+extra["springCloudGcpVersion"] = "5.5.0"
+extra["springCloudVersion"] = "2023.0.3"
+
 dependencies {
+    implementation("com.google.cloud:spring-cloud-gcp-starter-pubsub")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -75,6 +79,13 @@ tasks.jacocoTestCoverageVerification {
                 minimum = 0.7.toBigDecimal()
             }
         }
+    }
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("com.google.cloud:spring-cloud-gcp-dependencies:${property("springCloudGcpVersion")}")
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
     }
 }
 
