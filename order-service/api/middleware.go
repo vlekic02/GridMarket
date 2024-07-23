@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -33,13 +34,31 @@ func JsonLogger() gin.HandlerFunc {
 func ValidateOrder() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		orderRequest := new(model.OrderRequest)
-
 		if err := ctx.ShouldBindBodyWithJSON(&orderRequest); err != nil {
 			errorResponse := model.NewRestError(400, "Bad Request", "Failed to process order request data")
 			ctx.AbortWithStatusJSON(400, errorResponse)
 			return
 		}
+		value, ok := ctx.Get("userInfo")
 		ctx.Set("orderRequest", orderRequest)
+		if !ok {
+			return
+		}
+		userInfo := value.(*model.UserInfo)
+		orderRequest.User = userInfo.Id
+	}
+}
+
+func ExtractUserInfo() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		jsonData := ctx.Request.Header.Get("grid-user")
+		userInfo := new(model.UserInfo)
+		err := json.Unmarshal([]byte(jsonData), userInfo)
+		if err != nil {
+			log.Error("Failed to unmarshal user info data !", "error", err)
+		} else {
+			ctx.Set("userInfo", userInfo)
+		}
 	}
 }
 

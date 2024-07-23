@@ -27,7 +27,7 @@ func InitRouter(cApp client.ApplicationClient) *gin.Engine {
 	}
 
 	docs.SwaggerInfo.BasePath = "/v1/orders"
-	v1 := app.Group("v1/orders")
+	v1 := app.Group("v1/orders", ExtractUserInfo())
 	{
 		v1.GET("/", order.GetAllOrders)
 		v1.POST("/", ValidateOrder(), order.CreateOrder(cApp))
