@@ -101,6 +101,11 @@ services:
       POSTGRES_PASSWORD: grid
     networks:
       - auth-net
+  pub-sub:
+    image: google/cloud-sdk:emulators
+    command: gcloud beta emulators pubsub start --project=gridmarket-dev --host-port='0.0.0.0:8085'
+    networks:
+      - service-net
 networks:
   service-net:
   application-net:
