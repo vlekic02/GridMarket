@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.jdbc.JdbcTestUtils;
@@ -38,7 +39,7 @@ class PostgresUserRepositoryTest {
 
   @BeforeEach
   void setup() {
-    userRepository = new PostgresUserRepository(jdbcTemplate);
+    userRepository = new PostgresUserRepository(jdbcTemplate, new BCryptPasswordEncoder());
   }
 
   @AfterEach
@@ -48,14 +49,13 @@ class PostgresUserRepositoryTest {
 
   @Test
   @Sql(statements = {
-      "INSERT INTO grid_user VALUES (1, 2, 'testUsername', 'testPassword')"
+      "INSERT INTO grid_user VALUES (1,'testUsername', 'testPassword')"
   })
   void shouldReturnCorrectUserIfValidUsername() {
     Optional<User> userOptional = userRepository.findByUsername("testUsername");
     User user = userOptional.get();
     assertTrue(
         user.getId() == 1
-            && user.getUserId() == 2
             && "testUsername".equals(user.getUsername())
             && "testPassword".equals(user.getPassword())
     );
@@ -63,7 +63,7 @@ class PostgresUserRepositoryTest {
 
   @Test
   @Sql(statements = {
-      "INSERT INTO grid_user VALUES (1, 2, 'testUsername', 'testPassword')"
+      "INSERT INTO grid_user VALUES (1,'testUsername', 'testPassword')"
   })
   void shouldReturnEmptyOptionalIfInvalidUsername() {
     Optional<User> userOptional = userRepository.findByUsername("NonExistentUsername");
