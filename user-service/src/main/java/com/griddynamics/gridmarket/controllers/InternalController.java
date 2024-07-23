@@ -18,8 +18,8 @@ public class InternalController {
     this.userService = userService;
   }
 
-  @GetMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public UserInternalDto getUserById(@PathVariable long id) {
-    return new UserInternalDto(userService.getUserById(id));
+  @GetMapping(value = "/{username}", produces = MediaType.APPLICATION_JSON_VALUE)
+  public UserInternalDto getUserByUsername(@PathVariable String username) {
+    return new UserInternalDto(userService.getUserByUsername(username));
   }
 }

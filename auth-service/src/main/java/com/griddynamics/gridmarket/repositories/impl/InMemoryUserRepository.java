@@ -2,6 +2,7 @@ package com.griddynamics.gridmarket.repositories.impl;
 
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
+import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,6 @@ public class InMemoryUserRepository implements UserRepository {
     List<User> users = List.of(
         new User(
             1,
-            1,
             "User",
             "$2a$12$HxWrdRqiBamt3NGyp7xoreXu2Ig7yVUbtySR1mfgrZSdYBQjOHniG"
         )
@@ -29,5 +29,10 @@ public class InMemoryUserRepository implements UserRepository {
   @Override
   public Optional<User> findByUsername(String username) {
     return Optional.ofNullable(usersMap.get(username.toLowerCase()));
+  }
+
+  @Override
+  public void registerUser(UserRegistrationRequest userRegistrationRequest) {
+
   }
 }

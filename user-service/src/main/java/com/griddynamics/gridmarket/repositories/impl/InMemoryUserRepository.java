@@ -44,4 +44,9 @@ public class InMemoryUserRepository implements UserRepository {
   public Optional<User> findById(long id) {
     return users.stream().filter(user -> user.getId() == id).findFirst();
   }
+
+  @Override
+  public Optional<User> findByUsername(String username) {
+    return users.stream().filter(user -> user.getUsername().equals(username)).findFirst();
+  }
 }

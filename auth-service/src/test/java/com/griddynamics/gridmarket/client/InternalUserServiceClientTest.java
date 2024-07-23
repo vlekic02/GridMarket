@@ -31,7 +31,7 @@ class InternalUserServiceClientTest {
     String response = objectMapper.writeValueAsString(expectedUserInfo);
     server.expect(requestTo("http://user-service:8080/internal/users/1"))
         .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
-    UserInfo actualUserInfo = client.getUserInfo(1);
+    UserInfo actualUserInfo = client.getUserInfo("Test");
     assertEquals(expectedUserInfo, actualUserInfo);
   }
 }

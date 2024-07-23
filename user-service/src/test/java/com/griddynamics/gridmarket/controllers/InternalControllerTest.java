@@ -54,7 +54,7 @@ class InternalControllerTest {
       "insert into ban values (1, 1, 1, '2024-01-08 04:05:06', 'testReason')"
   })
   void shouldReturnCorrectInternalUserDto() {
-    UserInternalDto userDto = internalController.getUserById(1);
+    UserInternalDto userDto = internalController.getUserByUsername("test");
     assertTrue(
         userDto.getId() == 1
             && userDto.getBalance() == 10

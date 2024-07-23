@@ -56,4 +56,22 @@ public class PostgresUserRepository implements UserRepository {
     userStream.close();
     return userOptional;
   }
+
+  @Override
+  public Optional<User> findByUsername(String username) {
+    Stream<User> userStream = template.queryForStream(
+        """
+            SELECT "user".*, role_id, role.name as role_name, ban.* \
+            FROM "user" \
+            LEFT JOIN ban on ban."user" = "user".user_id \
+            INNER JOIN role on role.role_id = "user".role
+            WHERE username = ?
+            """,
+        new UserRowMapper(),
+        username
+    );
+    Optional<User> userOptional = userStream.findFirst();
+    userStream.close();
+    return userOptional;
+  }
 }
