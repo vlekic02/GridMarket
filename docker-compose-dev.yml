@@ -103,7 +103,10 @@ services:
       - auth-net
   pub-sub:
     image: google/cloud-sdk:emulators
-    command: gcloud beta emulators pubsub start --project=gridmarket-dev --host-port='0.0.0.0:8085'
+    volumes:
+      - ./python-pubsub:/pubsub
+      - ./scripts/pubsub-init.sh:/init.sh
+    command: ./init.sh
     networks:
       - service-net
 networks:
