@@ -1,18 +1,19 @@
 package com.griddynamics.gridmarket.controllers;
 
-import com.griddynamics.gridmarket.events.UserRegistrationEvent;
-import com.griddynamics.gridmarket.services.PubSubService;
-import org.springframework.http.ResponseEntity;
+import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
+import com.griddynamics.gridmarket.services.UserService;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
 public class AuthenticationController {
 
-  private final PubSubService pubSubService;
+  private final UserService userService;
 
-  public AuthenticationController(PubSubService pubSubService) {
-    this.pubSubService = pubSubService;
+  public AuthenticationController(UserService userService) {
+    this.userService = userService;
   }
 
   @GetMapping("/login")
@@ -21,8 +22,13 @@ public class AuthenticationController {
   }
 
   @GetMapping("/register")
-  public ResponseEntity<String> registerUser() {
-    pubSubService.publishUserRegistration(new UserRegistrationEvent("test", "test", "test"));
-    return ResponseEntity.ok("OK");
+  public String registerPage() {
+    return "register-page";
+  }
+
+  @PostMapping(value = "/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String registerUser(UserRegistrationRequest registrationRequest) {
+    userService.registerUser(registrationRequest);
+    return "redirect:register?success";
   }
 }
