@@ -31,6 +31,10 @@ public class UserService {
         .orElseThrow(() -> new NotFoundException("Specified user not found !"));
   }
 
+  public void createMember(String name, String surname, String username) {
+    userRepository.createMember(name, surname, username);
+  }
+
   public Balance getUserBalance(long id) {
     User user = getUserById(id);
     return user.getBalance();

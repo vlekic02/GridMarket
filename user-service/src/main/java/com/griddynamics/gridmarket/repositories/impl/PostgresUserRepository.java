@@ -74,4 +74,16 @@ public class PostgresUserRepository implements UserRepository {
     userStream.close();
     return userOptional;
   }
+
+  @Override
+  public void createMember(String name, String surname, String username) {
+    template.update(
+        """
+            INSERT INTO "user" (name, surname, username, role, balance)
+            SELECT ?, ?, ?, role_id, 0
+            FROM role
+            WHERE name = 'MEMBER'
+            """, name, surname, username
+    );
+  }
 }
