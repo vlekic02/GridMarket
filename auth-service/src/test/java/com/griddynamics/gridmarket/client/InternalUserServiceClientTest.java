@@ -29,7 +29,7 @@ class InternalUserServiceClientTest {
   void shouldGetCorrectUserInfo() throws JsonProcessingException {
     UserInfo expectedUserInfo = new UserInfo(1, "Test", "Test", "Test", "Admin", 100);
     String response = objectMapper.writeValueAsString(expectedUserInfo);
-    server.expect(requestTo("http://user-service:8080/internal/users/1"))
+    server.expect(requestTo("http://user-service:8080/internal/users/Test"))
         .andRespond(withSuccess(response, MediaType.APPLICATION_JSON));
     UserInfo actualUserInfo = client.getUserInfo("Test");
     assertEquals(expectedUserInfo, actualUserInfo);

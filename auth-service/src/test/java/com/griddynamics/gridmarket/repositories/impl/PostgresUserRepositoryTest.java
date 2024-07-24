@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
+import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.jdbc.JdbcTestUtils;
@@ -68,5 +70,19 @@ class PostgresUserRepositoryTest {
   void shouldReturnEmptyOptionalIfInvalidUsername() {
     Optional<User> userOptional = userRepository.findByUsername("NonExistentUsername");
     assertTrue(userOptional.isEmpty());
+  }
+
+  @Test
+  void shouldCorrectlyRegisterUser() {
+    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest(
+        "Test",
+        "Test",
+        "Test",
+        "Password"
+    );
+    userRepository.addRegisteredUser(userRegistrationRequest);
+    User user = userRepository.findByUsername("Test").get();
+    assertTrue(passwordEncoder.matches("Password", user.getPassword()));
   }
 }
