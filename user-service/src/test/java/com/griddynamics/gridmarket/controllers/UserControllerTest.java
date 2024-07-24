@@ -42,11 +42,13 @@ class UserControllerTest {
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
+  private UserService userService;
+
   private UserController userController;
 
   @BeforeEach
   void setup() {
-    UserService userService = new UserService(new PostgresUserRepository(jdbcTemplate));
+    userService = new UserService(new PostgresUserRepository(jdbcTemplate));
     userController = new UserController(userService);
   }
 
@@ -118,5 +120,19 @@ class UserControllerTest {
   void shouldReturnCorrectBalanceForUser() {
     Balance balance = userController.getUserBalance(1).getData();
     assertEquals(150.25, balance.getAmount());
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')"
+  })
+  void shouldReturnCorrectMemberAfterCreating() {
+    userService.createMember("TestName", "TestSurname", "TestUsername");
+    User user = userService.getUserByUsername("TestUsername");
+    assertTrue(
+        "TestName".equals(user.getName())
+            && "TestSurname".equals(user.getSurname())
+            && "TestUsername".equals(user.getUsername())
+    );
   }
 }

@@ -1,7 +1,9 @@
 package com.griddynamics.gridmarket.controllers;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.models.internal.UserInternalDto;
 import com.griddynamics.gridmarket.repositories.impl.PostgresUserRepository;
 import com.griddynamics.gridmarket.services.UserService;
@@ -63,5 +65,15 @@ class InternalControllerTest {
             && "test".equals(userDto.getUsername())
             && "MEMBER".equals(userDto.getRole())
     );
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 150.25)"
+  })
+  void shouldThrowIfUserWithUsernameDoesntExist() {
+    assertThrows(NotFoundException.class,
+        () -> internalController.getUserByUsername("notExisting"));
   }
 }

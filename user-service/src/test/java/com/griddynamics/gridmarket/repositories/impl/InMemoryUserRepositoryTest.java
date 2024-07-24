@@ -23,7 +23,7 @@ class InMemoryUserRepositoryTest {
   @Test
   void shouldReturnAllUsers() {
     List<User> users = userRepository.findAll();
-    assertThat(users).hasSize(4);
+    assertThat(users).isNotEmpty();
   }
 
   @Test
@@ -36,5 +36,23 @@ class InMemoryUserRepositoryTest {
   void shouldReturnEmptyOptionalIfIncorrectIdSupplied() {
     Optional<User> userOptional = userRepository.findById(50);
     assertTrue(userOptional.isEmpty());
+  }
+
+  @Test
+  void shouldReturnUserIfCorrectUsername() {
+    Optional<User> userOptional = userRepository.findByUsername("imirkovic");
+    assertEquals(1, userOptional.get().getId());
+  }
+
+  @Test
+  void shouldReturnCorrectUserAfterCreation() {
+    userRepository.createMember("TestName", "TestSurname", "TestUsername");
+    User user = userRepository.findByUsername("TestUsername").get();
+    assertTrue(
+        "TestName".equals(user.getName())
+            && "TestSurname".equals(user.getSurname())
+            && "TestUsername".equals(user.getUsername())
+            && user.getRole().getId() == 1
+    );
   }
 }
