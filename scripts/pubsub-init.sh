@@ -12,6 +12,7 @@ main() {
   sleep 10
   initPip
   createTopics
+  createSubscriptions
   tail -f /dev/null
 }
 
@@ -25,6 +26,10 @@ createTopics() {
   pip install -r requirements.txt
   export PUBSUB_EMULATOR_HOST=localhost:8085
   python3 publisher.py gridmarket-dev create user
+}
+
+createSubscriptions() {
+  python3 subscriber.py gridmarket-dev create user user-subscription
 }
 
 main "$@"
