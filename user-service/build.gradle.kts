@@ -45,6 +45,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:gcloud")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation("com.google.cloud:spring-cloud-gcp-starter-pubsub")
     implementation("org.springframework.boot:spring-boot-starter-web")
