@@ -39,7 +39,7 @@ public class UserService implements UserDetailsService {
         registrationRequest.surname(),
         registrationRequest.username()
     );
-    //pubSubService.publishUserRegistration(event);
-    //userRepository.registerUser(registrationRequest);
+    pubSubService.publishUserRegistration(event);
+    userRepository.addRegisteredUser(registrationRequest);
   }
 }
