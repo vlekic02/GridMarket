@@ -5,7 +5,7 @@ import com.griddynamics.gridmarket.services.UserService;
 import org.springframework.stereotype.Component;
 
 @Component
-public class UserListener extends ListenerAdapter {
+public class UserListener implements ListenerAdapter {
 
   private final UserService userService;
 
