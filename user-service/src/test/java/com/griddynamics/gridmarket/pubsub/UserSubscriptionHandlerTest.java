@@ -57,7 +57,7 @@ class UserSubscriptionHandlerTest {
 
   @BeforeEach
   void setup() {
-    userService = new UserService(new InMemoryUserRepository());
+    userService = new UserService(new InMemoryUserRepository(), null);
     admin = new PubSubAdmin(() -> PROJECT_ID, topicAdminClient, subscriptionAdminClient);
     admin.createTopic(TEST_TOPIC);
     admin.createSubscription(TEST_SUBSCRIPTION, TEST_TOPIC);

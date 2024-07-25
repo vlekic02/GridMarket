@@ -25,12 +25,12 @@ public class PostgresUserRepository implements UserRepository {
   public List<User> findAll(Pageable pageable) {
     return template.query(
         """
-            SELECT "user".*, role_id, role.name as role_name, ban.* \
-            FROM "user" \
-            LEFT JOIN ban on ban."user" = "user".user_id \
-            INNER JOIN role on role.role_id = "user".role \
-            ORDER BY user_id \
-            LIMIT ? \
+            SELECT "user".*, role_id, role.name as role_name, ban.*
+            FROM "user"
+            LEFT JOIN ban on ban."user" = "user".user_id
+            INNER JOIN role on role.role_id = "user".role
+            ORDER BY user_id
+            LIMIT ?
             OFFSET ?
             """,
         new UserRowMapper(),
@@ -43,9 +43,9 @@ public class PostgresUserRepository implements UserRepository {
   public Optional<User> findById(long id) {
     Stream<User> userStream = template.queryForStream(
         """
-            SELECT "user".*, role_id, role.name as role_name, ban.* \
-            FROM "user" \
-            LEFT JOIN ban on ban."user" = "user".user_id \
+            SELECT "user".*, role_id, role.name as role_name, ban.*
+            FROM "user"
+            LEFT JOIN ban on ban."user" = "user".user_id
             INNER JOIN role on role.role_id = "user".role
             WHERE user_id = ?
             """,
@@ -61,9 +61,9 @@ public class PostgresUserRepository implements UserRepository {
   public Optional<User> findByUsername(String username) {
     Stream<User> userStream = template.queryForStream(
         """
-            SELECT "user".*, role_id, role.name as role_name, ban.* \
-            FROM "user" \
-            LEFT JOIN ban on ban."user" = "user".user_id \
+            SELECT "user".*, role_id, role.name as role_name, ban.*
+            FROM "user"
+            LEFT JOIN ban on ban."user" = "user".user_id
             INNER JOIN role on role.role_id = "user".role
             WHERE username = ?
             """,
@@ -84,6 +84,17 @@ public class PostgresUserRepository implements UserRepository {
             FROM role
             WHERE name = 'MEMBER'
             """, name, surname, username
+    );
+  }
+
+  @Override
+  public void deleteUser(long id) {
+    template.update(
+        """
+            DELETE FROM "user"
+            WHERE user_id = ?
+            """
+        , id
     );
   }
 }

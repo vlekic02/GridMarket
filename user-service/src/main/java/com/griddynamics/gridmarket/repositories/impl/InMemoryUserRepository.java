@@ -61,4 +61,9 @@ public class InMemoryUserRepository implements UserRepository {
             new Role(1, "MEMBER"), null, 0))
     ;
   }
+
+  @Override
+  public void deleteUser(long id) {
+    users.removeIf(user -> user.getId() == id);
+  }
 }
