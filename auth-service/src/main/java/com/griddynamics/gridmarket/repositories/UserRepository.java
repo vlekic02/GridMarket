@@ -8,4 +8,6 @@ public interface UserRepository {
   Optional<User> findByUsername(String username);
 
   void addRegisteredUser(String username, String encodedPassword);
+
+  void deleteByUsername(String username);
 }

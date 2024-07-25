@@ -1,7 +1,7 @@
 package com.griddynamics.gridmarket.services;
 
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
-import com.griddynamics.gridmarket.events.UserRegistrationEvent;
+import com.griddynamics.gridmarket.pubsub.event.UserRegistrationEvent;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

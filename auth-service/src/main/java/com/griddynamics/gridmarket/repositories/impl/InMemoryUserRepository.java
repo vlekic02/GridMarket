@@ -42,4 +42,9 @@ public class InMemoryUserRepository implements UserRepository {
         new User(++lastId,
             username, encodedPassword));
   }
+
+  @Override
+  public void deleteByUsername(String username) {
+    usersMap.remove(username.toLowerCase());
+  }
 }

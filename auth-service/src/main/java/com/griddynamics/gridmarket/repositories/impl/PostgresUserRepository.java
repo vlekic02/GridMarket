@@ -5,6 +5,8 @@ import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.Optional;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Repository;
 public class PostgresUserRepository implements UserRepository {
 
   private final JdbcTemplate template;
+  private final Logger logger = LoggerFactory.getLogger(PostgresUserRepository.class);
 
   public PostgresUserRepository(JdbcTemplate template) {
     this.template = template;
@@ -42,6 +45,17 @@ public class PostgresUserRepository implements UserRepository {
             """,
         username,
         encodedPassword
+    );
+  }
+
+  @Override
+  public void deleteByUsername(String username) {
+    template.update(
+        """
+            DELETE FROM grid_user
+            WHERE username = ?
+            """,
+        username
     );
   }
 }
