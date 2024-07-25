@@ -47,8 +47,12 @@ public class UserController {
   @AdminAccess
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @DeleteMapping(value = "/{id}")
-  public void deleteUser() {
-
+  public void deleteUser(
+      @PathVariable
+      @Parameter(description = "User id")
+      long id
+  ) {
+    userService.deleteUser(id);
   }
 
   @Operation(summary = "Get specific user balance") //TODO: Only current user and admin
