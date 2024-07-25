@@ -7,16 +7,17 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Component
+@Order
 public class UserInfoResolverFilter extends OncePerRequestFilter {
 
+  public static final String REQUEST_USER_CONTEXT = "userContext";
   private static final String HEADER_KEY = "grid-user";
-  private static final String REQUEST_USER_CONTEXT = "userContext";
-
   private final ObjectMapper objectMapper;
 
   public UserInfoResolverFilter(ObjectMapper objectMapper) {
