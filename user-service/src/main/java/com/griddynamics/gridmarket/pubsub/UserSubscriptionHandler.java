@@ -34,6 +34,9 @@ public class UserSubscriptionHandler {
     PubsubMessage message = basicAcknowledgeablePubsubMessage.getPubsubMessage();
     String eventName = message.getAttributesOrThrow("event");
     Class<? extends GenericEvent> eventType = payloadTypes.get(eventName);
+    if (eventType == null) {
+      return;
+    }
     GenericEvent event = convertMessage(message, eventType);
     listenerAdapter.onEvent(event);
     basicAcknowledgeablePubsubMessage.ack();

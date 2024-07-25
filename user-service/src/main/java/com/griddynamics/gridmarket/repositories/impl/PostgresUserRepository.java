@@ -91,7 +91,7 @@ public class PostgresUserRepository implements UserRepository {
   public void deleteUser(long id) {
     template.update(
         """
-            DELETE FROM "user"
+            DELETE FROM grid_user
             WHERE user_id = ?
             """
         , id
