@@ -6,6 +6,7 @@ import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.Collection;
+import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -44,10 +45,11 @@ public class UserService {
   }
 
   public void deleteUser(long id) {
-    userRepository.findById(id).ifPresent(user -> {
+    Optional<User> userOptional = userRepository.findById(id);
+    userRepository.deleteUser(id);
+    userOptional.ifPresent(user -> {
       UserDeletionEvent event = new UserDeletionEvent(user.getUsername());
       pubSubService.publishUserDeletion(event);
     });
-    userRepository.deleteUser(id);
   }
 }
