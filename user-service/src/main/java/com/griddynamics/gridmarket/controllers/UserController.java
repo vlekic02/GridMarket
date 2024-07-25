@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.controllers;
 
+import com.griddynamics.gridmarket.annotations.AdminAccess;
 import com.griddynamics.gridmarket.http.response.DataResponse;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
@@ -8,9 +9,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import java.util.Collection;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/v1/users")
@@ -39,7 +43,15 @@ public class UserController {
     return DataResponse.of(userService.getUserById(id));
   }
 
-  @Operation(summary = "Get specific user balance")
+  @Operation(summary = "Deletes specific user")
+  @AdminAccess
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @DeleteMapping(value = "/{id}")
+  public void deleteUser() {
+
+  }
+
+  @Operation(summary = "Get specific user balance") //TODO: Only current user and admin
   @GetMapping(value = "/{id}/balance", produces = "application/vnd.api+json")
   public DataResponse<Balance> getUserBalance(
       @PathVariable
