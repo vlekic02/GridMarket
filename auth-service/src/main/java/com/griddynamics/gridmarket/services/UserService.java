@@ -9,16 +9,20 @@ import java.util.Optional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService implements UserDetailsService {
 
   private final UserRepository userRepository;
+  private final PasswordEncoder encoder;
   private final PubSubService pubSubService;
 
-  public UserService(UserRepository userRepository, PubSubService pubSubService) {
+  public UserService(UserRepository userRepository, PasswordEncoder encoder,
+      PubSubService pubSubService) {
     this.userRepository = userRepository;
+    this.encoder = encoder;
     this.pubSubService = pubSubService;
   }
 
@@ -34,12 +38,13 @@ public class UserService implements UserDetailsService {
     if (alreadyRegistered.isPresent()) {
       throw new UserExistsException(registrationRequest.username());
     }
+    userRepository.addRegisteredUser(registrationRequest.username(),
+        encoder.encode(registrationRequest.password()));
     UserRegistrationEvent event = new UserRegistrationEvent(
         registrationRequest.name(),
         registrationRequest.surname(),
         registrationRequest.username()
     );
     pubSubService.publishUserRegistration(event);
-    userRepository.addRegisteredUser(registrationRequest);
   }
 }

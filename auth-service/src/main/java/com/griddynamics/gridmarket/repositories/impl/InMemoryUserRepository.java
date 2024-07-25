@@ -2,7 +2,6 @@ package com.griddynamics.gridmarket.repositories.impl;
 
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
-import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,9 +37,9 @@ public class InMemoryUserRepository implements UserRepository {
   }
 
   @Override
-  public void addRegisteredUser(UserRegistrationRequest request) {
-    usersMap.put(request.username().toLowerCase(),
+  public void addRegisteredUser(String username, String encodedPassword) {
+    usersMap.put(username.toLowerCase(),
         new User(++lastId,
-            request.username(), passwordEncoder.encode(request.password())));
+            username, encodedPassword));
   }
 }

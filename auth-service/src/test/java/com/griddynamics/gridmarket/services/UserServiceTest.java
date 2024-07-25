@@ -8,6 +8,7 @@ import com.griddynamics.gridmarket.repositories.impl.InMemoryUserRepository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 class UserServiceTest {
 
@@ -15,7 +16,7 @@ class UserServiceTest {
 
   @BeforeAll
   static void setup() {
-    userService = new UserService(new InMemoryUserRepository(), null);
+    userService = new UserService(new InMemoryUserRepository(), new BCryptPasswordEncoder(), null);
   }
 
   @Test

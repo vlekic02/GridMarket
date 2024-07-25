@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationControllerTest {
@@ -25,7 +26,8 @@ class AuthenticationControllerTest {
 
   @BeforeEach
   void setup() {
-    userService = new UserService(new InMemoryUserRepository(), pubSubService);
+    userService = new UserService(new InMemoryUserRepository(), new BCryptPasswordEncoder(),
+        pubSubService);
     controller = new AuthenticationController(userService);
   }
 

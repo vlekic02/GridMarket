@@ -1,10 +1,10 @@
 package com.griddynamics.gridmarket.repositories.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
-import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -14,8 +14,6 @@ import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
 import org.springframework.test.jdbc.JdbcTestUtils;
@@ -41,7 +39,7 @@ class PostgresUserRepositoryTest {
 
   @BeforeEach
   void setup() {
-    userRepository = new PostgresUserRepository(jdbcTemplate, new BCryptPasswordEncoder());
+    userRepository = new PostgresUserRepository(jdbcTemplate);
   }
 
   @AfterEach
@@ -74,15 +72,8 @@ class PostgresUserRepositoryTest {
 
   @Test
   void shouldCorrectlyRegisterUser() {
-    PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest(
-        "Test",
-        "Test",
-        "Test",
-        "Password"
-    );
-    userRepository.addRegisteredUser(userRegistrationRequest);
-    User user = userRepository.findByUsername("Test").get();
-    assertTrue(passwordEncoder.matches("Password", user.getPassword()));
+    userRepository.addRegisteredUser("TestUsername", "TestPassword");
+    User user = userRepository.findByUsername("TestUsername").get();
+    assertEquals("TestPassword", user.getPassword());
   }
 }

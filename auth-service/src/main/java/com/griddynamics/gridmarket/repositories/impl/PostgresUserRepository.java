@@ -3,22 +3,18 @@ package com.griddynamics.gridmarket.repositories.impl;
 import com.griddynamics.gridmarket.mappers.UserRowMapper;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
-import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class PostgresUserRepository implements UserRepository {
 
   private final JdbcTemplate template;
-  private final PasswordEncoder passwordEncoder;
 
-  public PostgresUserRepository(JdbcTemplate template, PasswordEncoder passwordEncoder) {
+  public PostgresUserRepository(JdbcTemplate template) {
     this.template = template;
-    this.passwordEncoder = passwordEncoder;
   }
 
   @Override
@@ -38,14 +34,14 @@ public class PostgresUserRepository implements UserRepository {
   }
 
   @Override
-  public void addRegisteredUser(UserRegistrationRequest userRegistrationRequest) {
+  public void addRegisteredUser(String username, String encodedPassword) {
     template.update(
         """
             INSERT INTO
             grid_user VALUES (default,?,?)
             """,
-        userRegistrationRequest.username(),
-        passwordEncoder.encode(userRegistrationRequest.password())
+        username,
+        encodedPassword
     );
   }
 }
