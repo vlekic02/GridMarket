@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS role (
   name TEXT NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS "user" (
+CREATE TABLE IF NOT EXISTS grid_user (
   user_id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   surname TEXT NOT NULL,
@@ -16,9 +16,9 @@ CREATE TABLE IF NOT EXISTS "user" (
 CREATE TABLE IF NOT EXISTS ban (
   ban_id SERIAL PRIMARY KEY,
   issuer INTEGER NOT NULL,
-  "user" INTEGER NOT NULL,
+  grid_user INTEGER NOT NULL,
   "date" TIMESTAMP NOT NULL,
   reason TEXT,
-  FOREIGN KEY (issuer) REFERENCES "user"(user_id),
-  FOREIGN KEY ("user") REFERENCES "user"(user_id) ON DELETE CASCADE
+  FOREIGN KEY (issuer) REFERENCES grid_user(user_id),
+  FOREIGN KEY (grid_user) REFERENCES grid_user(user_id) ON DELETE CASCADE
 );

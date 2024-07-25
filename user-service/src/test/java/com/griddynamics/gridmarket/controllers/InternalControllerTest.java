@@ -46,13 +46,13 @@ class InternalControllerTest {
 
   @AfterEach
   void cleanup() {
-    JdbcTestUtils.deleteFromTables(jdbcTemplate, "ban", "\"user\"", "role");
+    JdbcTestUtils.deleteFromTables(jdbcTemplate, "ban", "grid_user", "role");
   }
 
   @Test
   @Sql(statements = {
       "insert into role values (1, 'MEMBER')",
-      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 10)",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 10)",
       "insert into ban values (1, 1, 1, '2024-01-08 04:05:06', 'testReason')"
   })
   void shouldReturnCorrectInternalUserDto() {
@@ -70,7 +70,7 @@ class InternalControllerTest {
   @Test
   @Sql(statements = {
       "insert into role values (1, 'MEMBER')",
-      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 150.25)"
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)"
   })
   void shouldThrowIfUserWithUsernameDoesntExist() {
     assertThrows(NotFoundException.class,
