@@ -1,6 +1,6 @@
 package com.griddynamics.gridmarket.configuration;
 
-import com.griddynamics.gridmarket.filters.AdminAccessInterceptor;
+import com.griddynamics.gridmarket.filters.RouteAccessInterceptor;
 import java.util.List;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.lang.NonNull;
@@ -13,7 +13,7 @@ public class WebConfiguration implements WebMvcConfigurer {
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(new AdminAccessInterceptor());
+    registry.addInterceptor(new RouteAccessInterceptor());
   }
 
   @Override
