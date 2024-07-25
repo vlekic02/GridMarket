@@ -20,7 +20,7 @@ public class WebExceptionHandler {
   @ResponseStatus(HttpStatus.FORBIDDEN)
   public ErrorResource handleUnauthorizedException(UnauthorizedException exception) {
     return ErrorResource.of(
-        "Unauthorized",
+        "Forbidden",
         HttpStatus.FORBIDDEN.value(),
         exception.getMessage()
     );
