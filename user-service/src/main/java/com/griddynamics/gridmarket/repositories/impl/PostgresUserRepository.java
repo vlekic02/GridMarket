@@ -93,8 +93,8 @@ public class PostgresUserRepository implements UserRepository {
         """
             DELETE FROM grid_user
             WHERE user_id = ?
-            """
-        , id
+            """,
+        id
     );
   }
 }
