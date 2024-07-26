@@ -76,7 +76,7 @@ class UserSubscriptionHandlerTest {
     PubSubMessageConverter converter = new JacksonPubSubMessageConverter(new ObjectMapper());
     template.publish(TEST_TOPIC,
         converter.toPubSubMessage(
-            new UserDeletionEvent("User"),
+            new UserDeletionEvent(1, "User"),
             Map.of("event", "user_deletion")
         )
     ).join();

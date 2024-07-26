@@ -1,5 +1,5 @@
 package com.griddynamics.gridmarket.pubsub.event;
 
-public record UserDeletionEvent(String username) implements GenericEvent {
+public record UserDeletionEvent(long id, String username) implements GenericEvent {
 
 }

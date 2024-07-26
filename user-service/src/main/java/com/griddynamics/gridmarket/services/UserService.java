@@ -48,7 +48,7 @@ public class UserService {
     Optional<User> userOptional = userRepository.findById(id);
     userRepository.deleteUser(id);
     userOptional.ifPresent(user -> {
-      UserDeletionEvent event = new UserDeletionEvent(user.getUsername());
+      UserDeletionEvent event = new UserDeletionEvent(user.getId(), user.getUsername());
       pubSubService.publishUserDeletion(event);
     });
   }
