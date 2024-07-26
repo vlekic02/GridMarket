@@ -5,17 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.impl.InMemoryUserRepository;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 class UserServiceTest {
 
-  private static UserService userService;
+  private UserService userService;
 
-  @BeforeAll
-  static void setup() {
+  @BeforeEach
+  void setup() {
     userService = new UserService(new InMemoryUserRepository(), new BCryptPasswordEncoder(), null);
   }
 
@@ -32,5 +32,11 @@ class UserServiceTest {
   @Test
   void shouldThrowIfUsernameDoesntExist() {
     assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername("Test"));
+  }
+
+  @Test
+  void shouldCorrectlyDeleteUserFromRepository() {
+    userService.deleteUser("User");
+    assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername("User"));
   }
 }
