@@ -6,6 +6,13 @@ spring:
       pubsub:
         project-id: gridmarket-dev
         emulator-host: pub-sub:8085
+        publisher:
+          retry:
+            initial-retry-delay-seconds: 0.6
+            initial-rpc-timeout-seconds: 1
+            retry-delay-multiplier: 2
+            total-timeout-seconds: 600
+            max-rpc-timeout-seconds: 600
   datasource:
     url: jdbc:postgresql://auth-db:5432/gridmarket
     username: grid
