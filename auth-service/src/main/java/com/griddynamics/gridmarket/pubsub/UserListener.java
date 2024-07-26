@@ -9,8 +9,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserListener implements ListenerAdapter {
 
+  private static final Logger LOGGER = LoggerFactory.getLogger(UserListener.class);
+  
   private final UserService userService;
-  private final Logger logger = LoggerFactory.getLogger(UserListener.class);
 
   public UserListener(UserService userService) {
     this.userService = userService;
@@ -19,6 +20,7 @@ public class UserListener implements ListenerAdapter {
   @Override
   public void onUserDeleteEvent(UserDeletionEvent event) {
     /*TODO Find a way to invalidate all existing tokens for user*/
+    LOGGER.debug("Recieved user deletion event: {}", event);
     userService.deleteUser(event.username());
   }
 }
