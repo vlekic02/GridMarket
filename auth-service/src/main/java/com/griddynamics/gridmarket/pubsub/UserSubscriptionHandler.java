@@ -33,7 +33,6 @@ public class UserSubscriptionHandler {
   private void handle(BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage) {
     PubsubMessage message = basicAcknowledgeablePubsubMessage.getPubsubMessage();
     String eventName = message.getAttributesOrThrow("event");
-    LOGGER.info(eventName);
     Class<? extends GenericEvent> eventType = payloadTypes.get(eventName);
     if (eventType == null) {
       return;
