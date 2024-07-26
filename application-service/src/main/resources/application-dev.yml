@@ -1,4 +1,9 @@
 spring:
+  cloud:
+    gcp:
+      pubsub:
+        project-id: gridmarket-dev
+        emulator-host: pub-sub:8085
   sql:
     init:
       separator: "@@"
@@ -7,3 +12,6 @@ spring:
     url: jdbc:postgresql://application-db:5432/gridmarket
     username: grid
     password: grid
+logging:
+  level:
+    root: DEBUG
