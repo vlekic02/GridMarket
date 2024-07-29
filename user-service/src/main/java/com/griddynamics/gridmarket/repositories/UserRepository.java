@@ -21,4 +21,6 @@ public interface UserRepository {
   void createMember(String name, String surname, String username);
 
   void deleteUser(long id);
+
+  void save(User user);
 }
