@@ -42,17 +42,19 @@ class UserControllerTest {
   @Autowired
   private JdbcTemplate jdbcTemplate;
 
+  private UserService userService;
+
   private UserController userController;
 
   @BeforeEach
   void setup() {
-    UserService userService = new UserService(new PostgresUserRepository(jdbcTemplate));
+    userService = new UserService(new PostgresUserRepository(jdbcTemplate));
     userController = new UserController(userService);
   }
 
   @AfterEach
   void cleanup() {
-    JdbcTestUtils.deleteFromTables(jdbcTemplate, "ban", "\"user\"", "role");
+    JdbcTestUtils.deleteFromTables(jdbcTemplate, "ban", "grid_user", "role");
   }
 
   @Test
@@ -68,7 +70,7 @@ class UserControllerTest {
   @Test
   @Sql(statements = {
       "insert into role values (1, 'MEMBER')",
-      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 0)",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 0)",
       "insert into ban values (1, 1, 1, '2024-01-08 04:05:06', 'testReason')"
   })
   void shouldReturnUserIfExist() {
@@ -83,9 +85,9 @@ class UserControllerTest {
   @Test
   @Sql(statements = {
       "insert into role values (1, 'MEMBER')",
-      "insert into \"user\" values (2, 'test', 'test', 'test2', 1, 0)",
-      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 0)",
-      "insert into \"user\" values (3, 'test', 'test', 'test3', 1, 0)"
+      "insert into grid_user values (2, 'test', 'test', 'test2', 1, 0)",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 0)",
+      "insert into grid_user values (3, 'test', 'test', 'test3', 1, 0)"
   })
   void shouldReturnAllUsers() {
     Collection<User> users = userController.getAllUsers(PageRequest.of(0, 30)).getData();
@@ -95,11 +97,11 @@ class UserControllerTest {
   @Test
   @Sql(statements = {
       "insert into role values (1, 'MEMBER')",
-      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 0)",
-      "insert into \"user\" values (2, 'test', 'test', 'test2', 1, 0)",
-      "insert into \"user\" values (3, 'test', 'test', 'test3', 1, 0)",
-      "insert into \"user\" values (4, 'test', 'test', 'test4', 1, 0)",
-      "insert into \"user\" values (5, 'test', 'test', 'test5', 1, 0)"
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 0)",
+      "insert into grid_user values (2, 'test', 'test', 'test2', 1, 0)",
+      "insert into grid_user values (3, 'test', 'test', 'test3', 1, 0)",
+      "insert into grid_user values (4, 'test', 'test', 'test4', 1, 0)",
+      "insert into grid_user values (5, 'test', 'test', 'test5', 1, 0)"
   })
   void shouldReturnCorrectlyPaginatedResult() {
     Pageable pageable = PageRequest.of(3, 1);
@@ -113,10 +115,24 @@ class UserControllerTest {
   @Test
   @Sql(statements = {
       "insert into role values (1, 'MEMBER')",
-      "insert into \"user\" values (1, 'test', 'test', 'test', 1, 150.25)"
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)"
   })
   void shouldReturnCorrectBalanceForUser() {
     Balance balance = userController.getUserBalance(1).getData();
     assertEquals(150.25, balance.getAmount());
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')"
+  })
+  void shouldReturnCorrectMemberAfterCreating() {
+    userService.createMember("TestName", "TestSurname", "TestUsername");
+    User user = userService.getUserByUsername("TestUsername");
+    assertTrue(
+        "TestName".equals(user.getName())
+            && "TestSurname".equals(user.getSurname())
+            && "TestUsername".equals(user.getUsername())
+    );
   }
 }

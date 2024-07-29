@@ -25,12 +25,12 @@ public class PostgresUserRepository implements UserRepository {
   public List<User> findAll(Pageable pageable) {
     return template.query(
         """
-            SELECT "user".*, role_id, role.name as role_name, ban.* \
-            FROM "user" \
-            LEFT JOIN ban on ban."user" = "user".user_id \
-            INNER JOIN role on role.role_id = "user".role \
-            ORDER BY user_id \
-            LIMIT ? \
+            SELECT grid_user.*, role_id, role.name as role_name, ban.*
+            FROM grid_user
+            LEFT JOIN ban on ban.grid_user = grid_user.user_id
+            INNER JOIN role on role.role_id = grid_user.role
+            ORDER BY user_id
+            LIMIT ?
             OFFSET ?
             """,
         new UserRowMapper(),
@@ -43,10 +43,10 @@ public class PostgresUserRepository implements UserRepository {
   public Optional<User> findById(long id) {
     Stream<User> userStream = template.queryForStream(
         """
-            SELECT "user".*, role_id, role.name as role_name, ban.* \
-            FROM "user" \
-            LEFT JOIN ban on ban."user" = "user".user_id \
-            INNER JOIN role on role.role_id = "user".role
+            SELECT grid_user.*, role_id, role.name as role_name, ban.*
+            FROM grid_user
+            LEFT JOIN ban on ban.grid_user = grid_user.user_id
+            INNER JOIN role on role.role_id = grid_user.role
             WHERE user_id = ?
             """,
         new UserRowMapper(),
@@ -55,5 +55,35 @@ public class PostgresUserRepository implements UserRepository {
     Optional<User> userOptional = userStream.findFirst();
     userStream.close();
     return userOptional;
+  }
+
+  @Override
+  public Optional<User> findByUsername(String username) {
+    Stream<User> userStream = template.queryForStream(
+        """
+            SELECT grid_user.*, role_id, role.name as role_name, ban.*
+            FROM grid_user
+            LEFT JOIN ban on ban.grid_user = grid_user.user_id
+            INNER JOIN role on role.role_id = grid_user.role
+            WHERE username = ?
+            """,
+        new UserRowMapper(),
+        username
+    );
+    Optional<User> userOptional = userStream.findFirst();
+    userStream.close();
+    return userOptional;
+  }
+
+  @Override
+  public void createMember(String name, String surname, String username) {
+    template.update(
+        """
+            INSERT INTO grid_user (name, surname, username, role, balance)
+            SELECT ?, ?, ?, role_id, 0
+            FROM role
+            WHERE name = 'MEMBER'
+            """, name, surname, username
+    );
   }
 }

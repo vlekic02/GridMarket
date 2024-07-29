@@ -20,11 +20,11 @@ public class InternalUserServiceClient {
         .build();
   }
 
-  public UserInfo getUserInfo(long id) {
-    LOGGER.debug("Calling user service with url /internal/users/{}", id);
+  public UserInfo getUserInfo(String username) {
+    LOGGER.debug("Calling user service with url /internal/users/{}", username);
     return userClient
         .get()
-        .uri("/users/{id}", id)
+        .uri("/users/{username}", username)
         .accept(MediaType.APPLICATION_JSON)
         .retrieve()
         .body(UserInfo.class);

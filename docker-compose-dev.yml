@@ -101,6 +101,14 @@ services:
       POSTGRES_PASSWORD: grid
     networks:
       - auth-net
+  pub-sub:
+    image: google/cloud-sdk:emulators
+    volumes:
+      - ./python-pubsub:/pubsub
+      - ./scripts/pubsub-init.sh:/init.sh
+    command: ./init.sh
+    networks:
+      - service-net
 networks:
   service-net:
   application-net:

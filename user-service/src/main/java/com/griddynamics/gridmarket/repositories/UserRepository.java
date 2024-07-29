@@ -15,4 +15,8 @@ public interface UserRepository {
   }
 
   Optional<User> findById(long id);
+
+  Optional<User> findByUsername(String username);
+
+  void createMember(String name, String surname, String username);
 }

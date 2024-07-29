@@ -32,4 +32,16 @@ public class PostgresUserRepository implements UserRepository {
     userStream.close();
     return userOptional;
   }
+
+  @Override
+  public void addRegisteredUser(String username, String encodedPassword) {
+    template.update(
+        """
+            INSERT INTO
+            grid_user VALUES (default,?,?)
+            """,
+        username,
+        encodedPassword
+    );
+  }
 }

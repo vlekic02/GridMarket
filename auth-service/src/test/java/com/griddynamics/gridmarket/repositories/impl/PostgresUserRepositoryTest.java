@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.repositories.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.models.User;
@@ -48,14 +49,13 @@ class PostgresUserRepositoryTest {
 
   @Test
   @Sql(statements = {
-      "INSERT INTO grid_user VALUES (1, 2, 'testUsername', 'testPassword')"
+      "INSERT INTO grid_user VALUES (1,'testUsername', 'testPassword')"
   })
   void shouldReturnCorrectUserIfValidUsername() {
     Optional<User> userOptional = userRepository.findByUsername("testUsername");
     User user = userOptional.get();
     assertTrue(
         user.getId() == 1
-            && user.getUserId() == 2
             && "testUsername".equals(user.getUsername())
             && "testPassword".equals(user.getPassword())
     );
@@ -63,10 +63,17 @@ class PostgresUserRepositoryTest {
 
   @Test
   @Sql(statements = {
-      "INSERT INTO grid_user VALUES (1, 2, 'testUsername', 'testPassword')"
+      "INSERT INTO grid_user VALUES (1,'testUsername', 'testPassword')"
   })
   void shouldReturnEmptyOptionalIfInvalidUsername() {
     Optional<User> userOptional = userRepository.findByUsername("NonExistentUsername");
     assertTrue(userOptional.isEmpty());
+  }
+
+  @Test
+  void shouldCorrectlyRegisterUser() {
+    userRepository.addRegisteredUser("TestUsername", "TestPassword");
+    User user = userRepository.findByUsername("TestUsername").get();
+    assertEquals("TestPassword", user.getPassword());
   }
 }

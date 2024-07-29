@@ -13,6 +13,6 @@ public class WebExceptionHandler {
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ErrorResource handleNotFoundException(
       NotFoundException exception) {
-    return ErrorResource.of("Not found", 404, exception.getMessage());
+    return ErrorResource.of("Not found", exception.getStatus(), exception.getMessage());
   }
 }

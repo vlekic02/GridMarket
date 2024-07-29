@@ -13,6 +13,10 @@ public class NotFoundException extends RuntimeException {
     this.message = message;
   }
 
+  public NotFoundException(String message) {
+    this(-1, message);
+  }
+
   public int getStatus() {
     return status;
   }
