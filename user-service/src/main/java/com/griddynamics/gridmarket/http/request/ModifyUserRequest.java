@@ -6,8 +6,8 @@ public record ModifyUserRequest(
     String name,
     String surname,
     String username,
-    @JsonProperty("role") long roleId,
-    double balance
+    @JsonProperty("role") Long roleId,
+    Double balance
 ) {
 
 }
