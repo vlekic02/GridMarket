@@ -1,6 +1,7 @@
 package com.griddynamics.gridmarket.controllers;
 
 import com.griddynamics.gridmarket.annotations.AdminAccess;
+import com.griddynamics.gridmarket.http.ModifyUserRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -41,6 +43,19 @@ public class UserController {
       long id
   ) {
     return DataResponse.of(userService.getUserById(id));
+  }
+
+  @Operation(summary = "Modifies specific user info")
+  @AdminAccess
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @PatchMapping("/{id}")
+  public void modifyUser(
+      @PathVariable
+      @Parameter(description = "User id")
+      long id,
+      ModifyUserRequest request
+  ) {
+
   }
 
   @Operation(summary = "Deletes specific user")
