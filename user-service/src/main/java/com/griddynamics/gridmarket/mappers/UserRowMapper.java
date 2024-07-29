@@ -14,7 +14,7 @@ public class UserRowMapper implements RowMapper<User> {
   private final BanRowMapper banRowMapper;
 
   public UserRowMapper() {
-    this.roleRowMapper = new RoleRowMapper();
+    this.roleRowMapper = new RoleRowMapper("role_name");
     this.banRowMapper = new BanRowMapper();
   }
 
