@@ -6,8 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
+import com.griddynamics.gridmarket.http.request.ModifyUserRequest;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
+import com.griddynamics.gridmarket.repositories.impl.PostgresRoleRepository;
 import com.griddynamics.gridmarket.repositories.impl.PostgresUserRepository;
 import com.griddynamics.gridmarket.services.PubSubService;
 import com.griddynamics.gridmarket.services.UserService;
@@ -53,7 +56,8 @@ class UserControllerTest {
 
   @BeforeEach
   void setup() {
-    userService = new UserService(new PostgresUserRepository(jdbcTemplate), null, pubSubService);
+    userService = new UserService(new PostgresUserRepository(jdbcTemplate),
+        new PostgresRoleRepository(jdbcTemplate), pubSubService);
     userController = new UserController(userService);
   }
 
@@ -149,5 +153,63 @@ class UserControllerTest {
   void shouldCorrectlyDeleteUser() {
     userController.deleteUser(1);
     assertThrows(NotFoundException.class, () -> userController.getUserById(1));
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into role values (2, 'ADMIN')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)"
+  })
+  void shouldCorrectlyModifyUser() {
+    ModifyUserRequest request = new ModifyUserRequest(
+        "editedName",
+        "editedSurname",
+        "editedUsername",
+        2L,
+        250D
+    );
+    userController.modifyUser(1, request);
+    User user = userController.getUserById(1).getData();
+    assertTrue(
+        "editedName".equals(user.getName())
+            && "editedSurname".equals(user.getSurname())
+            && "editedUsername".equals(user.getUsername())
+            && "ADMIN".equals(user.getRole().getName())
+            && 250 == user.getBalance().getAmount()
+    );
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)",
+      "insert into grid_user values (2, 'test', 'test', 'testUsername', 1, 150.25)"
+  })
+  void shouldThrowIfUsernameAlreadyExist() {
+    ModifyUserRequest request = new ModifyUserRequest(
+        "editedName",
+        "editedSurname",
+        "testUsername",
+        2L,
+        250D
+    );
+    assertThrows(UnprocessableEntityException.class, () -> userController.modifyUser(1, request));
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)",
+  })
+  void shouldThrowIfInvalidRole() {
+    ModifyUserRequest request = new ModifyUserRequest(
+        "editedName",
+        "editedSurname",
+        "editedUsername",
+        2L,
+        250D
+    );
+    assertThrows(UnprocessableEntityException.class, () -> userController.modifyUser(1, request));
   }
 }
