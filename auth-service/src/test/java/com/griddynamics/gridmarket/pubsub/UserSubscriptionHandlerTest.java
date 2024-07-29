@@ -1,6 +1,9 @@
 package com.griddynamics.gridmarket.pubsub;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.pubsub.v1.SubscriptionAdminClient;
@@ -12,8 +15,7 @@ import com.google.cloud.spring.pubsub.PubSubAdmin;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.converter.JacksonPubSubMessageConverter;
 import com.google.cloud.spring.pubsub.support.converter.PubSubMessageConverter;
-import com.griddynamics.gridmarket.models.User;
-import com.griddynamics.gridmarket.pubsub.event.UserRegistrationEvent;
+import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
 import com.griddynamics.gridmarket.repositories.impl.InMemoryUserRepository;
 import com.griddynamics.gridmarket.services.UserService;
 import java.util.Map;
@@ -21,6 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PubSubEmulatorContainer;
@@ -48,6 +52,7 @@ class UserSubscriptionHandlerTest {
   UserSubscriptionHandler userSubscriptionHandler;
   UserService userService;
   PubSubAdmin admin;
+  UserListener userListenerSpy;
 
   @DynamicPropertySource
   static void emulatorProperties(DynamicPropertyRegistry registry) {
@@ -57,29 +62,26 @@ class UserSubscriptionHandlerTest {
 
   @BeforeEach
   void setup() {
-    userService = new UserService(new InMemoryUserRepository(), null);
+    userService = new UserService(new InMemoryUserRepository(), new BCryptPasswordEncoder(), null);
     admin = new PubSubAdmin(() -> PROJECT_ID, topicAdminClient, subscriptionAdminClient);
     admin.createTopic(TEST_TOPIC);
     admin.createSubscription(TEST_SUBSCRIPTION, TEST_TOPIC);
+    userListenerSpy = spy(new UserListener(userService));
     userSubscriptionHandler = new UserSubscriptionHandler(template, new ObjectMapper(),
-        new UserListener(userService));
+        userListenerSpy);
   }
 
   @Test
-  void shouldAddUserAfterEventSent() throws InterruptedException {
+  void shouldDeleteUserAfterEventSent() throws InterruptedException {
     PubSubMessageConverter converter = new JacksonPubSubMessageConverter(new ObjectMapper());
     template.publish(TEST_TOPIC,
         converter.toPubSubMessage(
-            new UserRegistrationEvent("TestName", "TestSurname", "TestUsername"),
-            Map.of("event", "user_registration")
+            new UserDeletionEvent(1, "User"),
+            Map.of("event", "user_deletion")
         )
     ).join();
     Thread.sleep(1000);
-    User user = userService.getUserByUsername("TestUsername");
-    assertTrue(
-        "TestName".equals(user.getName())
-            && "TestSurname".equals(user.getSurname())
-            && "TestUsername".equals(user.getUsername())
-    );
+    verify(userListenerSpy).onUserDeleteEvent(any(UserDeletionEvent.class));
+    assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername("User"));
   }
 }

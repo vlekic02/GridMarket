@@ -48,7 +48,7 @@ class UserControllerTest {
 
   @BeforeEach
   void setup() {
-    userService = new UserService(new PostgresUserRepository(jdbcTemplate));
+    userService = new UserService(new PostgresUserRepository(jdbcTemplate), null);
     userController = new UserController(userService);
   }
 

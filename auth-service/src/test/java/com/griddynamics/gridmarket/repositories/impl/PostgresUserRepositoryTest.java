@@ -76,4 +76,14 @@ class PostgresUserRepositoryTest {
     User user = userRepository.findByUsername("TestUsername").get();
     assertEquals("TestPassword", user.getPassword());
   }
+
+  @Test
+  @Sql(statements = {
+      "INSERT INTO grid_user VALUES (1,'testUsername', 'testPassword')"
+  })
+  void shouldCorrectlyDeleteUserByUsername() {
+    userRepository.deleteByUsername("testUsername");
+    Optional<User> userOptional = userRepository.findByUsername("testUsername");
+    assertTrue(userOptional.isEmpty());
+  }
 }

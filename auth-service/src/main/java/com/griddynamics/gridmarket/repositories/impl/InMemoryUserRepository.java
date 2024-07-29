@@ -6,17 +6,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class InMemoryUserRepository implements UserRepository {
 
   private final Map<String, User> usersMap;
-  private final PasswordEncoder passwordEncoder;
   private long lastId;
 
   public InMemoryUserRepository() {
-    this.passwordEncoder = new BCryptPasswordEncoder();
     usersMap = new HashMap<>();
     List<User> users = List.of(
         new User(
@@ -41,5 +37,10 @@ public class InMemoryUserRepository implements UserRepository {
     usersMap.put(username.toLowerCase(),
         new User(++lastId,
             username, encodedPassword));
+  }
+
+  @Override
+  public void deleteByUsername(String username) {
+    usersMap.remove(username.toLowerCase());
   }
 }

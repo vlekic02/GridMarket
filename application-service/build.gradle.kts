@@ -37,21 +37,32 @@ repositories {
     mavenCentral()
 }
 
+extra["springCloudGcpVersion"] = "5.5.0"
+
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("com.griddynamics:test-utils:1.0")
+    testImplementation("org.testcontainers:gcloud")
+    testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testRuntimeOnly("com.h2database:h2")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
+    implementation("com.google.cloud:spring-cloud-gcp-starter-pubsub")
     implementation("com.griddynamics:jackson-jsonapi:1.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     runtimeOnly("io.micrometer:micrometer-registry-prometheus")
     runtimeOnly("org.postgresql:postgresql")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+}
+
+dependencyManagement {
+    imports {
+        mavenBom("com.google.cloud:spring-cloud-gcp-dependencies:${property("springCloudGcpVersion")}")
+    }
 }
 
 tasks.test {

@@ -15,4 +15,14 @@ public class WebExceptionHandler {
       NotFoundException exception) {
     return ErrorResource.of("Not found", exception.getStatus(), exception.getMessage());
   }
+
+  @ExceptionHandler(UnauthorizedException.class)
+  @ResponseStatus(HttpStatus.FORBIDDEN)
+  public ErrorResource handleUnauthorizedException(UnauthorizedException exception) {
+    return ErrorResource.of(
+        "Forbidden",
+        HttpStatus.FORBIDDEN.value(),
+        exception.getMessage()
+    );
+  }
 }

@@ -3,8 +3,10 @@ package com.griddynamics.gridmarket.services;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
+import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.Collection;
+import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -12,9 +14,11 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final PubSubService pubSubService;
 
-  public UserService(UserRepository userRepository) {
+  public UserService(UserRepository userRepository, PubSubService pubSubService) {
     this.userRepository = userRepository;
+    this.pubSubService = pubSubService;
   }
 
   public Collection<User> getAllUsers(Pageable pageable) {
@@ -38,5 +42,14 @@ public class UserService {
   public Balance getUserBalance(long id) {
     User user = getUserById(id);
     return user.getBalance();
+  }
+
+  public void deleteUser(long id) {
+    Optional<User> userOptional = userRepository.findById(id);
+    userRepository.deleteUser(id);
+    userOptional.ifPresent(user -> {
+      UserDeletionEvent event = new UserDeletionEvent(user.getId(), user.getUsername());
+      pubSubService.publishUserDeletion(event);
+    });
   }
 }

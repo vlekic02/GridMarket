@@ -86,4 +86,15 @@ public class PostgresUserRepository implements UserRepository {
             """, name, surname, username
     );
   }
+
+  @Override
+  public void deleteUser(long id) {
+    template.update(
+        """
+            DELETE FROM grid_user
+            WHERE user_id = ?
+            """,
+        id
+    );
+  }
 }

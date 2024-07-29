@@ -36,4 +36,8 @@ public class ApplicationService {
     double price = application.getRealPrice();
     return new Price(id, price);
   }
+
+  public void deleteApplicationByUser(long userId) {
+    /*TODO: placeholder, implement when implementing application CRUD*/
+  }
 }

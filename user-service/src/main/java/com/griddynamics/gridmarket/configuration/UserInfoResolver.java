@@ -1,6 +1,6 @@
 package com.griddynamics.gridmarket.configuration;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.griddynamics.gridmarket.filters.UserInfoResolverFilter;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.NonNull;
@@ -10,14 +10,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 public class UserInfoResolver implements HandlerMethodArgumentResolver {
-
-  private static final String HEADER_KEY = "grid-user";
-
-  private final ObjectMapper objectMapper;
-
-  public UserInfoResolver(ObjectMapper objectMapper) {
-    this.objectMapper = objectMapper;
-  }
 
   @Override
   public boolean supportsParameter(@NonNull MethodParameter parameter) {
@@ -31,7 +23,6 @@ public class UserInfoResolver implements HandlerMethodArgumentResolver {
       @NonNull NativeWebRequest webRequest,
       WebDataBinderFactory binderFactory
   ) throws Exception {
-    String jsonContext = webRequest.getHeader(HEADER_KEY);
-    return objectMapper.readValue(jsonContext, GridUserInfo.class);
+    return webRequest.getAttribute(UserInfoResolverFilter.REQUEST_USER_CONTEXT, 0);
   }
 }

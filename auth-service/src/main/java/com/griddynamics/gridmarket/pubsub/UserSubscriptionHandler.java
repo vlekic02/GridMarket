@@ -5,7 +5,7 @@ import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.pubsub.v1.PubsubMessage;
 import com.griddynamics.gridmarket.pubsub.event.GenericEvent;
-import com.griddynamics.gridmarket.pubsub.event.UserRegistrationEvent;
+import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
 import java.io.IOException;
 import java.util.Map;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ public class UserSubscriptionHandler {
   public UserSubscriptionHandler(PubSubTemplate template, ObjectMapper objectMapper,
       @Qualifier("userListener") ListenerAdapter listenerAdapter) {
     this.objectMapper = objectMapper;
-    payloadTypes = Map.of("user_registration", UserRegistrationEvent.class);
+    payloadTypes = Map.of("user_deletion", UserDeletionEvent.class);
     this.listenerAdapter = listenerAdapter;
     template.subscribe(SUBSCRIPTION_NAME, this::handle);
   }

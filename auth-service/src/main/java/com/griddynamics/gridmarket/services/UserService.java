@@ -1,8 +1,8 @@
 package com.griddynamics.gridmarket.services;
 
-import com.griddynamics.gridmarket.events.UserRegistrationEvent;
 import com.griddynamics.gridmarket.exceptions.UserExistsException;
 import com.griddynamics.gridmarket.models.User;
+import com.griddynamics.gridmarket.pubsub.event.UserRegistrationEvent;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
 import java.util.Optional;
@@ -46,5 +46,9 @@ public class UserService implements UserDetailsService {
         registrationRequest.username()
     );
     pubSubService.publishUserRegistration(event);
+  }
+
+  public void deleteUser(String username) {
+    userRepository.deleteByUsername(username);
   }
 }
