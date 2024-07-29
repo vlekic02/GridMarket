@@ -1,7 +1,7 @@
 package com.griddynamics.gridmarket.controllers;
 
 import com.griddynamics.gridmarket.annotations.AdminAccess;
-import com.griddynamics.gridmarket.http.ModifyUserRequest;
+import com.griddynamics.gridmarket.http.request.ModifyUserRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;

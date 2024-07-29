@@ -1,7 +1,7 @@
 package com.griddynamics.gridmarket.services;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
-import com.griddynamics.gridmarket.http.ModifyUserRequest;
+import com.griddynamics.gridmarket.http.request.ModifyUserRequest;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
@@ -55,6 +55,6 @@ public class UserService {
   }
 
   public void modifyUser(long id, ModifyUserRequest request) {
-    
+
   }
 }
