@@ -50,4 +50,68 @@ public class User extends Resource {
   public Balance getBalance() {
     return balance;
   }
+
+  public Builder builder() {
+    return new Builder(this);
+  }
+
+  public static class Builder {
+
+    private long id;
+    private String name;
+    private String surname;
+    private String username;
+    private Role role;
+    private Ban ban;
+    private double balance;
+
+    private Builder(User user) {
+      this.id = user.getId();
+      this.name = user.getName();
+      this.surname = user.getSurname();
+      this.username = user.getUsername();
+      this.role = user.getRole();
+      this.ban = user.getBan();
+      this.balance = user.getBalance().getAmount();
+    }
+
+    public Builder setId(long id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder setName(String name) {
+      this.name = name;
+      return this;
+    }
+
+    public Builder setSurname(String surname) {
+      this.surname = surname;
+      return this;
+    }
+
+    public Builder setUsername(String username) {
+      this.username = username;
+      return this;
+    }
+
+    public Builder setRole(Role role) {
+      this.role = role;
+      return this;
+    }
+
+    public Builder setBan(Ban ban) {
+      this.ban = ban;
+      return this;
+    }
+
+    public Builder setBalance(double balance) {
+      this.balance = balance;
+      return this;
+    }
+
+    public User build() {
+      return new User(id, name, surname, username, role, ban, balance);
+    }
+  }
 }
