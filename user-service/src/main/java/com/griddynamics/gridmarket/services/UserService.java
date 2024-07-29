@@ -1,7 +1,7 @@
 package com.griddynamics.gridmarket.services;
 
-import com.griddynamics.gridmarket.exceptions.BadRequestException;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
 import com.griddynamics.gridmarket.http.request.ModifyUserRequest;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.Role;
@@ -62,6 +62,7 @@ public class UserService {
 
   public void modifyUser(long id, ModifyUserRequest request) {
     User.Builder userBuilder = getUserById(id).builder();
+    boolean usernameChanged = false;
     if (request.name() != null) {
       userBuilder.setName(request.name());
     }
@@ -69,13 +70,18 @@ public class UserService {
       userBuilder.setSurname(request.surname());
     }
     if (request.username() != null) {
+      Optional<User> userOptional = userRepository.findByUsername(request.username());
+      if (userOptional.isPresent()) {
+        throw new UnprocessableEntityException("Specified username already exists !");
+      }
       // TODO publish change
+      usernameChanged = true;
       userBuilder.setUsername(request.username());
     }
     if (request.roleId() != null) {
       Optional<Role> roleOptional = roleRepository.findById(request.roleId());
       Role role = roleOptional.orElseThrow(
-          () -> new BadRequestException("Specified role is not found"));
+          () -> new UnprocessableEntityException("Specified role is not found"));
       userBuilder.setRole(role);
     }
     if (request.balance() != null) {
