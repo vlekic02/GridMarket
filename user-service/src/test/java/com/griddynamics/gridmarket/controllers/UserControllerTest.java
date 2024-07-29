@@ -9,11 +9,13 @@ import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.impl.PostgresUserRepository;
+import com.griddynamics.gridmarket.services.PubSubService;
 import com.griddynamics.gridmarket.services.UserService;
 import java.util.Collection;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -46,9 +48,12 @@ class UserControllerTest {
 
   private UserController userController;
 
+  @Mock
+  private PubSubService pubSubService;
+
   @BeforeEach
   void setup() {
-    userService = new UserService(new PostgresUserRepository(jdbcTemplate), null);
+    userService = new UserService(new PostgresUserRepository(jdbcTemplate), pubSubService);
     userController = new UserController(userService);
   }
 
@@ -134,5 +139,15 @@ class UserControllerTest {
             && "TestSurname".equals(user.getSurname())
             && "TestUsername".equals(user.getUsername())
     );
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)"
+  })
+  void shouldCorrectlyDeleteUser() {
+    userController.deleteUser(1);
+    assertThrows(NotFoundException.class, () -> userController.getUserById(1));
   }
 }
