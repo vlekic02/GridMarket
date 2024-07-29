@@ -15,9 +15,12 @@ import com.griddynamics.gridmarket.repositories.impl.PostgresUserRepository;
 import com.griddynamics.gridmarket.services.PubSubService;
 import com.griddynamics.gridmarket.services.UserService;
 import java.util.Collection;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
@@ -53,6 +56,23 @@ class UserControllerTest {
 
   @Mock
   private PubSubService pubSubService;
+
+  private static Stream<ModifyUserRequest> getInvalidModifyUserRequests() {
+    return Stream.of(new ModifyUserRequest(
+            "editedName",
+            "editedSurname",
+            "editedUsername",
+            2L,
+            250D
+        ),
+        new ModifyUserRequest(
+            "editedName",
+            "editedSurname",
+            "testUsername",
+            10L,
+            250D
+        ));
+  }
 
   @BeforeEach
   void setup() {
@@ -180,36 +200,14 @@ class UserControllerTest {
     );
   }
 
-  @Test
+  @ParameterizedTest
+  @MethodSource("getInvalidModifyUserRequests")
   @Sql(statements = {
       "insert into role values (1, 'MEMBER')",
       "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)",
       "insert into grid_user values (2, 'test', 'test', 'testUsername', 1, 150.25)"
   })
-  void shouldThrowIfUsernameAlreadyExist() {
-    ModifyUserRequest request = new ModifyUserRequest(
-        "editedName",
-        "editedSurname",
-        "testUsername",
-        2L,
-        250D
-    );
-    assertThrows(UnprocessableEntityException.class, () -> userController.modifyUser(1, request));
-  }
-
-  @Test
-  @Sql(statements = {
-      "insert into role values (1, 'MEMBER')",
-      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)",
-  })
-  void shouldThrowIfInvalidRole() {
-    ModifyUserRequest request = new ModifyUserRequest(
-        "editedName",
-        "editedSurname",
-        "editedUsername",
-        2L,
-        250D
-    );
+  void shouldThrowIfUsernameAlreadyExist(ModifyUserRequest request) {
     assertThrows(UnprocessableEntityException.class, () -> userController.modifyUser(1, request));
   }
 }
