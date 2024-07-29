@@ -7,6 +7,7 @@ import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.Role;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
+import com.griddynamics.gridmarket.pubsub.event.UsernameChangeEvent;
 import com.griddynamics.gridmarket.repositories.RoleRepository;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.Collection;
@@ -74,9 +75,8 @@ public class UserService {
       if (userOptional.isPresent()) {
         throw new UnprocessableEntityException("Specified username already exists !");
       }
-      // TODO publish change
-      usernameChanged = true;
       userBuilder.setUsername(request.username());
+      usernameChanged = true;
     }
     if (request.roleId() != null) {
       Optional<Role> roleOptional = roleRepository.findById(request.roleId());
@@ -88,5 +88,9 @@ public class UserService {
       userBuilder.setBalance(request.balance());
     }
     userRepository.save(userBuilder.build());
+    if (usernameChanged) {
+      UsernameChangeEvent event = new UsernameChangeEvent(request.username());
+      pubSubService.publishUsernameChange(event);
+    }
   }
 }
