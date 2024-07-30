@@ -17,6 +17,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ApplicationService {
@@ -55,6 +56,10 @@ public class ApplicationService {
     Application application = getApplicationById(id);
     double price = application.getRealPrice();
     return new Price(id, price);
+  }
+
+  public void handleApplicationUpload(String token, MultipartFile file) {
+    
   }
 
   public SignedUrl getUploadSignedUrl(ApplicationUploadRequest request, long publishedId) {
