@@ -51,4 +51,8 @@ public class UserService implements UserDetailsService {
   public void deleteUser(String username) {
     userRepository.deleteByUsername(username);
   }
+
+  public void changeUsername(String oldUsername, String newUsername) {
+    userRepository.changeUsername(oldUsername, newUsername);
+  }
 }

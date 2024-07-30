@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.pubsub;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
@@ -16,6 +17,7 @@ import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.converter.JacksonPubSubMessageConverter;
 import com.google.cloud.spring.pubsub.support.converter.PubSubMessageConverter;
 import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
+import com.griddynamics.gridmarket.pubsub.event.UsernameChangeEvent;
 import com.griddynamics.gridmarket.repositories.impl.InMemoryUserRepository;
 import com.griddynamics.gridmarket.services.UserService;
 import java.util.Map;
@@ -53,6 +55,7 @@ class UserSubscriptionHandlerTest {
   UserService userService;
   PubSubAdmin admin;
   UserListener userListenerSpy;
+  PubSubMessageConverter converter;
 
   @DynamicPropertySource
   static void emulatorProperties(DynamicPropertyRegistry registry) {
@@ -62,10 +65,15 @@ class UserSubscriptionHandlerTest {
 
   @BeforeEach
   void setup() {
+    converter = new JacksonPubSubMessageConverter(new ObjectMapper());
     userService = new UserService(new InMemoryUserRepository(), new BCryptPasswordEncoder(), null);
     admin = new PubSubAdmin(() -> PROJECT_ID, topicAdminClient, subscriptionAdminClient);
-    admin.createTopic(TEST_TOPIC);
-    admin.createSubscription(TEST_SUBSCRIPTION, TEST_TOPIC);
+    if (admin.getTopic(TEST_TOPIC) == null) {
+      admin.createTopic(TEST_TOPIC);
+    }
+    if (admin.getSubscription(TEST_SUBSCRIPTION) == null) {
+      admin.createSubscription(TEST_SUBSCRIPTION, TEST_TOPIC);
+    }
     userListenerSpy = spy(new UserListener(userService));
     userSubscriptionHandler = new UserSubscriptionHandler(template, new ObjectMapper(),
         userListenerSpy);
@@ -73,7 +81,6 @@ class UserSubscriptionHandlerTest {
 
   @Test
   void shouldDeleteUserAfterEventSent() throws InterruptedException {
-    PubSubMessageConverter converter = new JacksonPubSubMessageConverter(new ObjectMapper());
     template.publish(TEST_TOPIC,
         converter.toPubSubMessage(
             new UserDeletionEvent(1, "User"),
@@ -83,5 +90,17 @@ class UserSubscriptionHandlerTest {
     Thread.sleep(1000);
     verify(userListenerSpy).onUserDeleteEvent(any(UserDeletionEvent.class));
     assertThrows(UsernameNotFoundException.class, () -> userService.loadUserByUsername("User"));
+  }
+
+  @Test
+  void shouldChangeUserUsernameAfterEventSent() throws InterruptedException {
+    template.publish(TEST_TOPIC, converter.toPubSubMessage(
+            new UsernameChangeEvent("User", "NewUsername"),
+            Map.of("event", "username_change")
+        )
+    ).join();
+    Thread.sleep(1000);
+    verify(userListenerSpy).onUsernameChangeEvent(any(UsernameChangeEvent.class));
+    assertDoesNotThrow(() -> userService.loadUserByUsername("NewUsername"));
   }
 }

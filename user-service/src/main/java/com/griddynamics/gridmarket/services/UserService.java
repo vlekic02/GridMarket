@@ -62,7 +62,8 @@ public class UserService {
   }
 
   public void modifyUser(long id, ModifyUserRequest request) {
-    User.Builder userBuilder = getUserById(id).builder();
+    User user = getUserById(id);
+    User.Builder userBuilder = user.builder();
     boolean usernameChanged = false;
     if (request.name() != null) {
       userBuilder.setName(request.name());
@@ -89,7 +90,7 @@ public class UserService {
     }
     userRepository.save(userBuilder.build());
     if (usernameChanged) {
-      UsernameChangeEvent event = new UsernameChangeEvent(request.username());
+      UsernameChangeEvent event = new UsernameChangeEvent(user.getUsername(), request.username());
       pubSubService.publishUsernameChange(event);
     }
   }
