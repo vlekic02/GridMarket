@@ -10,4 +10,6 @@ public interface UserRepository {
   void addRegisteredUser(String username, String encodedPassword);
 
   void deleteByUsername(String username);
+
+  void changePassword(String username, String encodedPassword);
 }

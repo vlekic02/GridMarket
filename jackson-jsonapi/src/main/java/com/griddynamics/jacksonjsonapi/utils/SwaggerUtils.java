@@ -32,7 +32,7 @@ public class SwaggerUtils {
       double.class,
       Double.class
   );
-  private static final Logger logger = LoggerFactory.getLogger(SwaggerUtils.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(SwaggerUtils.class);
 
   private SwaggerUtils() {
   }
@@ -48,7 +48,7 @@ public class SwaggerUtils {
     try {
       beanInfo = Introspector.getBeanInfo(clazz, Resource.class);
     } catch (IntrospectionException e) {
-      logger.error("Failed to read bean info for {}", clazz.getSimpleName(), e);
+      LOGGER.error("Failed to read bean info for {}", clazz.getSimpleName(), e);
       return null;
     }
     Schema<?> attributesSchema = new ObjectSchema();
