@@ -21,12 +21,29 @@ public class WebExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
-  public ErrorResource handlerMethodArgumentNotValidException(
+  public ErrorResource handleMethodArgumentNotValidException(
       MethodArgumentNotValidException exception) {
     String validationErrors = exception.getBindingResult().getFieldErrors()
         .stream().map(DefaultMessageSourceResolvable::getDefaultMessage)
         .collect(Collectors.joining("\n"));
     return ErrorResource.of(
         "Bad request", HttpStatus.BAD_REQUEST.value(), validationErrors);
+  }
+
+  @ExceptionHandler(InvalidUploadTokenException.class)
+  @ResponseStatus(HttpStatus.UNAUTHORIZED)
+  public ErrorResource handleInvalidUploadTokenException(InvalidUploadTokenException exception) {
+    return ErrorResource.of(
+        "Invalid token", HttpStatus.UNAUTHORIZED.value(), exception.getMessage());
+  }
+
+  @ExceptionHandler(InternalServerException.class)
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  public ErrorResource handleInternalServerException(InternalServerException exception) {
+    return ErrorResource.of(
+        "Internal server error",
+        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+        exception.getMessage()
+    );
   }
 }
