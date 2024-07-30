@@ -56,7 +56,7 @@ public class PostgresUserRepository implements UserRepository {
     );
   }
 
- @Override
+  @Override
   public void changeUsername(String oldUsername, String newUsername) {
     template.update(
         """
@@ -68,7 +68,7 @@ public class PostgresUserRepository implements UserRepository {
         oldUsername
     );
   }
-  
+
   public void changePassword(String username, String encodedPassword) {
     template.update(
         """
