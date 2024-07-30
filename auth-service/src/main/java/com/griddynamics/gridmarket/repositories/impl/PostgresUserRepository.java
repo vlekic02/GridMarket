@@ -57,6 +57,18 @@ public class PostgresUserRepository implements UserRepository {
   }
 
   @Override
+  public void changeUsername(String oldUsername, String newUsername) {
+    template.update(
+        """
+            UPDATE grid_user
+            SET username = ?
+            WHERE username = ?
+            """,
+        newUsername,
+        oldUsername
+    );
+  }
+
   public void changePassword(String username, String encodedPassword) {
     template.update(
         """

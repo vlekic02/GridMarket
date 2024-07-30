@@ -25,4 +25,14 @@ public class WebExceptionHandler {
         exception.getMessage()
     );
   }
+
+  @ExceptionHandler(UnprocessableEntityException.class)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  public ErrorResource handleUnprocessableEntityException(UnprocessableEntityException exception) {
+    return ErrorResource.of(
+        "Bad request",
+        HttpStatus.UNPROCESSABLE_ENTITY.value(),
+        exception.getMessage()
+    );
+  }
 }

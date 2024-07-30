@@ -40,7 +40,7 @@ class InternalControllerTest {
 
   @BeforeEach
   void setup() {
-    UserService userService = new UserService(new PostgresUserRepository(jdbcTemplate), null);
+    UserService userService = new UserService(new PostgresUserRepository(jdbcTemplate), null, null);
     internalController = new InternalController(userService);
   }
 

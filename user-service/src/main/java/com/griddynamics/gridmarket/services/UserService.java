@@ -1,9 +1,14 @@
 package com.griddynamics.gridmarket.services;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
+import com.griddynamics.gridmarket.http.request.ModifyUserRequest;
 import com.griddynamics.gridmarket.models.Balance;
+import com.griddynamics.gridmarket.models.Role;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
+import com.griddynamics.gridmarket.pubsub.event.UsernameChangeEvent;
+import com.griddynamics.gridmarket.repositories.RoleRepository;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.Collection;
 import java.util.Optional;
@@ -14,10 +19,13 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
   private final UserRepository userRepository;
+  private final RoleRepository roleRepository;
   private final PubSubService pubSubService;
 
-  public UserService(UserRepository userRepository, PubSubService pubSubService) {
+  public UserService(UserRepository userRepository, RoleRepository roleRepository,
+      PubSubService pubSubService) {
     this.userRepository = userRepository;
+    this.roleRepository = roleRepository;
     this.pubSubService = pubSubService;
   }
 
@@ -51,5 +59,39 @@ public class UserService {
       UserDeletionEvent event = new UserDeletionEvent(user.getId(), user.getUsername());
       pubSubService.publishUserDeletion(event);
     });
+  }
+
+  public void modifyUser(long id, ModifyUserRequest request) {
+    User user = getUserById(id);
+    User.Builder userBuilder = user.builder();
+    boolean usernameChanged = false;
+    if (request.name() != null) {
+      userBuilder.setName(request.name());
+    }
+    if (request.surname() != null) {
+      userBuilder.setSurname(request.surname());
+    }
+    if (request.username() != null) {
+      Optional<User> userOptional = userRepository.findByUsername(request.username());
+      if (userOptional.isPresent()) {
+        throw new UnprocessableEntityException("Specified username already exists !");
+      }
+      userBuilder.setUsername(request.username());
+      usernameChanged = true;
+    }
+    if (request.roleId() != null) {
+      Optional<Role> roleOptional = roleRepository.findById(request.roleId());
+      Role role = roleOptional.orElseThrow(
+          () -> new UnprocessableEntityException("Specified role is not found"));
+      userBuilder.setRole(role);
+    }
+    if (request.balance() != null) {
+      userBuilder.setBalance(request.balance());
+    }
+    userRepository.save(userBuilder.build());
+    if (usernameChanged) {
+      UsernameChangeEvent event = new UsernameChangeEvent(user.getUsername(), request.username());
+      pubSubService.publishUsernameChange(event);
+    }
   }
 }

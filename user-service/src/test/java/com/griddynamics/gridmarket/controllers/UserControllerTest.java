@@ -6,14 +6,22 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
+import com.griddynamics.gridmarket.http.request.ModifyUserRequest;
 import com.griddynamics.gridmarket.models.Balance;
 import com.griddynamics.gridmarket.models.User;
+import com.griddynamics.gridmarket.repositories.impl.PostgresRoleRepository;
 import com.griddynamics.gridmarket.repositories.impl.PostgresUserRepository;
+import com.griddynamics.gridmarket.services.PubSubService;
 import com.griddynamics.gridmarket.services.UserService;
 import java.util.Collection;
+import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -46,9 +54,30 @@ class UserControllerTest {
 
   private UserController userController;
 
+  @Mock
+  private PubSubService pubSubService;
+
+  private static Stream<ModifyUserRequest> getInvalidModifyUserRequests() {
+    return Stream.of(new ModifyUserRequest(
+            "editedName",
+            "editedSurname",
+            "editedUsername",
+            2L,
+            250D
+        ),
+        new ModifyUserRequest(
+            "editedName",
+            "editedSurname",
+            "testUsername",
+            10L,
+            250D
+        ));
+  }
+
   @BeforeEach
   void setup() {
-    userService = new UserService(new PostgresUserRepository(jdbcTemplate), null);
+    userService = new UserService(new PostgresUserRepository(jdbcTemplate),
+        new PostgresRoleRepository(jdbcTemplate), pubSubService);
     userController = new UserController(userService);
   }
 
@@ -134,5 +163,51 @@ class UserControllerTest {
             && "TestSurname".equals(user.getSurname())
             && "TestUsername".equals(user.getUsername())
     );
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)"
+  })
+  void shouldCorrectlyDeleteUser() {
+    userController.deleteUser(1);
+    assertThrows(NotFoundException.class, () -> userController.getUserById(1));
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into role values (2, 'ADMIN')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)"
+  })
+  void shouldCorrectlyModifyUser() {
+    ModifyUserRequest request = new ModifyUserRequest(
+        "editedName",
+        "editedSurname",
+        "editedUsername",
+        2L,
+        250D
+    );
+    userController.modifyUser(1, request);
+    User user = userController.getUserById(1).getData();
+    assertTrue(
+        "editedName".equals(user.getName())
+            && "editedSurname".equals(user.getSurname())
+            && "editedUsername".equals(user.getUsername())
+            && "ADMIN".equals(user.getRole().getName())
+            && 250 == user.getBalance().getAmount()
+    );
+  }
+
+  @ParameterizedTest
+  @MethodSource("getInvalidModifyUserRequests")
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)",
+      "insert into grid_user values (2, 'test', 'test', 'testUsername', 1, 150.25)"
+  })
+  void shouldThrowIfUsernameAlreadyExist(ModifyUserRequest request) {
+    assertThrows(UnprocessableEntityException.class, () -> userController.modifyUser(1, request));
   }
 }

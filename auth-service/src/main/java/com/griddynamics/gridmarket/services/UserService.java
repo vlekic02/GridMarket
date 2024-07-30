@@ -54,6 +54,10 @@ public class UserService implements UserDetailsService {
     userRepository.deleteByUsername(username);
   }
 
+  public void changeUsername(String oldUsername, String newUsername) {
+    userRepository.changeUsername(oldUsername, newUsername);
+  }
+
   public String changePassword(ChangePasswordRequest changePasswordRequest) {
     User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     if (!encoder.matches(changePasswordRequest.oldPassword(), currentUser.getPassword())) {

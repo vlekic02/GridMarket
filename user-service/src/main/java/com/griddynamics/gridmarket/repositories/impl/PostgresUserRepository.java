@@ -97,4 +97,25 @@ public class PostgresUserRepository implements UserRepository {
         id
     );
   }
+
+  @Override
+  public void save(User user) {
+    template.update(
+        """
+            UPDATE grid_user
+            SET name = ?,
+            surname = ?,
+            username = ?,
+            role = ?,
+            balance = ?
+            WHERE user_id = ?
+            """,
+        user.getName(),
+        user.getSurname(),
+        user.getUsername(),
+        user.getRole().getId(),
+        user.getBalance().getAmount(),
+        user.getId()
+    );
+  }
 }
