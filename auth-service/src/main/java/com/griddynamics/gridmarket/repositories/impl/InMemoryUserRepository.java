@@ -51,4 +51,13 @@ public class InMemoryUserRepository implements UserRepository {
     User newUser = new User(user.getId(), newUsername, user.getPassword());
     usersMap.put(newUsername.toLowerCase(), newUser);
   }
+  
+  @Override
+  public void changePassword(String username, String encodedPassword) {
+    findByUsername(username.toLowerCase()).ifPresent(user -> {
+      deleteByUsername(username);
+      User newUser = new User(user.getId(), user.getUsername(), encodedPassword);
+      usersMap.put(newUser.getUsername().toLowerCase(), newUser);
+    });
+  }
 }

@@ -4,8 +4,10 @@ import com.griddynamics.gridmarket.exceptions.UserExistsException;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.pubsub.event.UserRegistrationEvent;
 import com.griddynamics.gridmarket.repositories.UserRepository;
+import com.griddynamics.gridmarket.requests.ChangePasswordRequest;
 import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
 import java.util.Optional;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -54,5 +56,14 @@ public class UserService implements UserDetailsService {
 
   public void changeUsername(String oldUsername, String newUsername) {
     userRepository.changeUsername(oldUsername, newUsername);
+  
+  public String changePassword(ChangePasswordRequest changePasswordRequest) {
+    User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    if (!encoder.matches(changePasswordRequest.oldPassword(), currentUser.getPassword())) {
+      return "redirect:changepassword?error";
+    }
+    String encodedNewPassword = encoder.encode(changePasswordRequest.newPassword());
+    userRepository.changePassword(currentUser.getUsername(), encodedNewPassword);
+    return "redirect:logout";
   }
 }

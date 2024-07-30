@@ -86,4 +86,14 @@ class PostgresUserRepositoryTest {
     Optional<User> userOptional = userRepository.findByUsername("testUsername");
     assertTrue(userOptional.isEmpty());
   }
+
+  @Test
+  @Sql(statements = {
+      "INSERT INTO grid_user VALUES (1,'testUsername', 'testPassword')"
+  })
+  void shouldCorrectlyChangeUserPassword() {
+    userRepository.changePassword("testUsername", "newPassword");
+    User user = userRepository.findByUsername("testUsername").get();
+    assertEquals("newPassword", user.getPassword());
+  }
 }

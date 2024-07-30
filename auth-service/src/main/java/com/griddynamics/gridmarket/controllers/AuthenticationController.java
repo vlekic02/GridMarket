@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.controllers;
 
+import com.griddynamics.gridmarket.requests.ChangePasswordRequest;
 import com.griddynamics.gridmarket.requests.UserRegistrationRequest;
 import com.griddynamics.gridmarket.services.UserService;
 import jakarta.validation.Valid;
@@ -27,9 +28,19 @@ public class AuthenticationController {
     return "register-page";
   }
 
+  @GetMapping("/changepassword")
+  public String changePasswordPage() {
+    return "change-password";
+  }
+
   @PostMapping(value = "/register", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
   public String registerUser(@Valid UserRegistrationRequest registrationRequest) {
     userService.registerUser(registrationRequest);
     return "redirect:register?success";
+  }
+
+  @PostMapping(value = "/changepassword", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+  public String changePassword(@Valid ChangePasswordRequest changePasswordRequest) {
+    return userService.changePassword(changePasswordRequest);
   }
 }

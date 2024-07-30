@@ -11,5 +11,8 @@ public interface UserRepository {
 
   void deleteByUsername(String username);
 
+
   void changeUsername(String oldUsername, String newUsername);
+
+  void changePassword(String username, String encodedPassword);
 }
