@@ -46,13 +46,10 @@ public class InMemoryUserRepository implements UserRepository {
 
   @Override
   public void changePassword(String username, String encodedPassword) {
-    Optional<User> userOptional = findByUsername(username.toLowerCase());
-    if (userOptional.isEmpty()) {
-      return;
-    }
-    User user = userOptional.get();
-    deleteByUsername(username);
-    User newUser = new User(user.getId(), user.getUsername(), encodedPassword);
-    usersMap.put(newUser.getUsername().toLowerCase(), newUser);
+    findByUsername(username.toLowerCase()).ifPresent(user -> {
+      deleteByUsername(username);
+      User newUser = new User(user.getId(), user.getUsername(), encodedPassword);
+      usersMap.put(newUser.getUsername().toLowerCase(), newUser);
+    });
   }
 }
