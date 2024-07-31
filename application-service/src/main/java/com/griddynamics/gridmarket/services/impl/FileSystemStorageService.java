@@ -7,18 +7,24 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class FileSystemStorageService implements StorageService {
 
-  private static final Path ROOT_DIRECTORY = Path.of("applications");
   private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemStorageService.class);
+
+  private final Path rootDirectory;
+
+  public FileSystemStorageService(@Value("applications") String rootDirectory) {
+    this.rootDirectory = Path.of(rootDirectory);
+  }
 
   @Override
   public Path save(MultipartFile file, String fileName, long userId) {
-    Path userDirectory = ROOT_DIRECTORY.resolve(String.valueOf(userId));
+    Path userDirectory = rootDirectory.resolve(String.valueOf(userId));
     if (!Files.exists(userDirectory)) {
       try {
         Files.createDirectories(userDirectory);
