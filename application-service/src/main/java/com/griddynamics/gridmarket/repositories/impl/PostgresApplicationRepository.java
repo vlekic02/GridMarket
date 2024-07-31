@@ -57,6 +57,25 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public Optional<Application> findByName(String name) {
+    Stream<Application> applicationStream = template.queryForStream(
+        """
+             SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
+             end_date, \
+             application.*
+             FROM application
+             LEFT JOIN discount on discount.discount_id = application.discount
+             WHERE application.name = ?
+            """,
+        new ApplicationRowMapper(),
+        name
+    );
+    Optional<Application> applicationOptional = applicationStream.findFirst();
+    applicationStream.close();
+    return applicationOptional;
+  }
+
+  @Override
   public List<Review> findReviewsByApplication(Application application) {
     return template.query(
         """

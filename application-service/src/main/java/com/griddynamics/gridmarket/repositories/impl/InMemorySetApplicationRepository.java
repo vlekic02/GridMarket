@@ -53,6 +53,11 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public Optional<Application> findByName(String name) {
+    return applications.stream().filter(app -> app.getName().equals(name)).findFirst();
+  }
+
+  @Override
   public List<Review> findReviewsByApplication(Application application) {
     return reviews.stream().filter(review -> review.getApplication().getId() == application.getId())
         .toList();

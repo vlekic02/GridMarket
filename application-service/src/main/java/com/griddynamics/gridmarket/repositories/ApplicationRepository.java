@@ -12,6 +12,8 @@ public interface ApplicationRepository {
 
   Optional<Application> findById(long id);
 
+  Optional<Application> findByName(String name);
+
   List<Review> findReviewsByApplication(Application application);
 
   void saveApplication(ApplicationMetadata metadata, String path);
