@@ -18,7 +18,7 @@ class ApplicationServiceTest {
 
   @BeforeEach
   void setup() {
-    applicationService = new ApplicationService(new InMemorySetApplicationRepository(), null);
+    applicationService = new ApplicationService(new InMemorySetApplicationRepository(), null, null);
   }
 
   @Test

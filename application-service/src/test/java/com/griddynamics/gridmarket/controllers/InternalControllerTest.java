@@ -28,7 +28,7 @@ class InternalControllerTest {
   @BeforeEach
   void setup() {
     internalController = new InternalController(
-        new ApplicationService(new PostgresApplicationRepository(template), null));
+        new ApplicationService(new PostgresApplicationRepository(template), null, null));
   }
 
   @AfterEach

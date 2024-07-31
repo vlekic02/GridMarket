@@ -62,7 +62,7 @@ class UserSubscriptionHandlerTest {
     admin.createSubscription(TEST_SUBSCRIPTION, TEST_TOPIC);
     userListenerSpy = spy(
         new UserListener(
-            new ApplicationService(null, null))); // TODO fix tests when CRUD is implemented
+            new ApplicationService(null, null, null))); // TODO fix tests when CRUD is implemented
     userSubscriptionHandler = new UserSubscriptionHandler(template, new ObjectMapper(),
         userListenerSpy);
   }
