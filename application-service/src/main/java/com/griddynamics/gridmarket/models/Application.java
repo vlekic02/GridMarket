@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.griddynamics.jacksonjsonapi.annotations.JsonRelation;
 import com.griddynamics.jacksonjsonapi.models.Resource;
 
@@ -31,6 +32,7 @@ public class Application extends Resource {
     return description;
   }
 
+  @JsonIgnore
   public String getPath() {
     return path;
   }
