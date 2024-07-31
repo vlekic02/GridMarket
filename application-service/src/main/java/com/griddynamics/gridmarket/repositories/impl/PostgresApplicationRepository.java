@@ -3,6 +3,7 @@ package com.griddynamics.gridmarket.repositories.impl;
 import com.griddynamics.gridmarket.mappers.ApplicationRowMapper;
 import com.griddynamics.gridmarket.mappers.ReviewRowMapper;
 import com.griddynamics.gridmarket.models.Application;
+import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.util.List;
@@ -64,6 +65,22 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             """,
         new ReviewRowMapper(),
         application.getId()
+    );
+  }
+
+  @Override
+  public void saveApplication(ApplicationMetadata metadata, String path) {
+    template.update(
+        """
+            INSERT INTO application
+            VALUES (DEFAULT, ?, ?, ?, ?, ?, ?)
+            """,
+        metadata.request().name(),
+        metadata.request().description(),
+        path,
+        metadata.publisherId(),
+        metadata.request().price(),
+        null
     );
   }
 }
