@@ -12,7 +12,6 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Repository;
 
 @Profile("!cloud")
@@ -97,7 +96,14 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             WHERE application_id = ?
             RETURNING path
             """,
-        (ResultSetExtractor<Path>) rs -> Path.of(rs.getString("path"))
+        rs -> {
+          if (rs.next()) {
+            return Path.of(rs.getString("path"));
+          } else {
+            return null;
+          }
+        },
+        id
     );
   }
 
