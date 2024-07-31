@@ -6,6 +6,7 @@ import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.Discount.Type;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,6 +62,17 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   public List<Review> findReviewsByApplication(Application application) {
     return reviews.stream().filter(review -> review.getApplication().getId() == application.getId())
         .toList();
+  }
+
+  @Override
+  public Path deleteApplicationById(long id) {
+    Optional<Application> applicationOptional = findById(id);
+    if (applicationOptional.isPresent()) {
+      Application application = applicationOptional.get();
+      applications.removeIf(app -> app.getId() == id);
+      return Path.of(application.getPath());
+    }
+    return null;
   }
 
   @Override

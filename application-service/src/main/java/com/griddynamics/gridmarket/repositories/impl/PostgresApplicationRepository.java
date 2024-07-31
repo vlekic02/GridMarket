@@ -6,11 +6,13 @@ import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.context.annotation.Profile;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.stereotype.Repository;
 
 @Profile("!cloud")
@@ -84,6 +86,18 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             """,
         new ReviewRowMapper(),
         application.getId()
+    );
+  }
+
+  @Override
+  public Path deleteApplicationById(long id) {
+    return template.query(
+        """
+            DELETE FROM application
+            WHERE application_id = ?
+            RETURNING path
+            """,
+        (ResultSetExtractor<Path>) rs -> Path.of(rs.getString("path"))
     );
   }
 
