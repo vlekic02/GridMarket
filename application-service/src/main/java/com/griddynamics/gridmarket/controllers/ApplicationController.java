@@ -71,8 +71,8 @@ public class ApplicationController {
   @Operation(summary = "Deletes specific application")
   @DeleteMapping(value = "/{id}")
   @ResponseStatus(HttpStatus.NO_CONTENT)
-  public void deleteApplication(@PathVariable long id) {
-    applicationService.deleteApplication(id);
+  public void deleteApplication(@PathVariable long id, GridUserInfo userInfo) {
+    applicationService.deleteApplication(id, userInfo);
   }
 
   @Operation(summary = "Get all reviews for specific application")
