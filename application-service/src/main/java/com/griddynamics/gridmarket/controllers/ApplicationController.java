@@ -8,6 +8,8 @@ import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
 import com.griddynamics.gridmarket.services.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import jakarta.validation.Valid;
 import java.util.Collection;
 import org.springframework.http.HttpStatus;
@@ -52,6 +54,8 @@ public class ApplicationController {
       @RequestParam("file")
       MultipartFile file,
       @RequestParam("token")
+      @Parameter(in = ParameterIn.QUERY,
+          description = "Upload token received from POST /v1/applications")
       String token
   ) {
     applicationService.handleApplicationUpload(token, file);
