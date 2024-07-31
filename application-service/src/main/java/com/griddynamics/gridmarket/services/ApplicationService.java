@@ -45,13 +45,18 @@ public class ApplicationService {
     this.baseUrl = baseUrl;
   }
 
+  public Application getApplicationByName(String name) {
+    return applicationRepository.findByName(name)
+        .orElseThrow(() -> new NotFoundException("Specified application not found"));
+  }
+
   public Collection<Application> getAllApplications() {
     return applicationRepository.findAll();
   }
 
   public Application getApplicationById(long id) {
     return applicationRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(id, "Specified application not found !"));
+        .orElseThrow(() -> new NotFoundException("Specified application not found !"));
   }
 
   public Collection<Review> getAllReviewForApplication(long applicationId) {
