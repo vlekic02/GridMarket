@@ -49,8 +49,10 @@ public class ApplicationController {
   @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   public void uploadApplication(
-      @RequestParam("file") MultipartFile file,
-      @RequestParam("token") String token
+      @RequestParam("file")
+      MultipartFile file,
+      @RequestParam("token")
+      String token
   ) {
     applicationService.handleApplicationUpload(token, file);
   }
