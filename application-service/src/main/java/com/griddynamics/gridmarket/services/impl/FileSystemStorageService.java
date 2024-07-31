@@ -42,4 +42,13 @@ public class FileSystemStorageService implements StorageService {
     }
     return filePath;
   }
+
+  @Override
+  public void delete(Path path) {
+    try {
+      Files.delete(path);
+    } catch (IOException exception) {
+      LOGGER.error("Failed to delete file from disk !", exception);
+    }
+  }
 }
