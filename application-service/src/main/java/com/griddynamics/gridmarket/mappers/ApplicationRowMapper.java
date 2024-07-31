@@ -20,6 +20,8 @@ public class ApplicationRowMapper implements RowMapper<Application> {
     Application.Builder builder = new Application.Builder();
     long id = resultSet.getLong("application_id");
     builder.setId(id);
+    String name = resultSet.getString("name");
+    builder.setName(name);
     String description = resultSet.getString("description");
     builder.setDescription(description);
     String path = resultSet.getString("path");
