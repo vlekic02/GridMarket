@@ -46,4 +46,14 @@ public class WebExceptionHandler {
         exception.getMessage()
     );
   }
+
+  @ExceptionHandler(BadRequestException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResource handleBadRequestException(BadRequestException exception) {
+    return ErrorResource.of(
+        "Bad request",
+        HttpStatus.BAD_REQUEST.value(),
+        exception.getMessage()
+    );
+  }
 }
