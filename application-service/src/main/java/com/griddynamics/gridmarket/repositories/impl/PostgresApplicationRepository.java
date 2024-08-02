@@ -6,6 +6,7 @@ import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -84,6 +85,36 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             """,
         new ReviewRowMapper(),
         application.getId()
+    );
+  }
+
+  @Override
+  public Path deleteApplicationById(long id) {
+    return template.query(
+        """
+            DELETE FROM application
+            WHERE application_id = ?
+            RETURNING path
+            """,
+        rs -> {
+          if (rs.next()) {
+            return Path.of(rs.getString("path"));
+          } else {
+            return null;
+          }
+        },
+        id
+    );
+  }
+
+  @Override
+  public void deleteApplicationsByUser(long userId) {
+    template.update(
+        """
+            DELETE FROM application
+            WHERE publisher = ?
+            """,
+        userId
     );
   }
 

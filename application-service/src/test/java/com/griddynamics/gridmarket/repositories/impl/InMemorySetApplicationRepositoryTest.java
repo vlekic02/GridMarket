@@ -1,6 +1,8 @@
 package com.griddynamics.gridmarket.repositories.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
@@ -8,17 +10,18 @@ import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class InMemorySetApplicationRepositoryTest {
 
-  private static ApplicationRepository applicationRepository;
+  private ApplicationRepository applicationRepository;
 
-  @BeforeAll
-  static void setup() {
+  @BeforeEach
+  void setup() {
     applicationRepository = new InMemorySetApplicationRepository();
   }
 
@@ -66,5 +69,25 @@ class InMemorySetApplicationRepositoryTest {
             && application.getOriginalPrice() == 10
             && "path".equals(application.getPath())
     );
+  }
+
+  @Test
+  void shouldCorrectlyDeleteApplication() {
+    Path path = applicationRepository.deleteApplicationById(1);
+    Optional<Application> applicationOptional = applicationRepository.findById(1);
+    assertTrue(applicationOptional.isEmpty());
+    assertEquals("/system/path", path.toString());
+  }
+
+  @Test
+  void shouldReturnNullPathIfApplicationDoesntExist() {
+    Path path = applicationRepository.deleteApplicationById(100);
+    assertNull(path);
+  }
+
+  @Test
+  void shouldGetAllApplications() {
+    List<Application> applications = applicationRepository.findAll();
+    assertThat(applications).hasSize(4);
   }
 }

@@ -4,9 +4,11 @@ import com.griddynamics.gridmarket.exceptions.ApplicationExistsException;
 import com.griddynamics.gridmarket.exceptions.BadRequestException;
 import com.griddynamics.gridmarket.exceptions.InvalidUploadTokenException;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
+import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Price;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
@@ -35,9 +37,11 @@ public class ApplicationService {
   private final ScheduledExecutorService executorService;
   private final String baseUrl;
 
-  public ApplicationService(ApplicationRepository applicationRepository,
+  public ApplicationService(
+      ApplicationRepository applicationRepository,
       StorageService storageService,
-      @Value("${base-path}") String baseUrl) {
+      @Value("${base-path}") String baseUrl
+  ) {
     this.applicationRepository = applicationRepository;
     this.storageService = storageService;
     this.tokenMap = new ConcurrentHashMap<>();
@@ -97,7 +101,18 @@ public class ApplicationService {
     return new SignedUrl(publishedId, signedUrl);
   }
 
+  public void deleteApplication(long id, GridUserInfo userInfo) {
+    applicationRepository.findById(id).ifPresent(app -> {
+      if (!"ADMIN".equals(userInfo.role()) && userInfo.id() != app.getPublisher().getId()) {
+        throw new UnauthorizedException("You don't have permission to delete this application");
+      }
+      Path applicationPath = applicationRepository.deleteApplicationById(id);
+      storageService.delete(applicationPath);
+    });
+  }
+
   public void deleteApplicationByUser(long userId) {
-    /*TODO: placeholder, implement when implementing application CRUD*/
+    applicationRepository.deleteApplicationsByUser(userId);
+    storageService.deleteByUser(userId);
   }
 }
