@@ -150,4 +150,17 @@ class PostgresApplicationRepositoryTest {
     Path path = applicationRepository.deleteApplicationById(100);
     assertNull(path);
   }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, '/path/test', 1, 20, default)",
+      "insert into application values (2, 'Test1', null, '/path/test', 1, 20, default)",
+      "insert into application values (3, 'Test2', null, '/path/test', 1, 20, default)",
+      "insert into application values (4, 'Test3', null, '/path/test', 2, 20, default)"
+  })
+  void shouldDeleteAllApplicationsByUser() {
+    applicationRepository.deleteApplicationsByUser(1);
+    List<Application> applications = applicationRepository.findAll();
+    assertThat(applications).hasSize(1);
+  }
 }
