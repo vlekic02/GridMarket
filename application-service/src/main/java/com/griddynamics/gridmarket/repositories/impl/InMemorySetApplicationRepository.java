@@ -79,6 +79,13 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public boolean alreadyMadeReview(long userId, long applicationId) {
+    return reviews.stream()
+        .anyMatch(review -> review.getApplication().getId() == applicationId
+            && review.getAuthor().getId() == userId);
+  }
+
+  @Override
   public Path deleteApplicationById(long id) {
     Optional<Application> applicationOptional = findById(id);
     if (applicationOptional.isPresent()) {

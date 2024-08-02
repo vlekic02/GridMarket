@@ -20,6 +20,8 @@ public interface ApplicationRepository {
 
   void createReview(long applicationId, long userId, ReviewCreateRequest request);
 
+  boolean alreadyMadeReview(long userId, long applicationId);
+
   Path deleteApplicationById(long id);
 
   void deleteApplicationsByUser(long userId);

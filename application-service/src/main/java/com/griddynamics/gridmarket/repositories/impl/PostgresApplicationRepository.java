@@ -104,6 +104,21 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public boolean alreadyMadeReview(long userId, long applicationId) {
+    List<Review> reviews = template.query(
+        """
+            SELECT *
+            FROM review
+            WHERE application = ? AND author = ?
+            LIMIT 1
+            """, new ReviewRowMapper(),
+        applicationId,
+        userId
+    );
+    return !reviews.isEmpty();
+  }
+
+  @Override
   public Path deleteApplicationById(long id) {
     return template.query(
         """

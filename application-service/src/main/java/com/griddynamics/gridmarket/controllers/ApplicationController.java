@@ -1,6 +1,7 @@
 package com.griddynamics.gridmarket.controllers;
 
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
+import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.GridUserInfo;
@@ -79,5 +80,16 @@ public class ApplicationController {
   @GetMapping(value = "/{id}/reviews", produces = "application/vnd.api+json")
   public DataResponse<Collection<Review>> getReviewByApplication(@PathVariable long id) {
     return DataResponse.of(applicationService.getAllReviewForApplication(id));
+  }
+
+  @Operation(summary = "Create new review for specific application")
+  @PostMapping(value = "/{id}/reviews")
+  @ResponseStatus(HttpStatus.CREATED)
+  public void createReview(
+      @PathVariable long id,
+      @RequestBody @Valid ReviewCreateRequest request,
+      GridUserInfo userInfo
+  ) {
+    applicationService.createReview(id, request, userInfo);
   }
 }
