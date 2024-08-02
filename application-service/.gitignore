@@ -2,3 +2,4 @@
 !.gitignore
 build/
 gha-creds-*.json
+applications/

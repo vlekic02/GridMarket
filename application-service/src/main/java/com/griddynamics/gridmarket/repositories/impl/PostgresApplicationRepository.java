@@ -3,8 +3,10 @@ package com.griddynamics.gridmarket.repositories.impl;
 import com.griddynamics.gridmarket.mappers.ApplicationRowMapper;
 import com.griddynamics.gridmarket.mappers.ReviewRowMapper;
 import com.griddynamics.gridmarket.models.Application;
+import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -56,6 +58,25 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public Optional<Application> findByName(String name) {
+    Stream<Application> applicationStream = template.queryForStream(
+        """
+             SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
+             end_date, \
+             application.*
+             FROM application
+             LEFT JOIN discount on discount.discount_id = application.discount
+             WHERE application.name = ?
+            """,
+        new ApplicationRowMapper(),
+        name
+    );
+    Optional<Application> applicationOptional = applicationStream.findFirst();
+    applicationStream.close();
+    return applicationOptional;
+  }
+
+  @Override
   public List<Review> findReviewsByApplication(Application application) {
     return template.query(
         """
@@ -64,6 +85,52 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             """,
         new ReviewRowMapper(),
         application.getId()
+    );
+  }
+
+  @Override
+  public Path deleteApplicationById(long id) {
+    return template.query(
+        """
+            DELETE FROM application
+            WHERE application_id = ?
+            RETURNING path
+            """,
+        rs -> {
+          if (rs.next()) {
+            return Path.of(rs.getString("path"));
+          } else {
+            return null;
+          }
+        },
+        id
+    );
+  }
+
+  @Override
+  public void deleteApplicationsByUser(long userId) {
+    template.update(
+        """
+            DELETE FROM application
+            WHERE publisher = ?
+            """,
+        userId
+    );
+  }
+
+  @Override
+  public void saveApplication(ApplicationMetadata metadata, String path) {
+    template.update(
+        """
+            INSERT INTO application
+            VALUES (DEFAULT, ?, ?, ?, ?, ?, ?)
+            """,
+        metadata.request().name(),
+        metadata.request().description(),
+        path,
+        metadata.publisherId(),
+        metadata.request().price(),
+        null
     );
   }
 }

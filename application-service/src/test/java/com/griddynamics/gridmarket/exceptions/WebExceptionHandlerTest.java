@@ -17,7 +17,7 @@ class WebExceptionHandlerTest {
 
   @Test
   void testNotFoundExceptionHandler() {
-    NotFoundException notFoundException = new NotFoundException(10, "Resource not found");
+    NotFoundException notFoundException = new NotFoundException("Resource not found");
     ErrorResource exceptionResponse = webExceptionHandler.handleNotFoundException(
         notFoundException);
     assertThat(exceptionResponse.getErrors()).hasSize(1);

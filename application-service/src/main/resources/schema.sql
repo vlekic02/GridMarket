@@ -22,14 +22,14 @@ CREATE TABLE IF NOT EXISTS application (
   publisher INTEGER NOT NULL,
   price DECIMAL NOT NULL CHECK (price >= 0),
   discount INTEGER,
-  FOREIGN KEY (discount) REFERENCES discount(discount_id)
+  FOREIGN KEY (discount) REFERENCES discount(discount_id) ON DELETE SET NULL
 )@@
 
 CREATE TABLE IF NOT EXISTS sellable_application (
   application INTEGER PRIMARY KEY,
   start_date TIMESTAMP,
   end_date TIMESTAMP,
-  FOREIGN KEY (application) REFERENCES application(application_id)
+  FOREIGN KEY (application) REFERENCES application(application_id) ON DELETE CASCADE
 )@@
 
 CREATE TABLE IF NOT EXISTS ownership (
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS review (
   stars SMALLINT NOT NULL CHECK (stars > 0 AND stars <= 5),
   application INTEGER NOT NULL,
   UNIQUE (author, application),
-  FOREIGN KEY (application) REFERENCES application(application_id)
+  FOREIGN KEY (application) REFERENCES application(application_id) ON DELETE CASCADE
 )@@
 
 -- TODO: add indexes
