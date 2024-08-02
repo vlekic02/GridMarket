@@ -15,14 +15,21 @@ import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.converter.JacksonPubSubMessageConverter;
 import com.google.cloud.spring.pubsub.support.converter.PubSubMessageConverter;
 import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
+import com.griddynamics.gridmarket.repositories.impl.InMemorySetApplicationRepository;
 import com.griddynamics.gridmarket.services.ApplicationService;
+import com.griddynamics.gridmarket.services.StorageService;
+import com.griddynamics.gridmarket.services.impl.FileSystemStorageService;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Map;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.util.FileSystemUtils;
 import org.testcontainers.containers.PubSubEmulatorContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -48,6 +55,7 @@ class UserSubscriptionHandlerTest {
   UserSubscriptionHandler userSubscriptionHandler;
   PubSubAdmin admin;
   UserListener userListenerSpy;
+  ApplicationService applicationService;
 
   @DynamicPropertySource
   static void emulatorProperties(DynamicPropertyRegistry registry) {
@@ -60,15 +68,22 @@ class UserSubscriptionHandlerTest {
     admin = new PubSubAdmin(() -> PROJECT_ID, topicAdminClient, subscriptionAdminClient);
     admin.createTopic(TEST_TOPIC);
     admin.createSubscription(TEST_SUBSCRIPTION, TEST_TOPIC);
-    userListenerSpy = spy(
-        new UserListener(
-            new ApplicationService(null, null, null))); // TODO fix tests when CRUD is implemented
+    StorageService storageService = new FileSystemStorageService("testApp");
+    applicationService = new ApplicationService(new InMemorySetApplicationRepository(),
+        storageService,
+        "");
+    userListenerSpy = spy(new UserListener(applicationService));
     userSubscriptionHandler = new UserSubscriptionHandler(template, new ObjectMapper(),
         userListenerSpy);
   }
 
+  @AfterEach
+  void cleanup() throws IOException {
+    FileSystemUtils.deleteRecursively(Path.of("testApp"));
+  }
+
   @Test
-  void shouldDeleteUserAfterEventSent() throws InterruptedException {
+  void shouldDeleteApplicationAfterEventSent() throws InterruptedException {
     PubSubMessageConverter converter = new JacksonPubSubMessageConverter(new ObjectMapper());
     template.publish(TEST_TOPIC,
         converter.toPubSubMessage(
