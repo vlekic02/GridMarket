@@ -19,5 +19,7 @@ public interface ApplicationRepository {
 
   Path deleteApplicationById(long id);
 
+  void deleteApplicationsByUser(long userId);
+
   void saveApplication(ApplicationMetadata metadata, String path);
 }

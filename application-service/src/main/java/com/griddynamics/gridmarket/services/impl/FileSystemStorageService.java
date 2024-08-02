@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -49,6 +50,15 @@ public class FileSystemStorageService implements StorageService {
       Files.delete(path);
     } catch (IOException exception) {
       LOGGER.error("Failed to delete file from disk !", exception);
+    }
+  }
+
+  @Override
+  public void deleteByUser(long userId) {
+    try {
+      FileSystemUtils.deleteRecursively(rootDirectory.resolve(String.valueOf(userId)));
+    } catch (IOException exception) {
+      LOGGER.error("Failed to delete user applications folder !", exception);
     }
   }
 }

@@ -76,6 +76,11 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public void deleteApplicationsByUser(long userId) {
+    applications.removeIf(app -> app.getPublisher().getId() == userId);
+  }
+
+  @Override
   public void saveApplication(ApplicationMetadata metadata, String path) {
     applications.add(new Application(
         ++lastId,

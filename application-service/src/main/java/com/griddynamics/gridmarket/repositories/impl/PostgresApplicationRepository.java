@@ -108,6 +108,17 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public void deleteApplicationsByUser(long userId) {
+    template.update(
+        """
+            DELETE FROM application
+            WHERE publisher = ?
+            """,
+        userId
+    );
+  }
+
+  @Override
   public void saveApplication(ApplicationMetadata metadata, String path) {
     template.update(
         """

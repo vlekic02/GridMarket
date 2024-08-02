@@ -37,9 +37,11 @@ public class ApplicationService {
   private final ScheduledExecutorService executorService;
   private final String baseUrl;
 
-  public ApplicationService(ApplicationRepository applicationRepository,
+  public ApplicationService(
+      ApplicationRepository applicationRepository,
       StorageService storageService,
-      @Value("${base-path}") String baseUrl) {
+      @Value("${base-path}") String baseUrl
+  ) {
     this.applicationRepository = applicationRepository;
     this.storageService = storageService;
     this.tokenMap = new ConcurrentHashMap<>();
@@ -110,6 +112,7 @@ public class ApplicationService {
   }
 
   public void deleteApplicationByUser(long userId) {
-    /*TODO: placeholder, implement when implementing application CRUD*/
+    applicationRepository.deleteApplicationsByUser(userId);
+    storageService.deleteByUser(userId);
   }
 }
