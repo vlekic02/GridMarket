@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
+import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Review;
@@ -162,5 +163,36 @@ class PostgresApplicationRepositoryTest {
     applicationRepository.deleteApplicationsByUser(1);
     List<Application> applications = applicationRepository.findAll();
     assertThat(applications).hasSize(1);
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, '/path/test', 1, 20, default)"
+  })
+  void shouldCorrectlyCreateReview() {
+    ReviewCreateRequest request = new ReviewCreateRequest("Test", 5);
+    applicationRepository.createReview(1, 2, request);
+    Application app = applicationRepository.findById(1).get();
+    List<Review> reviews = applicationRepository.findReviewsByApplication(app);
+    Review review = reviews.get(0);
+    assertTrue("Test".equals(review.getMessage()) && review.getStars() == 5);
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, '/path/test', 1, 20, default)",
+      "insert into review values (1, 2, 'msg', 5, 1)"
+  })
+  void shouldCorrectlyCheckIfUserMadeReviewForApp() {
+    assertTrue(applicationRepository.alreadyMadeReview(2, 1));
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, '/path/test', 1, 20, default)",
+      "insert into review values (1, 3, 'msg', 5, 1)"
+  })
+  void shouldReturnFalseIfUserDidntMakeReviewForApp() {
+    assertFalse(applicationRepository.alreadyMadeReview(2, 1));
   }
 }
