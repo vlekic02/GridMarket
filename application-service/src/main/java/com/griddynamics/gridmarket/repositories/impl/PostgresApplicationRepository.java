@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.repositories.impl;
 
+import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.mappers.ApplicationRowMapper;
 import com.griddynamics.gridmarket.mappers.ReviewRowMapper;
 import com.griddynamics.gridmarket.models.Application;
@@ -85,6 +86,20 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             """,
         new ReviewRowMapper(),
         application.getId()
+    );
+  }
+
+  @Override
+  public void createReview(long applicationId, long userId, ReviewCreateRequest request) {
+    template.update(
+        """
+            INSERT INTO review
+            VALUES (DEFAULT, ?, ?, ?, ?)
+            """,
+        userId,
+        request.message(),
+        request.stars(),
+        applicationId
     );
   }
 
