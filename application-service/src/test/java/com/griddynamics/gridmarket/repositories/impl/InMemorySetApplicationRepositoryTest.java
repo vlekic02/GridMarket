@@ -112,4 +112,12 @@ class InMemorySetApplicationRepositoryTest {
   void shouldReturnFalseIfUserDidntMakeReviewForApp() {
     assertFalse(applicationRepository.alreadyMadeReview(5, 1));
   }
+
+  @Test
+  void shouldCorrectlyDeleteReview() {
+    applicationRepository.deleteReviewById(3);
+    Application application = applicationRepository.findById(3).get();
+    List<Review> applicationReview = applicationRepository.findReviewsByApplication(application);
+    assertThat(applicationReview).isEmpty();
+  }
 }
