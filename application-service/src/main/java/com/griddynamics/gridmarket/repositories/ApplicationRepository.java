@@ -22,6 +22,8 @@ public interface ApplicationRepository {
 
   boolean alreadyMadeReview(long userId, long applicationId);
 
+  void deleteReviewById(long id);
+
   Path deleteApplicationById(long id);
 
   void deleteApplicationsByUser(long userId);

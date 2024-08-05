@@ -119,6 +119,17 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public void deleteReviewById(long id) {
+    template.update(
+        """
+            DELETE FROM review
+            WHERE review_id = ?
+            """,
+        id
+    );
+  }
+
+  @Override
   public Path deleteApplicationById(long id) {
     return template.query(
         """

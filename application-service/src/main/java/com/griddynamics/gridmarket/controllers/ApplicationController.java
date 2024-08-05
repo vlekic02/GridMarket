@@ -99,6 +99,6 @@ public class ApplicationController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   @AdminAccess
   public void deleteReview(@PathVariable long id) {
-
+    applicationService.deleteReview(id);
   }
 }
