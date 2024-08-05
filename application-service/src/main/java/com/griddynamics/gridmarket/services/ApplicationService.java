@@ -6,6 +6,7 @@ import com.griddynamics.gridmarket.exceptions.InvalidUploadTokenException;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
+import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.GridUserInfo;
@@ -114,5 +115,21 @@ public class ApplicationService {
   public void deleteApplicationByUser(long userId) {
     applicationRepository.deleteApplicationsByUser(userId);
     storageService.deleteByUser(userId);
+  }
+
+  public void createReview(long applicationId, ReviewCreateRequest request, GridUserInfo userInfo) {
+    Application application = applicationRepository.findById(applicationId)
+        .orElseThrow(() -> new NotFoundException("Application not found"));
+    if (application.getPublisher().getId() == userInfo.id()) {
+      throw new BadRequestException("You can't review your own application");
+    }
+    if (applicationRepository.alreadyMadeReview(userInfo.id(), applicationId)) {
+      throw new BadRequestException("You already reviewed this application");
+    }
+    applicationRepository.createReview(applicationId, userInfo.id(), request);
+  }
+
+  public void deleteReview(long id) {
+    applicationRepository.deleteReviewById(id);
   }
 }

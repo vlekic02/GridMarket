@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.repositories.impl;
 
+import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Discount;
@@ -20,7 +21,8 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
 
   private final List<Application> applications;
   private final List<Review> reviews;
-  private long lastId;
+  private long lastApplicationId;
+  private long lastReviewId;
 
   public InMemorySetApplicationRepository() {
     this.applications = new ArrayList<>(Arrays.asList(
@@ -34,13 +36,14 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
         new Application(4, "Application 4", "Some description",
             "/system/path2", null, 5, 1)
     ));
-    lastId = 4;
+    lastApplicationId = 4;
     this.reviews = new ArrayList<>(Arrays.asList(
         new Review(1, 1, 2, "Nice application", 5),
         new Review(2, 1, 4, "Meh... don't like it", 2),
         new Review(3, 3, 5, "OK", 4),
         new Review(4, 4, 8, null, 4)
     ));
+    lastApplicationId = 4;
   }
 
   @Override
@@ -65,6 +68,29 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public void createReview(long applicationId, long userId, ReviewCreateRequest request) {
+    this.reviews.add(new Review(
+        ++lastReviewId,
+        applicationId,
+        userId,
+        request.message(),
+        request.stars()
+    ));
+  }
+
+  @Override
+  public boolean alreadyMadeReview(long userId, long applicationId) {
+    return reviews.stream()
+        .anyMatch(review -> review.getApplication().getId() == applicationId
+            && review.getAuthor().getId() == userId);
+  }
+
+  @Override
+  public void deleteReviewById(long id) {
+    this.reviews.removeIf(review -> review.getId() == id);
+  }
+
+  @Override
   public Path deleteApplicationById(long id) {
     Optional<Application> applicationOptional = findById(id);
     if (applicationOptional.isPresent()) {
@@ -83,7 +109,7 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   @Override
   public void saveApplication(ApplicationMetadata metadata, String path) {
     applications.add(new Application(
-        ++lastId,
+        ++lastApplicationId,
         metadata.request().name(),
         metadata.request().description(),
         path,
