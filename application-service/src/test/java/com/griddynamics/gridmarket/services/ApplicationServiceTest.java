@@ -190,4 +190,11 @@ class ApplicationServiceTest {
     Review review = reviews.get(0);
     assertTrue("Test".equals(review.getMessage()) && review.getStars() == 5);
   }
+
+  @Test
+  void shouldCorrectlyDeleteReview() {
+    applicationService.deleteReview(3);
+    Collection<Review> reviewList = applicationService.getAllReviewForApplication(3);
+    assertThat(reviewList).isEmpty();
+  }
 }

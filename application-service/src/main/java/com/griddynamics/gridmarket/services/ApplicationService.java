@@ -128,4 +128,8 @@ public class ApplicationService {
     }
     applicationRepository.createReview(applicationId, userInfo.id(), request);
   }
+
+  public void deleteReview(long id) {
+    applicationRepository.deleteReviewById(id);
+  }
 }

@@ -195,4 +195,16 @@ class PostgresApplicationRepositoryTest {
   void shouldReturnFalseIfUserDidntMakeReviewForApp() {
     assertFalse(applicationRepository.alreadyMadeReview(2, 1));
   }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, '/path/test', 1, 20, default)",
+      "insert into review values (1, 3, 'msg', 5, 1)"
+  })
+  void shouldCorrectlyDeleteReview() {
+    applicationRepository.deleteReviewById(1);
+    Application application = applicationRepository.findById(1).get();
+    List<Review> applicationReview = applicationRepository.findReviewsByApplication(application);
+    assertThat(applicationReview).isEmpty();
+  }
 }
