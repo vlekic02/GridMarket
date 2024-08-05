@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.controllers;
 
+import com.griddynamics.gridmarket.annotations.AdminAccess;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
@@ -91,5 +92,13 @@ public class ApplicationController {
       GridUserInfo userInfo
   ) {
     applicationService.createReview(id, request, userInfo);
+  }
+
+  @Operation(summary = "Deletes a specific review")
+  @DeleteMapping("/reviews/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  @AdminAccess
+  public void deleteReview(@PathVariable long id) {
+
   }
 }
