@@ -19,6 +19,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class InMemorySetApplicationRepository implements ApplicationRepository {
 
+  private final List<Long> sellableApplication;
   private final List<Application> applications;
   private final List<Review> reviews;
   private long lastApplicationId;
@@ -44,11 +45,25 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
         new Review(4, 4, 8, null, 4)
     ));
     lastApplicationId = 4;
+
+    this.sellableApplication = new ArrayList<>(Arrays.asList(2L, 3L));
   }
 
   @Override
   public List<Application> findAll() {
     return applications;
+  }
+
+  @Override
+  public List<Application> findAllSellable() {
+    List<Application> result = new ArrayList<>();
+    for (Long id : sellableApplication) {
+      if (id == null) {
+        continue;
+      }
+      findById(id).ifPresent(result::add);
+    }
+    return result;
   }
 
   @Override

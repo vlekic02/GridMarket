@@ -12,6 +12,8 @@ public interface ApplicationRepository {
 
   List<Application> findAll();
 
+  List<Application> findAllSellable();
+
   Optional<Application> findById(long id);
 
   Optional<Application> findByName(String name);

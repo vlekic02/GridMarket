@@ -59,6 +59,10 @@ public class ApplicationService {
     return applicationRepository.findAll();
   }
 
+  public Collection<Application> getAllSellableApplications() {
+    return applicationRepository.findAllSellable();
+  }
+
   public Application getApplicationById(long id) {
     return applicationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Specified application not found !"));

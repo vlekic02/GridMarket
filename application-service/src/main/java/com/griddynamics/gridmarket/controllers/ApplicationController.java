@@ -40,7 +40,7 @@ public class ApplicationController {
   @Operation(summary = "Get all available applications")
   @GetMapping(produces = "application/vnd.api+json")
   public DataResponse<Collection<Application>> getAllApplications() {
-    return DataResponse.of(applicationService.getAllApplications());
+    return DataResponse.of(applicationService.getAllSellableApplications());
   }
 
   @Operation(summary = "Prepare application metadata for upload")

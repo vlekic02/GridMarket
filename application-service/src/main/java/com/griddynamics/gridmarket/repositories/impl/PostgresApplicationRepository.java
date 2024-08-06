@@ -40,6 +40,19 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public List<Application> findAllSellable() {
+    return template.query(
+        """
+            SELECT *
+            FROM sellable_application AS sa
+            INNER JOIN application ON sa.application = application.application_id
+            LEFT JOIN discount on discount.discount_id = application.discount
+            """,
+        new ApplicationRowMapper()
+    );
+  }
+
+  @Override
   public Optional<Application> findById(long id) {
     Stream<Application> applicationStream = template.queryForStream(
         """
