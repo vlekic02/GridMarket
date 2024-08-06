@@ -37,10 +37,17 @@ public class ApplicationController {
     this.applicationService = applicationService;
   }
 
-  @Operation(summary = "Get all available applications")
+  @Operation(summary = "Get all sellable applications")
   @GetMapping(produces = "application/vnd.api+json")
   public DataResponse<Collection<Application>> getAllApplications() {
     return DataResponse.of(applicationService.getAllSellableApplications());
+  }
+
+  @Operation(summary = "Get all unverified applications")
+  @GetMapping(value = "/unverified", produces = "application/vnd.api+json")
+  @AdminAccess
+  public DataResponse<Collection<Application>> getAllUnverifiedApplications() {
+    return DataResponse.of(applicationService.getAllUnverifiedApplications());
   }
 
   @Operation(summary = "Prepare application metadata for upload")

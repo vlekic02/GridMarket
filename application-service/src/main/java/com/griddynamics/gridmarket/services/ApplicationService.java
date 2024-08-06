@@ -63,6 +63,10 @@ public class ApplicationService {
     return applicationRepository.findAllSellable();
   }
 
+  public Collection<Application> getAllUnverifiedApplications() {
+    return applicationRepository.findAllUnverified();
+  }
+
   public Application getApplicationById(long id) {
     return applicationRepository.findById(id)
         .orElseThrow(() -> new NotFoundException("Specified application not found !"));

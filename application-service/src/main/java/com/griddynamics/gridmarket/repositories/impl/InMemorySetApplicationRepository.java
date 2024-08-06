@@ -67,6 +67,13 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public List<Application> findAllUnverified() {
+    return applications.stream()
+        .filter(app -> !sellableApplication.contains(app.getId()))
+        .toList();
+  }
+
+  @Override
   public Optional<Application> findById(long id) {
     return applications.stream().filter(app -> app.getId() == id).findFirst();
   }

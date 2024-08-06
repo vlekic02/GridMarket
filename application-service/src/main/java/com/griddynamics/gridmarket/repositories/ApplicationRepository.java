@@ -14,6 +14,8 @@ public interface ApplicationRepository {
 
   List<Application> findAllSellable();
 
+  List<Application> findAllUnverified();
+
   Optional<Application> findById(long id);
 
   Optional<Application> findByName(String name);

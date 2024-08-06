@@ -44,9 +44,23 @@ public class PostgresApplicationRepository implements ApplicationRepository {
     return template.query(
         """
             SELECT *
-            FROM sellable_application AS sa
+            FROM sellable_application sa
             INNER JOIN application ON sa.application = application.application_id
             LEFT JOIN discount on discount.discount_id = application.discount
+            """,
+        new ApplicationRowMapper()
+    );
+  }
+
+  @Override
+  public List<Application> findAllUnverified() {
+    return template.query(
+        """
+            SELECT *
+            FROM application
+            LEFT JOIN sellable_application sa ON application.application_id = sa.application
+            LEFT JOIN discount on discount.discount_id = application.discount
+            WHERE sa.application IS NUll
             """,
         new ApplicationRowMapper()
     );
