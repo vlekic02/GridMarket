@@ -67,12 +67,15 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   public Optional<Application> findById(long id) {
     Stream<Application> applicationStream = template.queryForStream(
         """
-             SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
-             end_date, \
-             application.*
-             FROM application
-             LEFT JOIN discount on discount.discount_id = application.discount
-             WHERE application_id = ?
+            SELECT discount_id, discount.name AS discount_name,
+             type, "value", start_date, end_date, application.*,
+             EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+             ) AS verified
+            FROM application
+            LEFT JOIN discount on discount.discount_id = application.discount
+            WHERE application_id = ?
             """,
         new ApplicationRowMapper(),
         id
@@ -86,12 +89,15 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   public Optional<Application> findByName(String name) {
     Stream<Application> applicationStream = template.queryForStream(
         """
-             SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
-             end_date, \
-             application.*
-             FROM application
-             LEFT JOIN discount on discount.discount_id = application.discount
-             WHERE application.name = ?
+            SELECT discount_id, discount.name AS discount_name,
+             type, "value", start_date, end_date, application.*,
+             EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+             ) AS verified
+            FROM application
+            LEFT JOIN discount on discount.discount_id = application.discount
+            WHERE application.name = ?
             """,
         new ApplicationRowMapper(),
         name
