@@ -22,6 +22,7 @@ import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
 import com.griddynamics.gridmarket.repositories.impl.InMemorySetApplicationRepository;
+import com.griddynamics.gridmarket.utils.GridUserBuilder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -55,8 +56,8 @@ class ApplicationServiceTest {
 
   private static Stream<GridUserInfo> getUserInfo() {
     return Stream.of(
-        new GridUserInfo(2, "", "", "", "ADMIN", 10), //ADMIN
-        new GridUserInfo(1, "", "", "", "MEMBER", 10) // Resource owner
+        GridUserBuilder.adminUser().setId(2).build(), //ADMIN
+        GridUserBuilder.memberUser().setId(1).build() // Resource owner
     );
   }
 
@@ -77,12 +78,15 @@ class ApplicationServiceTest {
 
   @Test
   void shouldThrowIfNoApplicationPresentWhenRequestingReview() {
-    assertThrows(NotFoundException.class, () -> applicationService.getAllReviewForApplication(10));
+    GridUserInfo gridUserInfo = GridUserBuilder.memberUser().build();
+    assertThrows(NotFoundException.class,
+        () -> applicationService.getAllReviewForApplication(10, gridUserInfo));
   }
 
   @Test
   void shouldReturnReviewForApplication() {
-    Collection<Review> reviews = applicationService.getAllReviewForApplication(1);
+    GridUserInfo gridUserInfo = GridUserBuilder.memberUser().build();
+    Collection<Review> reviews = applicationService.getAllReviewForApplication(3, gridUserInfo);
     assertFalse(reviews.isEmpty());
   }
 
@@ -96,6 +100,31 @@ class ApplicationServiceTest {
   void shouldReturnAllApplications() {
     Collection<Application> applications = applicationService.getAllApplications();
     assertFalse(applications.isEmpty());
+  }
+
+  @Test
+  void shouldReturnAllVerifiedApplications() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
+    Collection<Application> applications = applicationService.getAllApplications(true, userInfo);
+    assertThat(applications).hasSize(2);
+  }
+
+  @Test
+  void shouldReturnVerifiedAppsIfUserIsNotAdmin() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
+    Collection<Application> applications = applicationService.getAllApplications(false, userInfo);
+    assertThat(applications)
+        .hasSize(2)
+        .allMatch(Application::isVerified);
+  }
+
+  @Test
+  void shouldReturnAllUnverifiedApps() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().build();
+    Collection<Application> applications = applicationService.getAllApplications(false, userInfo);
+    assertThat(applications)
+        .hasSize(2)
+        .allMatch(app -> !app.isVerified());
   }
 
   @Test
@@ -156,7 +185,7 @@ class ApplicationServiceTest {
 
   @Test
   void shouldThrowIfUnauthorizedUserTryToDeleteApplication() {
-    GridUserInfo userInfo = new GridUserInfo(2, "", "", "", "MEMBER", 10);
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
     assertThrows(UnauthorizedException.class,
         () -> applicationService.deleteApplication(1, userInfo));
   }
@@ -168,25 +197,34 @@ class ApplicationServiceTest {
   }
 
   @Test
+  void shouldThrowIfApplicationIsNotVerified() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
+    assertThrows(NotFoundException.class,
+        () -> applicationService.createReview(4, new ReviewCreateRequest("", 5), userInfo));
+  }
+
+  @Test
   void shouldThrowIfAppPublisherAndReviewAuthorAreSame() {
     assertThrows(BadRequestException.class,
-        () -> applicationService.createReview(1, new ReviewCreateRequest("", 5),
-            new GridUserInfo(1, "", "", "", "", 10)));
+        () -> applicationService.createReview(2, new ReviewCreateRequest("", 5),
+            GridUserBuilder.memberUser().setId(3).build()));
   }
 
   @Test
   void shouldThrowIfUserAlreadyMadeRequest() {
     assertThrows(BadRequestException.class,
-        () -> applicationService.createReview(1, new ReviewCreateRequest("", 5),
-            new GridUserInfo(2, "", "", "", "", 10)));
+        () -> applicationService.createReview(3, new ReviewCreateRequest("", 5),
+            GridUserBuilder.memberUser().setId(5).build()));
   }
 
   @Test
   void shouldCorrectlyCreateReview() {
+    GridUserInfo gridUserInfo = GridUserBuilder.memberUser().setId(10).build();
     applicationService.createReview(2, new ReviewCreateRequest("Test", 5),
-        new GridUserInfo(10, "", "", "", "", 10));
+        gridUserInfo);
 
-    List<Review> reviews = (List<Review>) applicationService.getAllReviewForApplication(2);
+    List<Review> reviews = (List<Review>) applicationService.getAllReviewForApplication(2,
+        gridUserInfo);
     Review review = reviews.get(0);
     assertTrue("Test".equals(review.getMessage()) && review.getStars() == 5);
   }
@@ -194,7 +232,8 @@ class ApplicationServiceTest {
   @Test
   void shouldCorrectlyDeleteReview() {
     applicationService.deleteReview(3);
-    Collection<Review> reviewList = applicationService.getAllReviewForApplication(3);
+    GridUserInfo gridUserInfo = GridUserBuilder.memberUser().build();
+    Collection<Review> reviewList = applicationService.getAllReviewForApplication(3, gridUserInfo);
     assertThat(reviewList).isEmpty();
   }
 }

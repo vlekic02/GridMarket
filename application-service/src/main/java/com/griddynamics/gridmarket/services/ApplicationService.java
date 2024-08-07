@@ -81,7 +81,7 @@ public class ApplicationService {
 
   public Application getApplicationById(long id, GridUserInfo userInfo) {
     return applicationRepository.findById(id)
-        .filter(app -> !app.isVerified() && ADMIN_ROLE.equals(userInfo.role()))
+        .filter(app -> app.isVerified() || ADMIN_ROLE.equals(userInfo.role()))
         .orElseThrow(() -> new NotFoundException("Specified application not found !"));
   }
 

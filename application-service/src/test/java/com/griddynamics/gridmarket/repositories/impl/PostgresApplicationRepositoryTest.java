@@ -70,6 +70,30 @@ class PostgresApplicationRepositoryTest {
   }
 
   @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, 'path', 1, 20, null)",
+      "insert into application values (2, 'Test2', null, 'path', 3, 25, null)",
+      "insert into application values (3, 'Test3', null, 'path', 3, 25, null)",
+      "insert into sellable_application values (3, default, default)"
+  })
+  void shouldFindAllVerifiedApplications() {
+    List<Application> applications = applicationRepository.findAll(true);
+    assertThat(applications).hasSize(1);
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, 'path', 1, 20, null)",
+      "insert into application values (2, 'Test2', null, 'path', 3, 25, null)",
+      "insert into application values (3, 'Test3', null, 'path', 3, 25, null)",
+      "insert into sellable_application values (3, default, default)"
+  })
+  void shouldFindAllUnverifiedApplications() {
+    List<Application> applications = applicationRepository.findAll(false);
+    assertThat(applications).hasSize(2);
+  }
+
+  @Test
   @Sql(statements = "insert into application values (1, 'Test', null, 'path', 1, 20, null)")
   void shouldReturnApplicationIfIdPresent() {
     Optional<Application> applicationOptional = applicationRepository.findById(1);
