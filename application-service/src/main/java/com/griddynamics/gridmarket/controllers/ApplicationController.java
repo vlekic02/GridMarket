@@ -78,8 +78,9 @@ public class ApplicationController {
 
   @Operation(summary = "Get specific application by id")
   @GetMapping(value = "/{id}", produces = "application/vnd.api+json")
-  public DataResponse<Application> getApplicationById(@PathVariable long id) {
-    return DataResponse.of(applicationService.getApplicationById(id));
+  public DataResponse<Application> getApplicationById(@PathVariable long id,
+      GridUserInfo userInfo) {
+    return DataResponse.of(applicationService.getApplicationById(id, userInfo));
   }
 
   @Operation(summary = "Deletes specific application")
@@ -107,8 +108,9 @@ public class ApplicationController {
 
   @Operation(summary = "Get all reviews for specific application")
   @GetMapping(value = "/{id}/reviews", produces = "application/vnd.api+json")
-  public DataResponse<Collection<Review>> getReviewByApplication(@PathVariable long id) {
-    return DataResponse.of(applicationService.getAllReviewForApplication(id));
+  public DataResponse<Collection<Review>> getReviewByApplication(@PathVariable long id,
+      GridUserInfo userInfo) {
+    return DataResponse.of(applicationService.getAllReviewForApplication(id, userInfo));
   }
 
   @Operation(summary = "Create new review for specific application")
