@@ -63,17 +63,14 @@ public class ApplicationService {
   }
 
   public Collection<Application> getAllApplications(boolean verified, GridUserInfo userInfo) {
-    if (!verified && !isAdmin(userInfo)) {
+    if (!verified && isNotAdmin(userInfo)) {
       verified = true;
     }
     return applicationRepository.findAll(verified);
   }
 
   public FileSystemResource pullApplication(long id, GridUserInfo userInfo) {
-    Application application = getApplicationById(id);
-    if (!application.isVerified() && !isAdmin(userInfo)) {
-      throw new NotFoundException("Specified application not found !");
-    }
+    Application application = getApplicationById(id, userInfo);
     return storageService.getFileByPath(application.getPath());
   }
 
@@ -82,8 +79,14 @@ public class ApplicationService {
         .orElseThrow(() -> new NotFoundException("Specified application not found !"));
   }
 
-  public Collection<Review> getAllReviewForApplication(long applicationId) {
-    Application application = getApplicationById(applicationId);
+  public Application getApplicationById(long id, GridUserInfo userInfo) {
+    return applicationRepository.findById(id)
+        .filter(app -> !app.isVerified() && ADMIN_ROLE.equals(userInfo.role()))
+        .orElseThrow(() -> new NotFoundException("Specified application not found !"));
+  }
+
+  public Collection<Review> getAllReviewForApplication(long applicationId, GridUserInfo userInfo) {
+    Application application = getApplicationById(applicationId, userInfo);
     return applicationRepository.findReviewsByApplication(application);
   }
 
@@ -125,7 +128,7 @@ public class ApplicationService {
 
   public void deleteApplication(long id, GridUserInfo userInfo) {
     applicationRepository.findById(id).ifPresent(app -> {
-      if (!isAdmin(userInfo) && userInfo.id() != app.getPublisher().getId()) {
+      if (isNotAdmin(userInfo) && userInfo.id() != app.getPublisher().getId()) {
         throw new UnauthorizedException("You don't have permission to delete this application");
       }
       Path applicationPath = applicationRepository.deleteApplicationById(id);
@@ -139,8 +142,7 @@ public class ApplicationService {
   }
 
   public void createReview(long applicationId, ReviewCreateRequest request, GridUserInfo userInfo) {
-    Application application = applicationRepository.findById(applicationId)
-        .orElseThrow(() -> new NotFoundException("Application not found"));
+    Application application = getApplicationById(applicationId, userInfo);
     if (application.getPublisher().getId() == userInfo.id()) {
       throw new BadRequestException("You can't review your own application");
     }
@@ -154,7 +156,7 @@ public class ApplicationService {
     applicationRepository.deleteReviewById(id);
   }
 
-  private boolean isAdmin(GridUserInfo userInfo) {
-    return ADMIN_ROLE.equals(userInfo.role());
+  private boolean isNotAdmin(GridUserInfo userInfo) {
+    return !ADMIN_ROLE.equals(userInfo.role());
   }
 }
