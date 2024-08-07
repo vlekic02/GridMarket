@@ -29,13 +29,13 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
     this.applications = new ArrayList<>(Arrays.asList(
         new Application(1, "Test", null, "/system/path",
             Discount.unlimited(1, "Black friday", Type.PERCENTAGE, 20),
-            25, 1),
+            25, 1, false),
         new Application(2, "Application 2", "Some description",
-            "/system/path2", null, 15, 3),
+            "/system/path2", null, 15, 3, true),
         new Application(3, "Application 3", "Some description",
-            "/system/path2", null, 50, 2),
+            "/system/path2", null, 50, 2, true),
         new Application(4, "Application 4", "Some description",
-            "/system/path2", null, 5, 1)
+            "/system/path2", null, 5, 1, false)
     ));
     lastApplicationId = 4;
     this.reviews = new ArrayList<>(Arrays.asList(
@@ -55,21 +55,9 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   }
 
   @Override
-  public List<Application> findAllSellable() {
-    List<Application> result = new ArrayList<>();
-    for (Long id : sellableApplication) {
-      if (id == null) {
-        continue;
-      }
-      findById(id).ifPresent(result::add);
-    }
-    return result;
-  }
-
-  @Override
-  public List<Application> findAllUnverified() {
+  public List<Application> findAll(boolean verified) {
     return applications.stream()
-        .filter(app -> !sellableApplication.contains(app.getId()))
+        .filter(app -> app.isVerified() == verified)
         .toList();
   }
 
@@ -137,7 +125,8 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
         path,
         null,
         metadata.request().price(),
-        metadata.publisherId()
+        metadata.publisherId(),
+        false
     ));
   }
 }

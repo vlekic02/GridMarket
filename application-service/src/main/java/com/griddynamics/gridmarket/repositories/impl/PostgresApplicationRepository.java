@@ -29,40 +29,33 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   public List<Application> findAll() {
     return template.query(
         """
-            SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
-            end_date, \
-            application.*
-            FROM application
-            LEFT JOIN discount on discount.discount_id = application.discount
+            SELECT discount_id, discount.name AS discount_name,
+             type, "value", start_date, end_date, application.*,
+             EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+             ) AS verified
             """,
         new ApplicationRowMapper()
     );
   }
 
   @Override
-  public List<Application> findAllSellable() {
+  public List<Application> findAll(boolean verified) {
     return template.query(
         """
-            SELECT *
-            FROM sellable_application sa
-            INNER JOIN application ON sa.application = application.application_id
-            LEFT JOIN discount on discount.discount_id = application.discount
+            SELECT * FROM (
+              SELECT discount_id, discount.name AS discount_name,
+              type, "value", start_date, end_date, application.*,
+              EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+              ) AS verified
+            ) AS tb
+            WHERE tb.verified = ?
             """,
-        new ApplicationRowMapper()
-    );
-  }
-
-  @Override
-  public List<Application> findAllUnverified() {
-    return template.query(
-        """
-            SELECT *
-            FROM application
-            LEFT JOIN sellable_application sa ON application.application_id = sa.application
-            LEFT JOIN discount on discount.discount_id = application.discount
-            WHERE sa.application IS NUll
-            """,
-        new ApplicationRowMapper()
+        new ApplicationRowMapper(),
+        verified
     );
   }
 

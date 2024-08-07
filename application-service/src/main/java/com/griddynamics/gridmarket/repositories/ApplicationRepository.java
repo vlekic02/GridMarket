@@ -12,9 +12,7 @@ public interface ApplicationRepository {
 
   List<Application> findAll();
 
-  List<Application> findAllSellable();
-
-  List<Application> findAllUnverified();
+  List<Application> findAll(boolean verified);
 
   Optional<Application> findById(long id);
 

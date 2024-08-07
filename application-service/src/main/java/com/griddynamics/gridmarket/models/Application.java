@@ -12,9 +12,10 @@ public class Application extends Resource {
   private final Discount discount;
   private final double originalPrice;
   private final Resource publisher;
+  private final boolean verified;
 
   public Application(long id, String name, String description, String path, Discount discount,
-      double originalPrice, long publisherId) {
+      double originalPrice, long publisherId, boolean verified) {
     super(id, "application");
     this.name = name;
     this.description = description;
@@ -22,6 +23,7 @@ public class Application extends Resource {
     this.discount = discount;
     this.originalPrice = originalPrice;
     this.publisher = new Resource(publisherId, "user");
+    this.verified = verified;
   }
 
   public String getName() {
@@ -51,6 +53,11 @@ public class Application extends Resource {
     return publisher;
   }
 
+  @JsonIgnore
+  public boolean isVerified() {
+    return verified;
+  }
+
   public double getRealPrice() {
     if (discount != null && discount.isValid()) {
       return discount.getRealPrice(originalPrice);
@@ -67,6 +74,7 @@ public class Application extends Resource {
     private Discount discount;
     private double originalPrice;
     private long publisherId;
+    private boolean verified;
 
     public Builder setId(long id) {
       this.id = id;
@@ -103,8 +111,14 @@ public class Application extends Resource {
       return this;
     }
 
+    public Builder setVerified(boolean verified) {
+      this.verified = verified;
+      return this;
+    }
+
     public Application build() {
-      return new Application(id, name, description, path, discount, originalPrice, publisherId);
+      return new Application(id, name, description, path, discount, originalPrice, publisherId,
+          verified);
     }
   }
 }
