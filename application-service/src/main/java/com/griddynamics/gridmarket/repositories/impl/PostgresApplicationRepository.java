@@ -35,6 +35,8 @@ public class PostgresApplicationRepository implements ApplicationRepository {
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
              ) AS verified
+            FROM application
+            LEFT JOIN discount on discount.discount_id = application.discount
             """,
         new ApplicationRowMapper()
     );
@@ -51,6 +53,8 @@ public class PostgresApplicationRepository implements ApplicationRepository {
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
               ) AS verified
+              FROM application
+              LEFT JOIN discount on discount.discount_id = application.discount
             ) AS tb
             WHERE tb.verified = ?
             """,
