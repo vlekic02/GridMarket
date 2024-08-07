@@ -97,12 +97,6 @@ class ApplicationServiceTest {
   }
 
   @Test
-  void shouldReturnAllApplications() {
-    Collection<Application> applications = applicationService.getAllApplications();
-    assertFalse(applications.isEmpty());
-  }
-
-  @Test
   void shouldReturnAllVerifiedApplications() {
     GridUserInfo userInfo = GridUserBuilder.memberUser().build();
     Collection<Application> applications = applicationService.getAllApplications(true, userInfo);

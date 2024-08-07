@@ -57,11 +57,6 @@ public class ApplicationService {
         .orElseThrow(() -> new NotFoundException("Specified application not found"));
   }
 
-  //TODO REMOVE
-  public Collection<Application> getAllApplications() {
-    return applicationRepository.findAll();
-  }
-
   public Collection<Application> getAllApplications(boolean verified, GridUserInfo userInfo) {
     if (!verified && isNotAdmin(userInfo)) {
       verified = true;
