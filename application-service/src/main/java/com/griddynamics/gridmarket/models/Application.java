@@ -52,8 +52,7 @@ public class Application extends Resource {
   public Resource getPublisher() {
     return publisher;
   }
-
-  @JsonIgnore
+  
   public boolean isVerified() {
     return verified;
   }
