@@ -12,8 +12,12 @@ import com.griddynamics.gridmarket.services.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.Collection;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,17 +41,18 @@ public class ApplicationController {
     this.applicationService = applicationService;
   }
 
-  @Operation(summary = "Get all sellable applications")
+  @Operation(summary = "Get all applications")
   @GetMapping(produces = "application/vnd.api+json")
-  public DataResponse<Collection<Application>> getAllApplications() {
-    return DataResponse.of(applicationService.getAllSellableApplications());
-  }
-
-  @Operation(summary = "Get all unverified applications")
-  @GetMapping(value = "/unverified", produces = "application/vnd.api+json")
-  @AdminAccess
-  public DataResponse<Collection<Application>> getAllUnverifiedApplications() {
-    return DataResponse.of(applicationService.getAllUnverifiedApplications());
+  public DataResponse<Collection<Application>> getAllApplications(
+      @RequestParam(name = "verified", defaultValue = "true")
+      @Parameter(in = ParameterIn.QUERY,
+          description = "Specifies which type of apps it should return, "
+              + "only admin can see unverified ones"
+      )
+      boolean verified,
+      GridUserInfo userInfo
+  ) {
+    return DataResponse.of(applicationService.getAllApplications(verified, userInfo));
   }
 
   @Operation(summary = "Prepare application metadata for upload")
@@ -82,6 +87,22 @@ public class ApplicationController {
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void deleteApplication(@PathVariable long id, GridUserInfo userInfo) {
     applicationService.deleteApplication(id, userInfo);
+  }
+
+  @Operation(summary = "Downloads file by id")
+  @GetMapping(value = "/{id}/pull", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public FileSystemResource pullApplication(
+      @PathVariable long id,
+      GridUserInfo userInfo,
+      HttpServletResponse response
+  ) {
+    FileSystemResource fileSystemResource = applicationService.pullApplication(id, userInfo);
+    ContentDisposition contentDisposition = ContentDisposition
+        .attachment()
+        .filename(fileSystemResource.getFilename())
+        .build();
+    response.addHeader(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString());
+    return fileSystemResource;
   }
 
   @Operation(summary = "Get all reviews for specific application")

@@ -23,6 +23,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ApplicationService {
 
   private static final int TOKEN_LIFETIME = 5;
+  private static final String ADMIN_ROLE = "ADMIN";
   private static final String UPLOAD_URI = "/v1/applications/upload?token=";
 
   private final ApplicationRepository applicationRepository;
@@ -55,16 +57,24 @@ public class ApplicationService {
         .orElseThrow(() -> new NotFoundException("Specified application not found"));
   }
 
+  //TODO REMOVE
   public Collection<Application> getAllApplications() {
     return applicationRepository.findAll();
   }
 
-  public Collection<Application> getAllSellableApplications() {
-    return applicationRepository.findAllSellable();
+  public Collection<Application> getAllApplications(boolean verified, GridUserInfo userInfo) {
+    if (!verified && !isAdmin(userInfo)) {
+      verified = true;
+    }
+    return applicationRepository.findAll(verified);
   }
 
-  public Collection<Application> getAllUnverifiedApplications() {
-    return applicationRepository.findAllUnverified();
+  public FileSystemResource pullApplication(long id, GridUserInfo userInfo) {
+    Application application = getApplicationById(id);
+    if (!application.isVerified() && !isAdmin(userInfo)) {
+      throw new NotFoundException("Specified application not found !");
+    }
+    return storageService.getFileByPath(application.getPath());
   }
 
   public Application getApplicationById(long id) {
@@ -79,6 +89,9 @@ public class ApplicationService {
 
   public Price getApplicationPriceById(long id) {
     Application application = getApplicationById(id);
+    if (!application.isVerified()) {
+      throw new NotFoundException("Specified application not found !");
+    }
     double price = application.getRealPrice();
     return new Price(id, price);
   }
@@ -112,7 +125,7 @@ public class ApplicationService {
 
   public void deleteApplication(long id, GridUserInfo userInfo) {
     applicationRepository.findById(id).ifPresent(app -> {
-      if (!"ADMIN".equals(userInfo.role()) && userInfo.id() != app.getPublisher().getId()) {
+      if (!isAdmin(userInfo) && userInfo.id() != app.getPublisher().getId()) {
         throw new UnauthorizedException("You don't have permission to delete this application");
       }
       Path applicationPath = applicationRepository.deleteApplicationById(id);
@@ -139,5 +152,9 @@ public class ApplicationService {
 
   public void deleteReview(long id) {
     applicationRepository.deleteReviewById(id);
+  }
+
+  private boolean isAdmin(GridUserInfo userInfo) {
+    return ADMIN_ROLE.equals(userInfo.role());
   }
 }
