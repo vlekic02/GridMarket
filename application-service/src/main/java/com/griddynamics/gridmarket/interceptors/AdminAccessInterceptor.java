@@ -1,7 +1,8 @@
-package com.griddynamics.gridmarket.filters;
+package com.griddynamics.gridmarket.interceptors;
 
 import com.griddynamics.gridmarket.annotations.AdminAccess;
 import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
+import com.griddynamics.gridmarket.filters.UserInfoResolverFilter;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

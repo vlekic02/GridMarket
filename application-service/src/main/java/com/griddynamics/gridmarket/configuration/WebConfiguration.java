@@ -1,6 +1,6 @@
 package com.griddynamics.gridmarket.configuration;
 
-import com.griddynamics.gridmarket.filters.AdminAccessInterceptor;
+import com.griddynamics.gridmarket.interceptors.AdminAccessInterceptor;
 import com.griddynamics.gridmarket.interceptors.PrometheusCounterInterceptor;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
