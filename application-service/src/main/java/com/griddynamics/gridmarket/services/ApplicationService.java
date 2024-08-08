@@ -185,10 +185,12 @@ public class ApplicationService {
           .orElseThrow(() -> new UnprocessableEntityException("Provided discount doesn't exist"));
       applicatioBuilder.setDiscount(discount);
     }
+    if (applicatioBuilder.isChanged()) {
+      applicationRepository.save(applicatioBuilder.build());
+    }
     if (request.verify() != null) {
       handleVerification(application.getId(), request.verify());
     }
-    applicationRepository.save(applicatioBuilder.build());
   }
 
   private boolean isNotAdmin(GridUserInfo userInfo) {

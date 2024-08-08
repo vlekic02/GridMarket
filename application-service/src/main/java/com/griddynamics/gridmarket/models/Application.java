@@ -78,6 +78,7 @@ public class Application extends Resource {
     private double originalPrice;
     private long publisherId;
     private boolean verified;
+    private boolean changed;
 
     public Builder(Application application) {
       this.setId(application.getId())
@@ -88,50 +89,63 @@ public class Application extends Resource {
           .setOriginalPrice(application.getOriginalPrice())
           .setPublisher(application.getPublisher().getId())
           .setVerified(application.isVerified());
+      this.changed = false;
     }
 
     public Builder() {
-
+      this.changed = false;
     }
 
     public Builder setId(long id) {
       this.id = id;
+      this.changed = true;
       return this;
     }
 
     public Builder setName(String name) {
       this.name = name;
+      this.changed = true;
       return this;
     }
 
     public Builder setDescription(String description) {
       this.description = description;
+      this.changed = true;
       return this;
     }
 
     public Builder setPath(String path) {
       this.path = path;
+      this.changed = true;
       return this;
     }
 
     public Builder setDiscount(Discount discount) {
       this.discount = discount;
+      this.changed = true;
       return this;
     }
 
     public Builder setOriginalPrice(double originalPrice) {
       this.originalPrice = originalPrice;
+      this.changed = true;
       return this;
     }
 
     public Builder setPublisher(long publisherId) {
       this.publisherId = publisherId;
+      this.changed = true;
       return this;
     }
 
     public Builder setVerified(boolean verified) {
       this.verified = verified;
+      this.changed = true;
       return this;
+    }
+
+    public boolean isChanged() {
+      return changed;
     }
 
     public Application build() {
