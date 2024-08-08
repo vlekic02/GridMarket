@@ -52,7 +52,7 @@ public class Application extends Resource {
   public Resource getPublisher() {
     return publisher;
   }
-  
+
   public boolean isVerified() {
     return verified;
   }
@@ -62,6 +62,10 @@ public class Application extends Resource {
       return discount.getRealPrice(originalPrice);
     }
     return originalPrice;
+  }
+
+  public Builder builder() {
+    return new Builder(this);
   }
 
   public static class Builder {
@@ -74,6 +78,21 @@ public class Application extends Resource {
     private double originalPrice;
     private long publisherId;
     private boolean verified;
+
+    public Builder(Application application) {
+      this.setId(application.getId())
+          .setName(application.getName())
+          .setDescription(application.getDescription())
+          .setPath(application.getPath())
+          .setDiscount(application.getDiscount())
+          .setOriginalPrice(application.getOriginalPrice())
+          .setPublisher(application.getPublisher().getId())
+          .setVerified(application.isVerified());
+    }
+
+    public Builder() {
+
+    }
 
     public Builder setId(long id) {
       this.id = id;
