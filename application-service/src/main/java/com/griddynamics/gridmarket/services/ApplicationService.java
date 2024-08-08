@@ -5,10 +5,14 @@ import com.griddynamics.gridmarket.exceptions.BadRequestException;
 import com.griddynamics.gridmarket.exceptions.InvalidUploadTokenException;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
+import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
+import com.griddynamics.gridmarket.http.request.ApplicationUpdateRequest;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
+import com.griddynamics.gridmarket.http.request.VerifyRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
+import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Price;
 import com.griddynamics.gridmarket.models.Review;
@@ -17,6 +21,7 @@ import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
@@ -151,7 +156,50 @@ public class ApplicationService {
     applicationRepository.deleteReviewById(id);
   }
 
+  public void updateApplication(long id, ApplicationUpdateRequest request, GridUserInfo userInfo) {
+    if (request.verify() != null && isNotAdmin(userInfo)) {
+      throw new UnauthorizedException("You can't change verification status of the app");
+    }
+    Application application = getApplicationById(id, userInfo);
+    if (application.getPublisher().getId() != userInfo.id() && isNotAdmin(userInfo)) {
+      throw new UnauthorizedException("You don't have permission to update this app");
+    }
+    Application.Builder applicatioBuilder = application.builder();
+    if (request.name() != null && !request.name().isEmpty()) {
+      Optional<Application> applicationOptional = applicationRepository.findByName(request.name());
+      if (applicationOptional.isPresent()) {
+        throw new UnprocessableEntityException(
+            "Application with name " + request.name() + " already exist");
+      }
+      applicatioBuilder.setName(request.name());
+    }
+    String description = request.description();
+    if (description != null) {
+      applicatioBuilder.setDescription(description.isEmpty() ? null : description);
+    }
+    if (request.price() != null) {
+      applicatioBuilder.setOriginalPrice(request.price());
+    }
+    if (request.discountId() != null) {
+      Discount discount = applicationRepository.findDiscountById(request.discountId())
+          .orElseThrow(() -> new UnprocessableEntityException("Provided discount doesn't exist"));
+      applicatioBuilder.setDiscount(discount);
+    }
+    if (request.verify() != null) {
+      handleVerification(application.getId(), request.verify());
+    }
+    applicationRepository.save(applicatioBuilder.build());
+  }
+
   private boolean isNotAdmin(GridUserInfo userInfo) {
     return !ADMIN_ROLE.equals(userInfo.role());
+  }
+
+  private void handleVerification(long id, VerifyRequest request) {
+    if (request.verified()) {
+      applicationRepository.verifyApplication(id, request.startDate(), request.endDate());
+    } else {
+      applicationRepository.removeVerification(id);
+    }
   }
 }
