@@ -1,6 +1,7 @@
 package com.griddynamics.gridmarket.controllers;
 
 import com.griddynamics.gridmarket.annotations.AdminAccess;
+import com.griddynamics.gridmarket.http.request.ApplicationUpdateRequest;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
@@ -22,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -81,6 +83,16 @@ public class ApplicationController {
   public DataResponse<Application> getApplicationById(@PathVariable long id,
       GridUserInfo userInfo) {
     return DataResponse.of(applicationService.getApplicationById(id, userInfo));
+  }
+
+  @Operation(summary = "Updates specific application")
+  @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public void updateApplication(
+      @PathVariable long id,
+      @Valid @RequestBody ApplicationUpdateRequest request,
+      GridUserInfo userInfo
+  ) {
+    applicationService.updateApplication(id, request, userInfo);
   }
 
   @Operation(summary = "Deletes specific application")
