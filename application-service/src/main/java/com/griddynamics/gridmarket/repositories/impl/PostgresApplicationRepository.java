@@ -2,12 +2,15 @@ package com.griddynamics.gridmarket.repositories.impl;
 
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.mappers.ApplicationRowMapper;
+import com.griddynamics.gridmarket.mappers.DiscountRowMapper;
 import com.griddynamics.gridmarket.mappers.ReviewRowMapper;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
+import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -108,6 +111,22 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public Optional<Discount> findDiscountById(long id) {
+    Stream<Discount> discountStream = template.queryForStream(
+        """
+            SELECT discount_id, name AS discount_name, type, "value", start_date, end_date
+            FROM discount
+            WHERE discount_id = ?
+            """,
+        new DiscountRowMapper(),
+        id
+    );
+    Optional<Discount> discountOptional = discountStream.findFirst();
+    discountStream.close();
+    return discountOptional;
+  }
+
+  @Override
   public List<Review> findReviewsByApplication(Application application) {
     return template.query(
         """
@@ -130,6 +149,52 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         request.message(),
         request.stars(),
         applicationId
+    );
+  }
+
+  @Override
+  public void verifyApplication(long id, LocalDateTime startTime, LocalDateTime endTime) {
+    template.update(
+        """
+            INSERT INTO sellable_application VALUES (?, ?, ?)
+            ON CONFLICT (application) DO UPDATE
+            SET start_date = ?, end_date = ?
+            """,
+        id,
+        startTime,
+        endTime,
+        startTime,
+        endTime
+    );
+  }
+
+  @Override
+  public void removeVerification(long id) {
+    template.update(
+        """
+            DELETE FROM sellable_application
+            WHERE application = ?
+            """,
+        id
+    );
+  }
+
+  @Override
+  public void save(Application application) {
+    template.update(
+        """
+            UPDATE application
+            SET name = ?,
+            description = ?,
+            price = ?,
+            discount = ?
+            WHERE application_id = ?
+            """,
+        application.getName(),
+        application.getDescription(),
+        application.getOriginalPrice(),
+        application.getDiscount() == null ? null : application.getDiscount().getId(),
+        application.getId()
     );
   }
 
