@@ -11,9 +11,12 @@ import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
+import com.griddynamics.gridmarket.models.Discount;
+import com.griddynamics.gridmarket.models.Discount.Type;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
@@ -230,5 +233,61 @@ class PostgresApplicationRepositoryTest {
     Application application = applicationRepository.findById(1).get();
     List<Review> applicationReview = applicationRepository.findReviewsByApplication(application);
     assertThat(applicationReview).isEmpty();
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null)"
+  })
+  void shouldCorrectlyFindDiscountById() {
+    Discount discount = applicationRepository.findDiscountById(1).get();
+    assertTrue(
+        discount.getId() == 1
+            && discount.getDiscountType() == Type.PERCENTAGE
+            && discount.getName().equals("test discount")
+            && discount.getValue() == 20
+    );
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, '/path/test', 1, 20, default)"
+  })
+  void shouldCorrectlyVerifyApplication() {
+    applicationRepository.verifyApplication(1, LocalDateTime.now(),
+        LocalDateTime.now().plusDays(10));
+    Application application = applicationRepository.findById(1).get();
+    assertTrue(application.isVerified());
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, '/path/test', 1, 20, default)",
+      "insert into sellable_application values (1, default, default)"
+  })
+  void shouldCorrectlyRemoveAppVerification() {
+    applicationRepository.removeVerification(1);
+    Application application = applicationRepository.findById(1).get();
+    assertFalse(application.isVerified());
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, '/path/test', 1, 20, default)"
+  })
+  void shouldCorrectlyUpdateApplication() {
+    Application application = new Application.Builder()
+        .setId(1)
+        .setName("TestEdit")
+        .setDescription("DescEdit")
+        .setOriginalPrice(15)
+        .build();
+    applicationRepository.save(application);
+    Application updatedApp = applicationRepository.findById(1).get();
+    assertTrue(
+        "TestEdit".equals(updatedApp.getName())
+            && "DescEdit".equals(updatedApp.getDescription())
+            && updatedApp.getOriginalPrice() == 15
+    );
   }
 }

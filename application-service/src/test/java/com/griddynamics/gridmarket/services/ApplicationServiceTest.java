@@ -15,8 +15,11 @@ import com.griddynamics.gridmarket.exceptions.BadRequestException;
 import com.griddynamics.gridmarket.exceptions.InvalidUploadTokenException;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
+import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
+import com.griddynamics.gridmarket.http.request.ApplicationUpdateRequest;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
+import com.griddynamics.gridmarket.http.request.VerifyRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
@@ -229,5 +232,75 @@ class ApplicationServiceTest {
     GridUserInfo gridUserInfo = GridUserBuilder.memberUser().build();
     Collection<Review> reviewList = applicationService.getAllReviewForApplication(3, gridUserInfo);
     assertThat(reviewList).isEmpty();
+  }
+
+  @Test
+  void shouldThrowIfMemberTryToChangeVerificationStatus() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
+    ApplicationUpdateRequest request = new ApplicationUpdateRequest(
+        "", "", 1D, 1L, new VerifyRequest(true, null, null));
+    assertThrows(UnauthorizedException.class,
+        () -> applicationService.updateApplication(1, request, userInfo));
+  }
+
+  @Test
+  void shouldTrowIfUnauthorizedMemberTryToUpdateApp() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().setId(1).build();
+    ApplicationUpdateRequest request = new ApplicationUpdateRequest(
+        "", "", 1D, 1L, null);
+    assertThrows(UnauthorizedException.class,
+        () -> applicationService.updateApplication(2, request, userInfo));
+  }
+
+  @Test
+  void shouldCorrectlyUpdateApplication() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest("TestName",
+        "TestDesc", 10D, null, null);
+    applicationService.updateApplication(2, applicationUpdateRequest, userInfo);
+    Application application = applicationService.getApplicationById(2);
+    assertTrue(
+        "TestName".equals(application.getName())
+            && "TestDesc".equals(application.getDescription())
+            && application.getOriginalPrice() == 10
+    );
+  }
+
+  @Test
+  void shouldThrowIfNewApplicationNameAlreadyPresent() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest("Test",
+        "TestDesc", 10D, null, null);
+    assertThrows(UnprocessableEntityException.class,
+        () -> applicationService.updateApplication(2, applicationUpdateRequest, userInfo));
+  }
+
+  @Test
+  void shouldThrowIfInvalidDiscoundId() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest("TestName",
+        "TestDesc", 10D, 10L, null);
+    assertThrows(UnprocessableEntityException.class,
+        () -> applicationService.updateApplication(2, applicationUpdateRequest, userInfo));
+  }
+
+  @Test
+  void shouldCorrectlyVerifyApplication() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest(null,
+        null, null, null, new VerifyRequest(true, null, null));
+    applicationService.updateApplication(1, applicationUpdateRequest, userInfo);
+    Application application = applicationService.getApplicationById(1);
+    assertTrue(application.isVerified());
+  }
+
+  @Test
+  void shouldCorrectlyRemoveAppVerification() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest(null,
+        null, null, null, new VerifyRequest(false, null, null));
+    applicationService.updateApplication(2, applicationUpdateRequest, userInfo);
+    Application application = applicationService.getApplicationById(2);
+    assertFalse(application.isVerified());
   }
 }
