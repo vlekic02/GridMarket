@@ -29,6 +29,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -62,11 +63,19 @@ public class ApplicationService {
         .orElseThrow(() -> new NotFoundException("Specified application not found"));
   }
 
-  public Collection<Application> getAllApplications(boolean verified, GridUserInfo userInfo) {
+  public Collection<Application> getAllApplications(
+      boolean verified,
+      String searchKey,
+      Pageable pageable,
+      GridUserInfo userInfo
+  ) {
     if (!verified && isNotAdmin(userInfo)) {
       verified = true;
     }
-    return applicationRepository.findAll(verified);
+    if (searchKey != null) {
+      return applicationRepository.findBySearchKey(verified, searchKey.toLowerCase(), pageable);
+    }
+    return applicationRepository.findAll(verified, pageable);
   }
 
   public FileSystemResource pullApplication(long id, GridUserInfo userInfo) {

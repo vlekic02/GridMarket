@@ -9,12 +9,15 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Pageable;
 
 public interface ApplicationRepository {
 
   List<Application> findAll();
 
-  List<Application> findAll(boolean verified);
+  List<Application> findAll(boolean verified, Pageable pageable);
+
+  List<Application> findBySearchKey(boolean verified, String searchKey, Pageable pageable);
 
   Optional<Application> findById(long id);
 
