@@ -26,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -80,7 +81,7 @@ class PostgresApplicationRepositoryTest {
       "insert into sellable_application values (3, default, default)"
   })
   void shouldFindAllVerifiedApplications() {
-    List<Application> applications = applicationRepository.findAll(true);
+    List<Application> applications = applicationRepository.findAll(true, PageRequest.of(0, 30));
     assertThat(applications).hasSize(1);
   }
 
@@ -92,7 +93,48 @@ class PostgresApplicationRepositoryTest {
       "insert into sellable_application values (3, default, default)"
   })
   void shouldFindAllUnverifiedApplications() {
-    List<Application> applications = applicationRepository.findAll(false);
+    List<Application> applications = applicationRepository.findAll(false, PageRequest.of(0, 30));
+    assertThat(applications).hasSize(2);
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, 'path', 1, 20, null)",
+      "insert into application values (2, 'Test2', null, 'path', 3, 25, null)",
+      "insert into application values (3, 'Test3', null, 'path', 3, 25, null)",
+  })
+  void shouldCorrectlyPaginateApplications() {
+    List<Application> applications = applicationRepository.findAll(false, PageRequest.of(1, 1));
+    assertThat(applications).hasSize(1).satisfies(apps -> {
+      Application application = apps.iterator().next();
+      assertEquals(2, application.getId());
+    });
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, 'path', 1, 20, null)",
+      "insert into application values (2, 'Test2', null, 'path', 3, 25, null)",
+      "insert into application values (3, 'Test33', null, 'path', 3, 25, null)",
+  })
+  void shouldCorrectlyFindAppByName() {
+    List<Application> applications = applicationRepository.findBySearchKey(false, "test3",
+        PageRequest.of(0, 30));
+    assertThat(applications).hasSize(1).satisfies(apps -> {
+      Application application = apps.iterator().next();
+      assertEquals(3, application.getId());
+    });
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', 'null', 'path', 1, 20, null)",
+      "insert into application values (2, 'Test2', 'some desc3', 'path', 3, 25, null)",
+      "insert into application values (3, 'Test33', 'Some description', 'path', 3, 25, null)",
+  })
+  void shouldCorrectlyFindAppByDescription() {
+    List<Application> applications = applicationRepository.findBySearchKey(false, "desc",
+        PageRequest.of(0, 30));
     assertThat(applications).hasSize(2);
   }
 
