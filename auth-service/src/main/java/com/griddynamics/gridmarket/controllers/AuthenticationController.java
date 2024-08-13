@@ -18,6 +18,11 @@ public class AuthenticationController {
     this.userService = userService;
   }
 
+  @GetMapping
+  public String mainPage() {
+    return "main-page";
+  }
+
   @GetMapping("/login")
   public String loginPage() {
     return "login-page";
