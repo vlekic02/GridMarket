@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.Collection;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -52,9 +53,15 @@ public class ApplicationController {
               + "only admin can see unverified ones"
       )
       boolean verified,
+      @RequestParam(name = "search", required = false)
+      @Parameter(in = ParameterIn.QUERY, description = "Key for application searching")
+      String searchKey,
+      Pageable pageable,
       GridUserInfo userInfo
   ) {
-    return DataResponse.of(applicationService.getAllApplications(verified, userInfo));
+    return DataResponse.of(
+        applicationService.getAllApplications(verified, searchKey, pageable, userInfo)
+    );
   }
 
   @Operation(summary = "Prepare application metadata for upload")

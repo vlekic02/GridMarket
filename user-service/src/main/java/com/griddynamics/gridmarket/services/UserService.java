@@ -1,9 +1,11 @@
 package com.griddynamics.gridmarket.services;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
 import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
 import com.griddynamics.gridmarket.http.request.ModifyUserRequest;
 import com.griddynamics.gridmarket.models.Balance;
+import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Role;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
+
+  private static final String ADMIN_ROLE = "ADMIN";
 
   private final UserRepository userRepository;
   private final RoleRepository roleRepository;
@@ -47,7 +51,10 @@ public class UserService {
     userRepository.createMember(name, surname, username);
   }
 
-  public Balance getUserBalance(long id) {
+  public Balance getUserBalance(long id, GridUserInfo userInfo) {
+    if (userInfo.id() != id && !ADMIN_ROLE.equals(userInfo.role())) {
+      throw new UnauthorizedException("You can't view this user balance");
+    }
     User user = getUserById(id);
     return user.getBalance();
   }

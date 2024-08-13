@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Profile("cloud")
@@ -63,9 +64,32 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   }
 
   @Override
-  public List<Application> findAll(boolean verified) {
+  public List<Application> findAll(boolean verified, Pageable pageable) {
     return applications.stream()
         .filter(app -> app.isVerified() == verified)
+        .skip(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .toList();
+  }
+
+  @Override
+  public List<Application> findBySearchKey(boolean verified, String searchKey, Pageable pageable) {
+    return applications.stream()
+        .filter(app -> app.isVerified() == verified)
+        .filter(app -> {
+          if (app.getName().toLowerCase().contains(searchKey)) {
+            return true;
+          }
+          return app.getDescription() != null && app.getDescription().toLowerCase()
+              .contains(searchKey);
+        })
+        .sorted((first, second) -> {
+          int firsCount = findReviewsByApplication(first).size();
+          int secondCount = findReviewsByApplication(second).size();
+          return Integer.compare(firsCount, secondCount);
+        })
+        .skip(pageable.getOffset())
+        .limit(pageable.getPageSize())
         .toList();
   }
 

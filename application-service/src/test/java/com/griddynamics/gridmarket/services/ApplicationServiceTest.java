@@ -36,8 +36,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -102,14 +104,31 @@ class ApplicationServiceTest {
   @Test
   void shouldReturnAllVerifiedApplications() {
     GridUserInfo userInfo = GridUserBuilder.memberUser().build();
-    Collection<Application> applications = applicationService.getAllApplications(true, userInfo);
+    Collection<Application> applications = applicationService.getAllApplications(true, null,
+        PageRequest.of(0, 30),
+        userInfo);
     assertThat(applications).hasSize(2);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"app", "desc"})
+  void shouldReturnAllUnverifiedAppsBySearchKey(String key) {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().build();
+    Collection<Application> applications = applicationService.getAllApplications(false, key,
+        PageRequest.of(0, 30),
+        userInfo);
+    assertThat(applications).hasSize(1).satisfies(apps -> {
+      Application app = apps.iterator().next();
+      assertEquals(4, app.getId());
+    });
   }
 
   @Test
   void shouldReturnVerifiedAppsIfUserIsNotAdmin() {
     GridUserInfo userInfo = GridUserBuilder.memberUser().build();
-    Collection<Application> applications = applicationService.getAllApplications(false, userInfo);
+    Collection<Application> applications = applicationService.getAllApplications(false, null,
+        PageRequest.of(0, 30),
+        userInfo);
     assertThat(applications)
         .hasSize(2)
         .allMatch(Application::isVerified);
@@ -118,7 +137,9 @@ class ApplicationServiceTest {
   @Test
   void shouldReturnAllUnverifiedApps() {
     GridUserInfo userInfo = GridUserBuilder.adminUser().build();
-    Collection<Application> applications = applicationService.getAllApplications(false, userInfo);
+    Collection<Application> applications = applicationService.getAllApplications(false, null,
+        PageRequest.of(0, 30),
+        userInfo);
     assertThat(applications)
         .hasSize(2)
         .allMatch(app -> !app.isVerified());

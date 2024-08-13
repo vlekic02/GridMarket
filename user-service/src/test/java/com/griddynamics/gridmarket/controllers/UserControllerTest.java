@@ -6,14 +6,17 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
 import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
 import com.griddynamics.gridmarket.http.request.ModifyUserRequest;
 import com.griddynamics.gridmarket.models.Balance;
+import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.impl.PostgresRoleRepository;
 import com.griddynamics.gridmarket.repositories.impl.PostgresUserRepository;
 import com.griddynamics.gridmarket.services.PubSubService;
 import com.griddynamics.gridmarket.services.UserService;
+import com.griddynamics.gridmarket.utils.GridUserBuilder;
 import java.util.Collection;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.AfterEach;
@@ -72,6 +75,13 @@ class UserControllerTest {
             10L,
             250D
         ));
+  }
+
+  public static Stream<GridUserInfo> getBalanceGridUsers() {
+    return Stream.of(
+        GridUserBuilder.memberUser().setId(1).build(),
+        GridUserBuilder.adminUser().setId(30).build()
+    );
   }
 
   @BeforeEach
@@ -141,14 +151,25 @@ class UserControllerTest {
     });
   }
 
+  @ParameterizedTest
+  @MethodSource("getBalanceGridUsers")
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)"
+  })
+  void shouldReturnCorrectBalanceForUser(GridUserInfo userInfo) {
+    Balance balance = userController.getUserBalance(1, userInfo).getData();
+    assertEquals(150.25, balance.getAmount());
+  }
+
   @Test
   @Sql(statements = {
       "insert into role values (1, 'MEMBER')",
       "insert into grid_user values (1, 'test', 'test', 'test', 1, 150.25)"
   })
-  void shouldReturnCorrectBalanceForUser() {
-    Balance balance = userController.getUserBalance(1).getData();
-    assertEquals(150.25, balance.getAmount());
+  void shouldThrowIfUnauthorizedUserRequestBalance() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().setId(5).build();
+    assertThrows(UnauthorizedException.class, () -> userController.getUserBalance(1, userInfo));
   }
 
   @Test

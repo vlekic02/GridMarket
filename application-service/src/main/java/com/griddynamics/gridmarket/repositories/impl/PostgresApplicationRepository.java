@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -46,7 +47,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
-  public List<Application> findAll(boolean verified) {
+  public List<Application> findAll(boolean verified, Pageable pageable) {
     return template.query(
         """
             SELECT * FROM (
@@ -60,9 +61,47 @@ public class PostgresApplicationRepository implements ApplicationRepository {
               LEFT JOIN discount on discount.discount_id = application.discount
             ) AS tb
             WHERE tb.verified = ?
+            ORDER BY tb.application_id
+            LIMIT ?
+            OFFSET ?
             """,
         new ApplicationRowMapper(),
-        verified
+        verified,
+        pageable.getPageSize(),
+        pageable.getOffset()
+    );
+  }
+
+  @Override
+  public List<Application> findBySearchKey(boolean verified, String searchKey, Pageable pageable) {
+    return template.query(
+        """
+            SELECT * FROM (
+              SELECT discount_id, discount.name AS discount_name,
+              type, "value", start_date, end_date, application.*,
+              EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+              ) AS verified,
+              (
+              SELECT COUNT(review.review_id) FROM review
+              WHERE review.application = application.application_id
+              ) as review_count
+              FROM application
+              LEFT JOIN discount on discount.discount_id = application.discount
+            ) AS tb
+            WHERE tb.verified = ?
+            AND (LOWER(tb.name) LIKE '%' || ? || '%' OR LOWER(tb.description) LIKE '%' || ? || '%')
+            ORDER BY tb.review_count, tb.application_id
+            LIMIT ?
+            OFFSET ?
+            """,
+        new ApplicationRowMapper(),
+        verified,
+        searchKey,
+        searchKey,
+        pageable.getPageSize(),
+        pageable.getOffset()
     );
   }
 
