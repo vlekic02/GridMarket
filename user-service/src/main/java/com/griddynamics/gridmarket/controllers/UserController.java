@@ -4,6 +4,7 @@ import com.griddynamics.gridmarket.annotations.AdminAccess;
 import com.griddynamics.gridmarket.http.request.ModifyUserRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
 import com.griddynamics.gridmarket.models.Balance;
+import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.services.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -77,8 +78,9 @@ public class UserController {
   public DataResponse<Balance> getUserBalance(
       @PathVariable
       @Parameter(description = "User id")
-      long id
+      long id,
+      GridUserInfo userInfo
   ) {
-    return DataResponse.of(userService.getUserBalance(id));
+    return DataResponse.of(userService.getUserBalance(id, userInfo));
   }
 }

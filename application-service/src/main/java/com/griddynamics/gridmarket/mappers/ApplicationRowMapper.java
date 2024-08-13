@@ -32,6 +32,8 @@ public class ApplicationRowMapper implements RowMapper<Application> {
     builder.setOriginalPrice(price);
     long publisherId = resultSet.getLong("publisher");
     builder.setPublisher(publisherId);
+    boolean verified = resultSet.getBoolean("verified");
+    builder.setVerified(verified);
     return builder.build();
   }
 }

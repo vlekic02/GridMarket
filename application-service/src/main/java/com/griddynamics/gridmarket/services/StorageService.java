@@ -1,6 +1,7 @@
 package com.griddynamics.gridmarket.services;
 
 import java.nio.file.Path;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface StorageService {
@@ -10,4 +11,6 @@ public interface StorageService {
   void delete(Path path);
 
   void deleteByUser(long userId);
+
+  FileSystemResource getFileByPath(String path);
 }

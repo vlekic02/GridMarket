@@ -5,10 +5,14 @@ import com.griddynamics.gridmarket.exceptions.BadRequestException;
 import com.griddynamics.gridmarket.exceptions.InvalidUploadTokenException;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
+import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
+import com.griddynamics.gridmarket.http.request.ApplicationUpdateRequest;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
+import com.griddynamics.gridmarket.http.request.VerifyRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
+import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Price;
 import com.griddynamics.gridmarket.models.Review;
@@ -17,12 +21,15 @@ import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +37,7 @@ import org.springframework.web.multipart.MultipartFile;
 public class ApplicationService {
 
   private static final int TOKEN_LIFETIME = 5;
+  private static final String ADMIN_ROLE = "ADMIN";
   private static final String UPLOAD_URI = "/v1/applications/upload?token=";
 
   private final ApplicationRepository applicationRepository;
@@ -55,8 +63,24 @@ public class ApplicationService {
         .orElseThrow(() -> new NotFoundException("Specified application not found"));
   }
 
-  public Collection<Application> getAllApplications() {
-    return applicationRepository.findAll();
+  public Collection<Application> getAllApplications(
+      boolean verified,
+      String searchKey,
+      Pageable pageable,
+      GridUserInfo userInfo
+  ) {
+    if (!verified && isNotAdmin(userInfo)) {
+      verified = true;
+    }
+    if (searchKey != null) {
+      return applicationRepository.findBySearchKey(verified, searchKey.toLowerCase(), pageable);
+    }
+    return applicationRepository.findAll(verified, pageable);
+  }
+
+  public FileSystemResource pullApplication(long id, GridUserInfo userInfo) {
+    Application application = getApplicationById(id, userInfo);
+    return storageService.getFileByPath(application.getPath());
   }
 
   public Application getApplicationById(long id) {
@@ -64,13 +88,22 @@ public class ApplicationService {
         .orElseThrow(() -> new NotFoundException("Specified application not found !"));
   }
 
-  public Collection<Review> getAllReviewForApplication(long applicationId) {
-    Application application = getApplicationById(applicationId);
+  public Application getApplicationById(long id, GridUserInfo userInfo) {
+    return applicationRepository.findById(id)
+        .filter(app -> app.isVerified() || ADMIN_ROLE.equals(userInfo.role()))
+        .orElseThrow(() -> new NotFoundException("Specified application not found !"));
+  }
+
+  public Collection<Review> getAllReviewForApplication(long applicationId, GridUserInfo userInfo) {
+    Application application = getApplicationById(applicationId, userInfo);
     return applicationRepository.findReviewsByApplication(application);
   }
 
   public Price getApplicationPriceById(long id) {
     Application application = getApplicationById(id);
+    if (!application.isVerified()) {
+      throw new NotFoundException("Specified application not found !");
+    }
     double price = application.getRealPrice();
     return new Price(id, price);
   }
@@ -104,7 +137,7 @@ public class ApplicationService {
 
   public void deleteApplication(long id, GridUserInfo userInfo) {
     applicationRepository.findById(id).ifPresent(app -> {
-      if (!"ADMIN".equals(userInfo.role()) && userInfo.id() != app.getPublisher().getId()) {
+      if (isNotAdmin(userInfo) && userInfo.id() != app.getPublisher().getId()) {
         throw new UnauthorizedException("You don't have permission to delete this application");
       }
       Path applicationPath = applicationRepository.deleteApplicationById(id);
@@ -118,8 +151,7 @@ public class ApplicationService {
   }
 
   public void createReview(long applicationId, ReviewCreateRequest request, GridUserInfo userInfo) {
-    Application application = applicationRepository.findById(applicationId)
-        .orElseThrow(() -> new NotFoundException("Application not found"));
+    Application application = getApplicationById(applicationId, userInfo);
     if (application.getPublisher().getId() == userInfo.id()) {
       throw new BadRequestException("You can't review your own application");
     }
@@ -131,5 +163,54 @@ public class ApplicationService {
 
   public void deleteReview(long id) {
     applicationRepository.deleteReviewById(id);
+  }
+
+  public void updateApplication(long id, ApplicationUpdateRequest request, GridUserInfo userInfo) {
+    if (request.verify() != null && isNotAdmin(userInfo)) {
+      throw new UnauthorizedException("You can't change verification status of the app");
+    }
+    Application application = getApplicationById(id, userInfo);
+    if (application.getPublisher().getId() != userInfo.id() && isNotAdmin(userInfo)) {
+      throw new UnauthorizedException("You don't have permission to update this app");
+    }
+    Application.Builder applicatioBuilder = application.builder();
+    if (request.name() != null && !request.name().isEmpty()) {
+      Optional<Application> applicationOptional = applicationRepository.findByName(request.name());
+      if (applicationOptional.isPresent()) {
+        throw new UnprocessableEntityException(
+            "Application with name " + request.name() + " already exist");
+      }
+      applicatioBuilder.setName(request.name());
+    }
+    String description = request.description();
+    if (description != null) {
+      applicatioBuilder.setDescription(description.isEmpty() ? null : description);
+    }
+    if (request.price() != null) {
+      applicatioBuilder.setOriginalPrice(request.price());
+    }
+    if (request.discountId() != null) {
+      Discount discount = applicationRepository.findDiscountById(request.discountId())
+          .orElseThrow(() -> new UnprocessableEntityException("Provided discount doesn't exist"));
+      applicatioBuilder.setDiscount(discount);
+    }
+    if (applicatioBuilder.isChanged()) {
+      applicationRepository.save(applicatioBuilder.build());
+    }
+    if (request.verify() != null) {
+      handleVerification(application.getId(), request.verify());
+    }
+  }
+
+  private boolean isNotAdmin(GridUserInfo userInfo) {
+    return !ADMIN_ROLE.equals(userInfo.role());
+  }
+
+  private void handleVerification(long id, VerifyRequest request) {
+    if (request.verified()) {
+      applicationRepository.verifyApplication(id, request.startDate(), request.endDate());
+    } else {
+      applicationRepository.removeVerification(id);
+    }
   }
 }

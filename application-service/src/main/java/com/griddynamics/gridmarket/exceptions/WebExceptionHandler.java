@@ -57,6 +57,16 @@ public class WebExceptionHandler {
     );
   }
 
+  @ExceptionHandler(UnprocessableEntityException.class)
+  @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+  public ErrorResource handleUnprocessableEntityException(UnprocessableEntityException exception) {
+    return ErrorResource.of(
+        "Unprocessable entity",
+        HttpStatus.UNPROCESSABLE_ENTITY.value(),
+        exception.getMessage()
+    );
+  }
+
   @ExceptionHandler(UnauthorizedException.class)
   @ResponseStatus(HttpStatus.FORBIDDEN)
   public ErrorResource handleUnauthorizedException(UnauthorizedException exception) {

@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -60,5 +61,15 @@ public class FileSystemStorageService implements StorageService {
     } catch (IOException exception) {
       LOGGER.error("Failed to delete user applications folder !", exception);
     }
+  }
+
+  @Override
+  public FileSystemResource getFileByPath(String path) {
+    Path filePath = Path.of(path);
+    if (!Files.exists(filePath)) {
+      LOGGER.error("File path exists in database but not on filesystem ! Path: {}", path);
+      throw new InternalServerException("File doesn't exist on file system, contact administrator");
+    }
+    return new FileSystemResource(filePath);
   }
 }

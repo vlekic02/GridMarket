@@ -1,7 +1,9 @@
 package com.griddynamics.gridmarket.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.models.Price;
 import com.griddynamics.gridmarket.repositories.impl.PostgresApplicationRepository;
 import com.griddynamics.gridmarket.services.ApplicationService;
@@ -51,9 +53,18 @@ class InternalControllerTest {
   @Test
   @Sql(statements = {
       "insert into application values (1, 'Test', null, 'path', 1, 20, null)",
+      "insert into sellable_application values (1, default, default)"
   })
   void shouldReturnCorrectPriceForApplication() {
     Price price = internalController.getApplicationPriceById(1).getData();
     assertEquals(20, price.getPrice());
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, 'path', 1, 20, null)"
+  })
+  void shouldThrowIfApplicationIsNotVerified() {
+    assertThrows(NotFoundException.class, () -> internalController.getApplicationPriceById(1));
   }
 }

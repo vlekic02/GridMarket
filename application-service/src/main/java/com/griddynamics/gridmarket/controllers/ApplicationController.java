@@ -1,6 +1,7 @@
 package com.griddynamics.gridmarket.controllers;
 
 import com.griddynamics.gridmarket.annotations.AdminAccess;
+import com.griddynamics.gridmarket.http.request.ApplicationUpdateRequest;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
@@ -12,12 +13,18 @@ import com.griddynamics.gridmarket.services.ApplicationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.Collection;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,10 +44,24 @@ public class ApplicationController {
     this.applicationService = applicationService;
   }
 
-  @Operation(summary = "Get all available applications")
+  @Operation(summary = "Get all applications")
   @GetMapping(produces = "application/vnd.api+json")
-  public DataResponse<Collection<Application>> getAllApplications() {
-    return DataResponse.of(applicationService.getAllApplications());
+  public DataResponse<Collection<Application>> getAllApplications(
+      @RequestParam(name = "verified", defaultValue = "true")
+      @Parameter(in = ParameterIn.QUERY,
+          description = "Specifies which type of apps it should return, "
+              + "only admin can see unverified ones"
+      )
+      boolean verified,
+      @RequestParam(name = "search", required = false)
+      @Parameter(in = ParameterIn.QUERY, description = "Key for application searching")
+      String searchKey,
+      Pageable pageable,
+      GridUserInfo userInfo
+  ) {
+    return DataResponse.of(
+        applicationService.getAllApplications(verified, searchKey, pageable, userInfo)
+    );
   }
 
   @Operation(summary = "Prepare application metadata for upload")
@@ -66,8 +87,19 @@ public class ApplicationController {
 
   @Operation(summary = "Get specific application by id")
   @GetMapping(value = "/{id}", produces = "application/vnd.api+json")
-  public DataResponse<Application> getApplicationById(@PathVariable long id) {
-    return DataResponse.of(applicationService.getApplicationById(id));
+  public DataResponse<Application> getApplicationById(@PathVariable long id,
+      GridUserInfo userInfo) {
+    return DataResponse.of(applicationService.getApplicationById(id, userInfo));
+  }
+
+  @Operation(summary = "Updates specific application")
+  @PatchMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
+  public void updateApplication(
+      @PathVariable long id,
+      @Valid @RequestBody ApplicationUpdateRequest request,
+      GridUserInfo userInfo
+  ) {
+    applicationService.updateApplication(id, request, userInfo);
   }
 
   @Operation(summary = "Deletes specific application")
@@ -77,10 +109,27 @@ public class ApplicationController {
     applicationService.deleteApplication(id, userInfo);
   }
 
+  @Operation(summary = "Downloads file by id")
+  @GetMapping(value = "/{id}/pull", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+  public FileSystemResource pullApplication(
+      @PathVariable long id,
+      GridUserInfo userInfo,
+      HttpServletResponse response
+  ) {
+    FileSystemResource fileSystemResource = applicationService.pullApplication(id, userInfo);
+    ContentDisposition contentDisposition = ContentDisposition
+        .attachment()
+        .filename(fileSystemResource.getFilename())
+        .build();
+    response.addHeader(HttpHeaders.CONTENT_DISPOSITION, contentDisposition.toString());
+    return fileSystemResource;
+  }
+
   @Operation(summary = "Get all reviews for specific application")
   @GetMapping(value = "/{id}/reviews", produces = "application/vnd.api+json")
-  public DataResponse<Collection<Review>> getReviewByApplication(@PathVariable long id) {
-    return DataResponse.of(applicationService.getAllReviewForApplication(id));
+  public DataResponse<Collection<Review>> getReviewByApplication(@PathVariable long id,
+      GridUserInfo userInfo) {
+    return DataResponse.of(applicationService.getAllReviewForApplication(id, userInfo));
   }
 
   @Operation(summary = "Create new review for specific application")

@@ -8,35 +8,47 @@ import com.griddynamics.gridmarket.models.Discount.Type;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 @Profile("cloud")
 @Repository
 public class InMemorySetApplicationRepository implements ApplicationRepository {
 
+  private final Map<Long, DateRange> verificationPeriod;
   private final List<Application> applications;
+  private final List<Discount> discounts;
   private final List<Review> reviews;
   private long lastApplicationId;
   private long lastReviewId;
 
   public InMemorySetApplicationRepository() {
+    this.verificationPeriod = new HashMap<>();
+    this.discounts = new ArrayList<>(List.of(
+        Discount.unlimited(1, "Black friday", Type.PERCENTAGE, 20)
+    ));
     this.applications = new ArrayList<>(Arrays.asList(
         new Application(1, "Test", null, "/system/path",
-            Discount.unlimited(1, "Black friday", Type.PERCENTAGE, 20),
-            25, 1),
+            findDiscountById(1).orElseThrow(),
+            25, 1, false),
         new Application(2, "Application 2", "Some description",
-            "/system/path2", null, 15, 3),
+            "/system/path2", null, 15, 3, true),
         new Application(3, "Application 3", "Some description",
-            "/system/path2", null, 50, 2),
+            "/system/path2", null, 50, 2, true),
         new Application(4, "Application 4", "Some description",
-            "/system/path2", null, 5, 1)
+            "/system/path2", null, 5, 1, false)
     ));
     lastApplicationId = 4;
+    verificationPeriod.put(2L, DateRange.empty());
+    verificationPeriod.put(3L, DateRange.empty());
     this.reviews = new ArrayList<>(Arrays.asList(
         new Review(1, 1, 2, "Nice application", 5),
         new Review(2, 1, 4, "Meh... don't like it", 2),
@@ -52,6 +64,36 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public List<Application> findAll(boolean verified, Pageable pageable) {
+    return applications.stream()
+        .filter(app -> app.isVerified() == verified)
+        .skip(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .toList();
+  }
+
+  @Override
+  public List<Application> findBySearchKey(boolean verified, String searchKey, Pageable pageable) {
+    return applications.stream()
+        .filter(app -> app.isVerified() == verified)
+        .filter(app -> {
+          if (app.getName().toLowerCase().contains(searchKey)) {
+            return true;
+          }
+          return app.getDescription() != null && app.getDescription().toLowerCase()
+              .contains(searchKey);
+        })
+        .sorted((first, second) -> {
+          int firsCount = findReviewsByApplication(first).size();
+          int secondCount = findReviewsByApplication(second).size();
+          return Integer.compare(firsCount, secondCount);
+        })
+        .skip(pageable.getOffset())
+        .limit(pageable.getPageSize())
+        .toList();
+  }
+
+  @Override
   public Optional<Application> findById(long id) {
     return applications.stream().filter(app -> app.getId() == id).findFirst();
   }
@@ -59,6 +101,11 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   @Override
   public Optional<Application> findByName(String name) {
     return applications.stream().filter(app -> app.getName().equals(name)).findFirst();
+  }
+
+  @Override
+  public Optional<Discount> findDiscountById(long id) {
+    return discounts.stream().filter(discount -> discount.getId() == id).findFirst();
   }
 
   @Override
@@ -76,6 +123,32 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
         request.message(),
         request.stars()
     ));
+  }
+
+  @Override
+  public void verifyApplication(long id, LocalDateTime startTime, LocalDateTime endTime) {
+    findById(id).ifPresent(app -> {
+      deleteApplicationById(app.getId());
+      Application newApp = app.builder().setVerified(true).build();
+      applications.add(newApp);
+      verificationPeriod.put(app.getId(), new DateRange(startTime, endTime));
+    });
+  }
+
+  @Override
+  public void removeVerification(long id) {
+    findById(id).ifPresent(app -> {
+      deleteApplicationById(app.getId());
+      Application newApp = app.builder().setVerified(false).build();
+      applications.add(newApp);
+      verificationPeriod.remove(app.getId());
+    });
+  }
+
+  @Override
+  public void save(Application application) {
+    deleteApplicationById(application.getId());
+    applications.add(application);
   }
 
   @Override
@@ -115,7 +188,15 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
         path,
         null,
         metadata.request().price(),
-        metadata.publisherId()
+        metadata.publisherId(),
+        false
     ));
+  }
+
+  private record DateRange(LocalDateTime startTime, LocalDateTime endTime) {
+
+    public static DateRange empty() {
+      return new DateRange(null, null);
+    }
   }
 }

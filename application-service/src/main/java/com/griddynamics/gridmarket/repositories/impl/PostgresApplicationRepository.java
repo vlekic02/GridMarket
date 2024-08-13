@@ -2,16 +2,20 @@ package com.griddynamics.gridmarket.repositories.impl;
 
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.mappers.ApplicationRowMapper;
+import com.griddynamics.gridmarket.mappers.DiscountRowMapper;
 import com.griddynamics.gridmarket.mappers.ReviewRowMapper;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
+import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -29,9 +33,12 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   public List<Application> findAll() {
     return template.query(
         """
-            SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
-            end_date, \
-            application.*
+            SELECT discount_id, discount.name AS discount_name,
+             type, "value", start_date, end_date, application.*,
+             EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+             ) AS verified
             FROM application
             LEFT JOIN discount on discount.discount_id = application.discount
             """,
@@ -40,15 +47,77 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
+  public List<Application> findAll(boolean verified, Pageable pageable) {
+    return template.query(
+        """
+            SELECT * FROM (
+              SELECT discount_id, discount.name AS discount_name,
+              type, "value", start_date, end_date, application.*,
+              EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+              ) AS verified
+              FROM application
+              LEFT JOIN discount on discount.discount_id = application.discount
+            ) AS tb
+            WHERE tb.verified = ?
+            ORDER BY tb.application_id
+            LIMIT ?
+            OFFSET ?
+            """,
+        new ApplicationRowMapper(),
+        verified,
+        pageable.getPageSize(),
+        pageable.getOffset()
+    );
+  }
+
+  @Override
+  public List<Application> findBySearchKey(boolean verified, String searchKey, Pageable pageable) {
+    return template.query(
+        """
+            SELECT * FROM (
+              SELECT discount_id, discount.name AS discount_name,
+              type, "value", start_date, end_date, application.*,
+              EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+              ) AS verified,
+              (
+              SELECT COUNT(review.review_id) FROM review
+              WHERE review.application = application.application_id
+              ) as review_count
+              FROM application
+              LEFT JOIN discount on discount.discount_id = application.discount
+            ) AS tb
+            WHERE tb.verified = ?
+            AND (LOWER(tb.name) LIKE '%' || ? || '%' OR LOWER(tb.description) LIKE '%' || ? || '%')
+            ORDER BY tb.review_count, tb.application_id
+            LIMIT ?
+            OFFSET ?
+            """,
+        new ApplicationRowMapper(),
+        verified,
+        searchKey,
+        searchKey,
+        pageable.getPageSize(),
+        pageable.getOffset()
+    );
+  }
+
+  @Override
   public Optional<Application> findById(long id) {
     Stream<Application> applicationStream = template.queryForStream(
         """
-             SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
-             end_date, \
-             application.*
-             FROM application
-             LEFT JOIN discount on discount.discount_id = application.discount
-             WHERE application_id = ?
+            SELECT discount_id, discount.name AS discount_name,
+             type, "value", start_date, end_date, application.*,
+             EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+             ) AS verified
+            FROM application
+            LEFT JOIN discount on discount.discount_id = application.discount
+            WHERE application_id = ?
             """,
         new ApplicationRowMapper(),
         id
@@ -62,12 +131,15 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   public Optional<Application> findByName(String name) {
     Stream<Application> applicationStream = template.queryForStream(
         """
-             SELECT discount_id, discount.name as discount_name, type, "value", start_date, \
-             end_date, \
-             application.*
-             FROM application
-             LEFT JOIN discount on discount.discount_id = application.discount
-             WHERE application.name = ?
+            SELECT discount_id, discount.name AS discount_name,
+             type, "value", start_date, end_date, application.*,
+             EXISTS(
+              SELECT 1 FROM sellable_application
+              WHERE application = application.application_id
+             ) AS verified
+            FROM application
+            LEFT JOIN discount on discount.discount_id = application.discount
+            WHERE application.name = ?
             """,
         new ApplicationRowMapper(),
         name
@@ -75,6 +147,22 @@ public class PostgresApplicationRepository implements ApplicationRepository {
     Optional<Application> applicationOptional = applicationStream.findFirst();
     applicationStream.close();
     return applicationOptional;
+  }
+
+  @Override
+  public Optional<Discount> findDiscountById(long id) {
+    Stream<Discount> discountStream = template.queryForStream(
+        """
+            SELECT discount_id, name AS discount_name, type, "value", start_date, end_date
+            FROM discount
+            WHERE discount_id = ?
+            """,
+        new DiscountRowMapper(),
+        id
+    );
+    Optional<Discount> discountOptional = discountStream.findFirst();
+    discountStream.close();
+    return discountOptional;
   }
 
   @Override
@@ -100,6 +188,52 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         request.message(),
         request.stars(),
         applicationId
+    );
+  }
+
+  @Override
+  public void verifyApplication(long id, LocalDateTime startTime, LocalDateTime endTime) {
+    template.update(
+        """
+            INSERT INTO sellable_application VALUES (?, ?, ?)
+            ON CONFLICT (application) DO UPDATE
+            SET start_date = ?, end_date = ?
+            """,
+        id,
+        startTime,
+        endTime,
+        startTime,
+        endTime
+    );
+  }
+
+  @Override
+  public void removeVerification(long id) {
+    template.update(
+        """
+            DELETE FROM sellable_application
+            WHERE application = ?
+            """,
+        id
+    );
+  }
+
+  @Override
+  public void save(Application application) {
+    template.update(
+        """
+            UPDATE application
+            SET name = ?,
+            description = ?,
+            price = ?,
+            discount = ?
+            WHERE application_id = ?
+            """,
+        application.getName(),
+        application.getDescription(),
+        application.getOriginalPrice(),
+        application.getDiscount() == null ? null : application.getDiscount().getId(),
+        application.getId()
     );
   }
 

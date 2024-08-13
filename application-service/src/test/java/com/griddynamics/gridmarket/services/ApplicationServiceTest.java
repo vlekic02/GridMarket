@@ -15,13 +15,17 @@ import com.griddynamics.gridmarket.exceptions.BadRequestException;
 import com.griddynamics.gridmarket.exceptions.InvalidUploadTokenException;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
+import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
+import com.griddynamics.gridmarket.http.request.ApplicationUpdateRequest;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
+import com.griddynamics.gridmarket.http.request.VerifyRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
 import com.griddynamics.gridmarket.repositories.impl.InMemorySetApplicationRepository;
+import com.griddynamics.gridmarket.utils.GridUserBuilder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -32,8 +36,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -55,8 +61,8 @@ class ApplicationServiceTest {
 
   private static Stream<GridUserInfo> getUserInfo() {
     return Stream.of(
-        new GridUserInfo(2, "", "", "", "ADMIN", 10), //ADMIN
-        new GridUserInfo(1, "", "", "", "MEMBER", 10) // Resource owner
+        GridUserBuilder.adminUser().setId(2).build(), //ADMIN
+        GridUserBuilder.memberUser().setId(1).build() // Resource owner
     );
   }
 
@@ -77,12 +83,15 @@ class ApplicationServiceTest {
 
   @Test
   void shouldThrowIfNoApplicationPresentWhenRequestingReview() {
-    assertThrows(NotFoundException.class, () -> applicationService.getAllReviewForApplication(10));
+    GridUserInfo gridUserInfo = GridUserBuilder.memberUser().build();
+    assertThrows(NotFoundException.class,
+        () -> applicationService.getAllReviewForApplication(10, gridUserInfo));
   }
 
   @Test
   void shouldReturnReviewForApplication() {
-    Collection<Review> reviews = applicationService.getAllReviewForApplication(1);
+    GridUserInfo gridUserInfo = GridUserBuilder.memberUser().build();
+    Collection<Review> reviews = applicationService.getAllReviewForApplication(3, gridUserInfo);
     assertFalse(reviews.isEmpty());
   }
 
@@ -93,9 +102,47 @@ class ApplicationServiceTest {
   }
 
   @Test
-  void shouldReturnAllApplications() {
-    Collection<Application> applications = applicationService.getAllApplications();
-    assertFalse(applications.isEmpty());
+  void shouldReturnAllVerifiedApplications() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
+    Collection<Application> applications = applicationService.getAllApplications(true, null,
+        PageRequest.of(0, 30),
+        userInfo);
+    assertThat(applications).hasSize(2);
+  }
+
+  @ParameterizedTest
+  @ValueSource(strings = {"app", "desc"})
+  void shouldReturnAllUnverifiedAppsBySearchKey(String key) {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().build();
+    Collection<Application> applications = applicationService.getAllApplications(false, key,
+        PageRequest.of(0, 30),
+        userInfo);
+    assertThat(applications).hasSize(1).satisfies(apps -> {
+      Application app = apps.iterator().next();
+      assertEquals(4, app.getId());
+    });
+  }
+
+  @Test
+  void shouldReturnVerifiedAppsIfUserIsNotAdmin() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
+    Collection<Application> applications = applicationService.getAllApplications(false, null,
+        PageRequest.of(0, 30),
+        userInfo);
+    assertThat(applications)
+        .hasSize(2)
+        .allMatch(Application::isVerified);
+  }
+
+  @Test
+  void shouldReturnAllUnverifiedApps() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().build();
+    Collection<Application> applications = applicationService.getAllApplications(false, null,
+        PageRequest.of(0, 30),
+        userInfo);
+    assertThat(applications)
+        .hasSize(2)
+        .allMatch(app -> !app.isVerified());
   }
 
   @Test
@@ -156,7 +203,7 @@ class ApplicationServiceTest {
 
   @Test
   void shouldThrowIfUnauthorizedUserTryToDeleteApplication() {
-    GridUserInfo userInfo = new GridUserInfo(2, "", "", "", "MEMBER", 10);
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
     assertThrows(UnauthorizedException.class,
         () -> applicationService.deleteApplication(1, userInfo));
   }
@@ -168,25 +215,34 @@ class ApplicationServiceTest {
   }
 
   @Test
+  void shouldThrowIfApplicationIsNotVerified() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
+    assertThrows(NotFoundException.class,
+        () -> applicationService.createReview(4, new ReviewCreateRequest("", 5), userInfo));
+  }
+
+  @Test
   void shouldThrowIfAppPublisherAndReviewAuthorAreSame() {
     assertThrows(BadRequestException.class,
-        () -> applicationService.createReview(1, new ReviewCreateRequest("", 5),
-            new GridUserInfo(1, "", "", "", "", 10)));
+        () -> applicationService.createReview(2, new ReviewCreateRequest("", 5),
+            GridUserBuilder.memberUser().setId(3).build()));
   }
 
   @Test
   void shouldThrowIfUserAlreadyMadeRequest() {
     assertThrows(BadRequestException.class,
-        () -> applicationService.createReview(1, new ReviewCreateRequest("", 5),
-            new GridUserInfo(2, "", "", "", "", 10)));
+        () -> applicationService.createReview(3, new ReviewCreateRequest("", 5),
+            GridUserBuilder.memberUser().setId(5).build()));
   }
 
   @Test
   void shouldCorrectlyCreateReview() {
+    GridUserInfo gridUserInfo = GridUserBuilder.memberUser().setId(10).build();
     applicationService.createReview(2, new ReviewCreateRequest("Test", 5),
-        new GridUserInfo(10, "", "", "", "", 10));
+        gridUserInfo);
 
-    List<Review> reviews = (List<Review>) applicationService.getAllReviewForApplication(2);
+    List<Review> reviews = (List<Review>) applicationService.getAllReviewForApplication(2,
+        gridUserInfo);
     Review review = reviews.get(0);
     assertTrue("Test".equals(review.getMessage()) && review.getStars() == 5);
   }
@@ -194,7 +250,78 @@ class ApplicationServiceTest {
   @Test
   void shouldCorrectlyDeleteReview() {
     applicationService.deleteReview(3);
-    Collection<Review> reviewList = applicationService.getAllReviewForApplication(3);
+    GridUserInfo gridUserInfo = GridUserBuilder.memberUser().build();
+    Collection<Review> reviewList = applicationService.getAllReviewForApplication(3, gridUserInfo);
     assertThat(reviewList).isEmpty();
+  }
+
+  @Test
+  void shouldThrowIfMemberTryToChangeVerificationStatus() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().build();
+    ApplicationUpdateRequest request = new ApplicationUpdateRequest(
+        "", "", 1D, 1L, new VerifyRequest(true, null, null));
+    assertThrows(UnauthorizedException.class,
+        () -> applicationService.updateApplication(1, request, userInfo));
+  }
+
+  @Test
+  void shouldTrowIfUnauthorizedMemberTryToUpdateApp() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().setId(1).build();
+    ApplicationUpdateRequest request = new ApplicationUpdateRequest(
+        "", "", 1D, 1L, null);
+    assertThrows(UnauthorizedException.class,
+        () -> applicationService.updateApplication(2, request, userInfo));
+  }
+
+  @Test
+  void shouldCorrectlyUpdateApplication() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest("TestName",
+        "TestDesc", 10D, null, null);
+    applicationService.updateApplication(2, applicationUpdateRequest, userInfo);
+    Application application = applicationService.getApplicationById(2);
+    assertTrue(
+        "TestName".equals(application.getName())
+            && "TestDesc".equals(application.getDescription())
+            && application.getOriginalPrice() == 10
+    );
+  }
+
+  @Test
+  void shouldThrowIfNewApplicationNameAlreadyPresent() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest("Test",
+        "TestDesc", 10D, null, null);
+    assertThrows(UnprocessableEntityException.class,
+        () -> applicationService.updateApplication(2, applicationUpdateRequest, userInfo));
+  }
+
+  @Test
+  void shouldThrowIfInvalidDiscoundId() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest("TestName",
+        "TestDesc", 10D, 10L, null);
+    assertThrows(UnprocessableEntityException.class,
+        () -> applicationService.updateApplication(2, applicationUpdateRequest, userInfo));
+  }
+
+  @Test
+  void shouldCorrectlyVerifyApplication() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest(null,
+        null, null, null, new VerifyRequest(true, null, null));
+    applicationService.updateApplication(1, applicationUpdateRequest, userInfo);
+    Application application = applicationService.getApplicationById(1);
+    assertTrue(application.isVerified());
+  }
+
+  @Test
+  void shouldCorrectlyRemoveAppVerification() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest(null,
+        null, null, null, new VerifyRequest(false, null, null));
+    applicationService.updateApplication(2, applicationUpdateRequest, userInfo);
+    Application application = applicationService.getApplicationById(2);
+    assertFalse(application.isVerified());
   }
 }
