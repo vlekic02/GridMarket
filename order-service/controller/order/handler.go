@@ -2,6 +2,7 @@ package order
 
 import (
 	"order-service/client"
+	"order-service/database"
 	log "order-service/logging"
 	"order-service/model"
 
@@ -9,13 +10,33 @@ import (
 	"github.com/google/jsonapi"
 )
 
-// @Summary	Returns hello
+// @Summary	Returns orders
 // @Tags		Order
-// @Produce	plain
+// @Produce	application/vnd.api+json
+// @Param		user		query	int	false
+// @Param		application	query	int	false
 // @Success	200
 // @Router		/v1/orders/ [get]
 func GetAllOrders(ctx *gin.Context) {
-	ctx.String(200, "Hello !")
+	userId, ok := ctx.Keys["userId"]
+	if ok {
+		fetchOrderAndRespond(database.Db.GetOrdersByUser, userId.(int), ctx)
+		return
+	}
+	applicationId, ok := ctx.Keys["applicationId"]
+	if ok {
+		fetchOrderAndRespond(database.Db.GetOrdersByApplication, applicationId.(int), ctx)
+	}
+}
+
+func fetchOrderAndRespond(fetch func(int32) ([]model.Order, error), id int, ctx *gin.Context) {
+	orders, err := fetch(int32(id))
+	if err != nil {
+		log.Error("Error while fetching orders", "error", err)
+		ctx.Error(err)
+	}
+	payload, _ := jsonapi.Marshal(orders)
+	ctx.JSON(200, payload)
 }
 
 // @Summary	Create a new order
