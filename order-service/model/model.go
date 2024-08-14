@@ -57,6 +57,10 @@ type UserInfo struct {
 	Balance  float64 `json:"balance"`
 }
 
+func (ui *UserInfo) IsAdmin() bool {
+	return ui.Role == "ADMIN"
+}
+
 func NewRestError(status int, title string, detail string) *ErrorResponse {
 	return &ErrorResponse{[]*jsonapi.ErrorObject{{Title: title, Status: strconv.Itoa(status), Detail: detail}}}
 }
