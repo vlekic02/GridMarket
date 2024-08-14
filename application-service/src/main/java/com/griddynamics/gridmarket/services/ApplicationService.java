@@ -18,6 +18,7 @@ import com.griddynamics.gridmarket.models.Price;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
+import com.griddynamics.jacksonjsonapi.models.Resource;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
@@ -106,6 +107,11 @@ public class ApplicationService {
     }
     double price = application.getRealPrice();
     return new Price(id, price);
+  }
+
+  public Resource getApplicationOwnerById(long id) {
+    Application application = getApplicationById(id);
+    return application.getPublisher();
   }
 
   public void handleApplicationUpload(String token, MultipartFile file) {
