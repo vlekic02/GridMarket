@@ -36,6 +36,7 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
@@ -90,7 +91,9 @@ public class SecurityConfiguration {
         .formLogin(form -> form.loginPage("/login").permitAll())
         .logout((logout) -> {
           logout.logoutRequestMatcher(new AntPathRequestMatcher("/logout", "GET"));
-        });
+          logout.logoutSuccessUrl("/login");
+        })
+        .addFilterAfter(new LoginPageRedirectFilter(), UsernamePasswordAuthenticationFilter.class);
     return http.build();
   }
 
