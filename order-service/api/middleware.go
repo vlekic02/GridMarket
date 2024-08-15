@@ -99,7 +99,7 @@ func ValidateGetOrdersQuery(app client.ApplicationClient) gin.HandlerFunc {
 					ctx.Abort()
 					return
 				}
-				ownerId, _ := strconv.Atoi(response.ID)
+				ownerId, _ := strconv.Atoi(response.Id)
 				if currentUser.Id != int32(ownerId) {
 					ctx.Error(model.NewRestError(403, "Unauthorized", "You don't have permission to see orders of this application"))
 					ctx.Abort()

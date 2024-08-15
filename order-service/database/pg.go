@@ -80,9 +80,9 @@ func rowToOrder(row pgx.CollectableRow) (*model.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	order.ID = values[0].(int32)
-	order.User = &model.User{ID: values[1].(int32)}
-	order.Application = &model.Application{ID: values[2].(int32)}
+	order.Id = values[0].(int32)
+	order.User = &model.User{Id: values[1].(int32)}
+	order.Application = &model.Application{Id: values[2].(int32)}
 	order.Date = values[3].(time.Time)
 	order.Method = model.GetPaymentMethodByName(values[4].(string))
 	return order, nil

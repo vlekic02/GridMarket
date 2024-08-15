@@ -18,12 +18,12 @@ type ApplicationClient struct {
 }
 
 type ApplicationPriceResponse struct {
-	ID    string  `jsonapi:"primary,price"`
+	Id    string  `jsonapi:"primary,price"`
 	Price float64 `jsonapi:"attr,price"`
 }
 
 type ApplicationOwnerResponse struct {
-	ID string `jsonapi:"primary,user"`
+	Id string `jsonapi:"primary,user"`
 }
 
 func (app *ApplicationClient) GetApplicationPrice(id int32) (ApplicationPriceResponse, error) {
