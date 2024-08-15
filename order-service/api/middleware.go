@@ -10,6 +10,7 @@ import (
 	"order-service/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/jsonapi"
 )
 
 func JsonLogger() gin.HandlerFunc {
@@ -110,6 +111,12 @@ func ValidateGetOrdersQuery(app client.ApplicationClient) gin.HandlerFunc {
 		}
 
 		ctx.Set("userId", int(currentUser.Id))
+	}
+}
+
+func JsonApiMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Writer.Header().Set("Content-Type", jsonapi.MediaType)
 	}
 }
 

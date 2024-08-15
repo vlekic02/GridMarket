@@ -20,7 +20,7 @@ import (
 func InitRouter(cApp client.ApplicationClient) *gin.Engine {
 	app := gin.New()
 
-	app.Use(gin.Recovery(), ErrorHandler(), JsonLogger())
+	app.Use(gin.Recovery(), ErrorHandler(), JsonLogger(), JsonApiMiddleware())
 
 	if gin.Mode() == "debug" {
 		logging.SetLevel(slog.LevelDebug)
