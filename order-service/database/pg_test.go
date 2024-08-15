@@ -66,7 +66,7 @@ func TestInsertOrder(t *testing.T) {
 func TestGeyByUser(t *testing.T) {
 	orders, _ := database.Db.GetOrdersByUser(5)
 	order := orders[0]
-	if order.ID != 4 || order.User != 5 || order.Application != 5 || order.Method != model.Paypal {
+	if order.ID != 4 || order.User.ID != 5 || order.Application.ID != 5 || order.Method != model.Paypal {
 		t.Errorf("Unexpected struct returned ! got: %v", order)
 	}
 }

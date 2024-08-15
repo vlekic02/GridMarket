@@ -36,10 +36,18 @@ func GetPaymentMethodByName(name string) PaymentMethod {
 
 type Order struct {
 	ID          int32         `jsonapi:"primary,order"`
-	User        int32         `jsonapi:"relation,user"`
-	Application int32         `jsonapi:"relation,application"`
+	User        *User         `jsonapi:"relation,user"`
+	Application *Application  `jsonapi:"relation,application"`
 	Date        time.Time     `jsonapi:"attr,date"`
 	Method      PaymentMethod `jsonapi:"attr,method"`
+}
+
+type User struct {
+	ID int32 `jsonapi:"primary,user"`
+}
+
+type Application struct {
+	ID int32 `jsonapi:"primary,application"`
 }
 
 type OrderRequest struct {
