@@ -13,9 +13,9 @@ import (
 // @Summary	Returns orders
 // @Tags		Order
 // @Produce	application/vnd.api+json
-// @Param		user		query	int	false
-// @Param		application	query	int	false
-// @Success	200
+// @Param		user		query		int	false	"User id"
+// @Param		application	query		int	false	"Application id"
+// @Success	200			{object}	docs.Order
 // @Router		/v1/orders/ [get]
 func GetAllOrders(ctx *gin.Context) {
 	userId, ok := ctx.Keys["userId"]
