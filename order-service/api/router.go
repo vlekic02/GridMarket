@@ -17,7 +17,7 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func InitRouter(cApp client.ApplicationClient) *gin.Engine {
+func InitRouter(cApp client.ApplicationClient, uApp client.UserClient) *gin.Engine {
 	app := gin.New()
 
 	app.Use(gin.Recovery(), ErrorHandler(), JsonLogger(), JsonApiMiddleware())
@@ -30,7 +30,7 @@ func InitRouter(cApp client.ApplicationClient) *gin.Engine {
 	v1 := app.Group("v1/orders", ExtractUserInfo())
 	{
 		v1.GET("/", ValidateGetOrdersQuery(cApp), order.GetAllOrders)
-		v1.POST("/", ValidateOrder(), order.CreateOrder(cApp))
+		v1.POST("/", ValidateOrder(), order.CreateOrder(cApp, uApp))
 	}
 	app.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return app
