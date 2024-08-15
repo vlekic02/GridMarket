@@ -19,42 +19,46 @@ import (
 	"github.com/google/jsonapi"
 )
 
-func TestShouldReturn400IfInvalidQuery(t *testing.T) {
-	testCases := []string{"/v1/orders/?user=test", "/v1/orders/?application=test"}
-	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
-	for _, url := range testCases {
-		router := api.InitRouter(testApplicationClient)
-		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
-		req.Header.Set("grid-user", user)
-		router.ServeHTTP(w, req)
-		if w.Code != http.StatusBadRequest {
-			t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusBadRequest)
-		}
+func TestShouldReturn4xxCodeForInvalidRequest(t *testing.T) {
+	testCases := []struct {
+		name           string
+		url            string
+		expectedStatus int
+	}{
+		{
+			name:           "Invalid query with user=test",
+			url:            "/v1/orders/?user=test",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "Invalid query with application=test",
+			url:            "/v1/orders/?application=test",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "Invalid user ID",
+			url:            "/v1/orders/?user=2",
+			expectedStatus: http.StatusForbidden,
+		},
+		{
+			name:           "Invalid application publisher",
+			url:            "/v1/orders/?application=1",
+			expectedStatus: http.StatusForbidden,
+		},
 	}
-}
-
-func TestShouldReturn403IfInvalidUser(t *testing.T) {
 	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
-	router := api.InitRouter(testApplicationClient)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/orders/?user=2", nil)
-	req.Header.Set("grid-user", user)
-	router.ServeHTTP(w, req)
-	if w.Code != http.StatusForbidden {
-		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusForbidden)
-	}
-}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			router := api.InitRouter(testApplicationClient)
+			w := httptest.NewRecorder()
+			req, _ := http.NewRequest("GET", tc.url, nil)
+			req.Header.Set("grid-user", user)
+			router.ServeHTTP(w, req)
 
-func TestShouldReturn403IfInvalidAppPublisher(t *testing.T) {
-	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
-	router := api.InitRouter(testApplicationClient)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/orders/?application=1", nil)
-	req.Header.Set("grid-user", user)
-	router.ServeHTTP(w, req)
-	if w.Code != http.StatusForbidden {
-		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusForbidden)
+			if w.Code != tc.expectedStatus {
+				t.Errorf("Unexpected status code: got %d want %d", w.Code, tc.expectedStatus)
+			}
+		})
 	}
 }
 
