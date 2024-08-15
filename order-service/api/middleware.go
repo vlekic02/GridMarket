@@ -36,7 +36,7 @@ func JsonLogger() gin.HandlerFunc {
 func ValidateOrder() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		orderRequest := new(model.OrderRequest)
-		if err := ctx.ShouldBindBodyWithJSON(&orderRequest); err != nil {
+		if err := ctx.ShouldBindBodyWithJSON(orderRequest); err != nil {
 			ctx.Error(model.NewRestError(400, "Bad Request", "Failed to process order request data"))
 			ctx.Abort()
 			return
