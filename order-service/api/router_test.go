@@ -16,7 +16,7 @@ import (
 )
 
 func TestGetAllOrdersRoute(t *testing.T) {
-	router := api.InitRouter(client.DefaultApplicationClient)
+	router := api.InitRouter(testApplicationClient)
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/v1/orders/", nil)
 	router.ServeHTTP(w, req)
@@ -28,6 +28,45 @@ func TestGetAllOrdersRoute(t *testing.T) {
 	response := string(body)
 	if strings.TrimSpace(string(response)) != expectedResponse {
 		t.Errorf("Unexpected body: got %v want %v", response, expectedResponse)
+	}
+}
+
+func TestShouldReturn400IfInvalidQuery(t *testing.T) {
+	testCases := []string{"/v1/orders/?user=test", "/v1/orders/?application=test"}
+	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
+	for _, url := range testCases {
+		router := api.InitRouter(testApplicationClient)
+		w := httptest.NewRecorder()
+		req, _ := http.NewRequest("GET", url, nil)
+		req.Header.Set("grid-user", user)
+		router.ServeHTTP(w, req)
+		if w.Code != http.StatusBadRequest {
+			t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusBadRequest)
+		}
+	}
+}
+
+func TestShouldReturn403IfInvalidUser(t *testing.T) {
+	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
+	router := api.InitRouter(testApplicationClient)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/v1/orders/?user=2", nil)
+	req.Header.Set("grid-user", user)
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusForbidden {
+		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusForbidden)
+	}
+}
+
+func TestShouldReturn403IfInvalidAppPublisher(t *testing.T) {
+	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
+	router := api.InitRouter(testApplicationClient)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/v1/orders/?application=1", nil)
+	req.Header.Set("grid-user", user)
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusForbidden {
+		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusForbidden)
 	}
 }
 
@@ -103,6 +142,11 @@ func (tahc *TestApplicationHttpClient) Get(url string) (resp *http.Response, err
 		response := `{"errors":[{"title":"Not found","status":"404","detail":"Specified application not found !"}]}`
 		var reader io.Reader = strings.NewReader(response)
 		return &http.Response{StatusCode: 404, Body: io.NopCloser(reader)}, nil
+	}
+	if url == "http://application-service:8080/internal/1/owner" {
+		response := `{"data":{"type":"user","id":"3"}}`
+		var reader io.Reader = strings.NewReader(response)
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(reader)}, nil
 	}
 	return nil, nil
 }
