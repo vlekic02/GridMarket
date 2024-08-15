@@ -109,7 +109,7 @@ func ValidateGetOrdersQuery(app client.ApplicationClient) gin.HandlerFunc {
 			return
 		}
 
-		ctx.Set("userId", currentUser.Id)
+		ctx.Set("userId", int(currentUser.Id))
 	}
 }
 
