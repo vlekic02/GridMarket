@@ -51,6 +51,20 @@ func TestGetAllOrders(t *testing.T) {
 	}
 }
 
+func TestGetOrdersByApplication(t *testing.T) {
+	orders, _ := database.Db.GetOrdersByApplication(2)
+	expected := 2
+	actual := len(orders)
+	if actual != expected {
+		t.Errorf("Unexpected length of order slice ! got: %d want: %d", actual, expected)
+	}
+	for _, o := range orders {
+		if o.Application.ID != 2 {
+			t.Errorf("Unexpected application id ! got: %d want: %d", o.Application.ID, 2)
+		}
+	}
+}
+
 func TestInsertOrder(t *testing.T) {
 	balance := model.Balance
 	orderRequest := model.OrderRequest{User: 10, Application: 10, Method: &balance}

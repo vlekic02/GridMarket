@@ -9,27 +9,15 @@ import (
 	"net/http/httptest"
 	"order-service/api"
 	"order-service/client"
+	"order-service/database"
+	"order-service/model"
+	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/jsonapi"
 )
-
-func TestGetAllOrdersRoute(t *testing.T) {
-	router := api.InitRouter(testApplicationClient)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/orders/", nil)
-	router.ServeHTTP(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
-	}
-	expectedResponse := "Hello !"
-	body, _ := io.ReadAll(w.Result().Body)
-	response := string(body)
-	if strings.TrimSpace(string(response)) != expectedResponse {
-		t.Errorf("Unexpected body: got %v want %v", response, expectedResponse)
-	}
-}
 
 func TestShouldReturn400IfInvalidQuery(t *testing.T) {
 	testCases := []string{"/v1/orders/?user=test", "/v1/orders/?application=test"}
@@ -67,6 +55,44 @@ func TestShouldReturn403IfInvalidAppPublisher(t *testing.T) {
 	router.ServeHTTP(w, req)
 	if w.Code != http.StatusForbidden {
 		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusForbidden)
+	}
+}
+
+func TestShouldReturnAllOrdersForUser(t *testing.T) {
+	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
+	database.InitDb(database.InitMockDb())
+	router := api.InitRouter(testApplicationClient)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/v1/orders/", nil)
+	req.Header.Set("grid-user", user)
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
+	}
+	result, _ := jsonapi.UnmarshalManyPayload(w.Result().Body, reflect.TypeOf(new(model.Order)))
+	expected := 2
+	actual := len(result)
+	if actual != expected {
+		t.Errorf("Unexpected returned array length: got %d want %d", actual, expected)
+	}
+}
+
+func TestShouldReturnAllOrdersForApplication(t *testing.T) {
+	user := `{"id":1,"name":"","surname":"", "username": "", "role":"ADMIN", "balance":10}`
+	database.InitDb(database.InitMockDb())
+	router := api.InitRouter(testApplicationClient)
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/v1/orders/?application=3", nil)
+	req.Header.Set("grid-user", user)
+	router.ServeHTTP(w, req)
+	if w.Code != http.StatusOK {
+		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
+	}
+	result, _ := jsonapi.UnmarshalManyPayload(w.Result().Body, reflect.TypeOf(new(model.Order)))
+	expected := 1
+	actual := len(result)
+	if actual != expected {
+		t.Errorf("Unexpected returned array length: got %d want %d", actual, expected)
 	}
 }
 
