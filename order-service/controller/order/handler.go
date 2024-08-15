@@ -29,7 +29,7 @@ func GetAllOrders(ctx *gin.Context) {
 	}
 }
 
-func fetchOrderAndRespond(fetch func(int32) ([]model.Order, error), id int, ctx *gin.Context) {
+func fetchOrderAndRespond(fetch func(int32) ([]*model.Order, error), id int, ctx *gin.Context) {
 	orders, err := fetch(int32(id))
 	if err != nil {
 		log.Error("Error while fetching orders", "error", err)

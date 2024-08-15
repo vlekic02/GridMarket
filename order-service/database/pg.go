@@ -14,13 +14,13 @@ type postgres struct {
 	db *pgxpool.Pool
 }
 
-func (pg *postgres) GetAllOrders() ([]model.Order, error) {
+func (pg *postgres) GetAllOrders() ([]*model.Order, error) {
 	query := `SELECT * FROM "order"`
 	rows, err := pg.db.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
 	}
-	orders, err := pgx.CollectRows[model.Order](rows, rowToOrder)
+	orders, err := pgx.CollectRows[*model.Order](rows, rowToOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func (pg *postgres) InsertOrder(or model.OrderRequest) error {
 	return err
 }
 
-func (pg *postgres) GetOrdersByUser(userId int32) ([]model.Order, error) {
+func (pg *postgres) GetOrdersByUser(userId int32) ([]*model.Order, error) {
 	query := `SELECT * FROM "order" WHERE "user" = @user`
 	args := pgx.NamedArgs{
 		"user": userId,
@@ -48,14 +48,14 @@ func (pg *postgres) GetOrdersByUser(userId int32) ([]model.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	orders, err := pgx.CollectRows[model.Order](rows, rowToOrder)
+	orders, err := pgx.CollectRows[*model.Order](rows, rowToOrder)
 	if err != nil {
 		return nil, err
 	}
 	return orders, nil
 }
 
-func (pg *postgres) GetOrdersByApplication(applicationId int32) ([]model.Order, error) {
+func (pg *postgres) GetOrdersByApplication(applicationId int32) ([]*model.Order, error) {
 	query := `SELECT * FROM "order" WHERE application = @app`
 	args := pgx.NamedArgs{
 		"app": applicationId,
@@ -64,7 +64,7 @@ func (pg *postgres) GetOrdersByApplication(applicationId int32) ([]model.Order, 
 	if err != nil {
 		return nil, err
 	}
-	orders, err := pgx.CollectRows[model.Order](rows, rowToOrder)
+	orders, err := pgx.CollectRows[*model.Order](rows, rowToOrder)
 	if err != nil {
 		return nil, err
 	}
@@ -74,11 +74,11 @@ func (pg *postgres) GetOrdersByApplication(applicationId int32) ([]model.Order, 
 func (pg *postgres) Close() {
 	pg.db.Close()
 }
-func rowToOrder(row pgx.CollectableRow) (model.Order, error) {
-	order := model.Order{}
+func rowToOrder(row pgx.CollectableRow) (*model.Order, error) {
+	order := new(model.Order)
 	values, err := row.Values()
 	if err != nil {
-		return order, err
+		return nil, err
 	}
 	order.ID = values[0].(int32)
 	order.User = &model.User{ID: values[1].(int32)}
