@@ -62,41 +62,56 @@ func TestShouldReturn4xxCodeForInvalidRequest(t *testing.T) {
 	}
 }
 
-func TestShouldReturnAllOrdersForUser(t *testing.T) {
-	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
-	database.InitDb(database.InitMockDb())
-	router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/orders/", nil)
-	req.Header.Set("grid-user", user)
-	router.ServeHTTP(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
+func TestShouldReturnAllOrders(t *testing.T) {
+	testCases := []struct {
+		name string
+		url  string
+		user string
+		len  int
+	}{
+		{
+			name: "Should return all orders for user (USER)",
+			url:  "/v1/orders/",
+			user: `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`,
+			len:  2,
+		},
+		{
+			name: "Should return all orders for user (ADMIN)",
+			url:  "/v1/orders/?user=3",
+			user: `{"id":1,"name":"","surname":"", "username": "", "role":"ADMIN", "balance":10}`,
+			len:  1,
+		},
+		{
+			name: "Should return all orders for application (ADMIN)",
+			url:  "/v1/orders/?application=3",
+			user: `{"id":1,"name":"","surname":"", "username": "", "role":"ADMIN", "balance":10}`,
+			len:  1,
+		},
+		{
+			name: "Should return all orders for application (PUBLISHER)",
+			url:  "/v1/orders/?application=1",
+			user: `{"id":3,"name":"","surname":"", "username": "", "role":"", "balance":10}`,
+			len:  2,
+		},
 	}
-	result, _ := jsonapi.UnmarshalManyPayload(w.Result().Body, reflect.TypeOf(new(model.Order)))
-	expected := 2
-	actual := len(result)
-	if actual != expected {
-		t.Errorf("Unexpected returned array length: got %d want %d", actual, expected)
-	}
-}
 
-func TestShouldReturnAllOrdersForApplication(t *testing.T) {
-	user := `{"id":1,"name":"","surname":"", "username": "", "role":"ADMIN", "balance":10}`
-	database.InitDb(database.InitMockDb())
-	router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/orders/?application=3", nil)
-	req.Header.Set("grid-user", user)
-	router.ServeHTTP(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
-	}
-	result, _ := jsonapi.UnmarshalManyPayload(w.Result().Body, reflect.TypeOf(new(model.Order)))
-	expected := 1
-	actual := len(result)
-	if actual != expected {
-		t.Errorf("Unexpected returned array length: got %d want %d", actual, expected)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			database.InitDb(database.InitMockDb())
+			router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
+			w := httptest.NewRecorder()
+			req, _ := http.NewRequest("GET", tc.url, nil)
+			req.Header.Set("grid-user", tc.user)
+			router.ServeHTTP(w, req)
+			if w.Code != http.StatusOK {
+				t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
+			}
+			result, _ := jsonapi.UnmarshalManyPayload(w.Result().Body, reflect.TypeOf(new(model.Order)))
+			actual := len(result)
+			if actual != tc.len {
+				t.Errorf("Unexpected returned array length: got %d want %d", actual, tc.len)
+			}
+		})
 	}
 }
 
