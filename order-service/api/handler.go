@@ -61,17 +61,16 @@ func (service *AppService) CreateOrder() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		request, _ := ctx.Get("orderRequest")
 		orderRequest := request.(*model.OrderRequest)
-		applicationPrice, err := service.AppClient.GetApplicationPrice(orderRequest.Application)
+		applicationInfo, err := service.AppClient.GetApplicationInfo(orderRequest.Application)
 		if err != nil {
 			log.Error("Error while fetching application service", "error", err)
 			ctx.Error(err)
 			return
 		}
-		err = service.UserClient.RemoveUserBalance(orderRequest.User, client.UserPayRequest{Amount: applicationPrice.Price})
-		if err != nil {
-			ctx.Error(err)
+		if applicationInfo.Owner == orderRequest.User {
+			ctx.Error(model.NewRestError(400, "Bad Request", "You can't purchase your own application"))
 			return
 		}
-		ctx.Status(200)
+		ctx.JSON(200, applicationInfo)
 	}
 }
