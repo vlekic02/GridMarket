@@ -67,7 +67,11 @@ func (service *AppService) CreateOrder() gin.HandlerFunc {
 			ctx.Error(err)
 			return
 		}
-		payload, _ := jsonapi.Marshal(&applicationPrice)
-		ctx.JSON(200, payload)
+		err = service.UserClient.RemoveUserBalance(orderRequest.User, client.UserPayRequest{Amount: applicationPrice.Price})
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+		ctx.Status(200)
 	}
 }
