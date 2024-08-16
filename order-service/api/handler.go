@@ -11,7 +11,8 @@ import (
 )
 
 type AppService struct {
-	AppClient *client.ApplicationClient
+	AppClient  *client.ApplicationClient
+	UserClient *client.UserClient
 }
 
 // @Summary	Returns orders
