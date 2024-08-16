@@ -49,7 +49,7 @@ func TestShouldReturn4xxCodeForInvalidRequest(t *testing.T) {
 	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			router := api.InitRouter(testApplicationClient)
+			router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
 			w := httptest.NewRecorder()
 			req, _ := http.NewRequest("GET", tc.url, nil)
 			req.Header.Set("grid-user", user)
@@ -65,7 +65,7 @@ func TestShouldReturn4xxCodeForInvalidRequest(t *testing.T) {
 func TestShouldReturnAllOrdersForUser(t *testing.T) {
 	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
 	database.InitDb(database.InitMockDb())
-	router := api.InitRouter(testApplicationClient)
+	router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/v1/orders/", nil)
 	req.Header.Set("grid-user", user)
@@ -84,7 +84,7 @@ func TestShouldReturnAllOrdersForUser(t *testing.T) {
 func TestShouldReturnAllOrdersForApplication(t *testing.T) {
 	user := `{"id":1,"name":"","surname":"", "username": "", "role":"ADMIN", "balance":10}`
 	database.InitDb(database.InitMockDb())
-	router := api.InitRouter(testApplicationClient)
+	router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/v1/orders/?application=3", nil)
 	req.Header.Set("grid-user", user)
@@ -147,7 +147,7 @@ func constructJsonReader(in interface{}) (io.Reader, error) {
 }
 
 func setupPostOrdersRouter(request map[string]any, t *testing.T) (*gin.Engine, *httptest.ResponseRecorder, *http.Request) {
-	router := api.InitRouter(testApplicationClient)
+	router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
 	w := httptest.NewRecorder()
 	body, err := constructJsonReader(request)
 	if err != nil {

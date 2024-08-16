@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"order-service/client"
 	log "order-service/logging"
 	"order-service/model"
 
@@ -64,7 +63,7 @@ func ExtractUserInfo() gin.HandlerFunc {
 	}
 }
 
-func ValidateGetOrdersQuery(app client.ApplicationClient) gin.HandlerFunc {
+func (service *AppService) ValidateGetOrdersQuery() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		currentUser := ctx.Keys["userInfo"].(*model.UserInfo)
 		userQuery := ctx.Query("user")
@@ -93,7 +92,7 @@ func ValidateGetOrdersQuery(app client.ApplicationClient) gin.HandlerFunc {
 				return
 			}
 			if !currentUser.IsAdmin() {
-				response, err := app.GetApplicationOwner(int32(id))
+				response, err := service.AppClient.GetApplicationOwner(int32(id))
 				if err != nil {
 					ctx.Error(err)
 					ctx.Abort()
