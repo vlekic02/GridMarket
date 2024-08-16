@@ -7,8 +7,6 @@ import (
 	"net/http"
 	log "order-service/logging"
 	"order-service/model"
-
-	"github.com/google/jsonapi"
 )
 
 var DefaultApplicationClient = ApplicationClient{HttpClient: http.DefaultClient}
@@ -17,19 +15,15 @@ type ApplicationClient struct {
 	HttpClient
 }
 
-type ApplicationPriceResponse struct {
-	Id    string  `jsonapi:"primary,price"`
-	Price float64 `jsonapi:"attr,price"`
+type ApplicationInfoResponse struct {
+	Price float64 `json:"price"`
+	Owner int32   `json:"owner"`
 }
 
-type ApplicationOwnerResponse struct {
-	Id string `jsonapi:"primary,user"`
-}
-
-func (app *ApplicationClient) GetApplicationPrice(id int32) (ApplicationPriceResponse, error) {
-	log.Debug(fmt.Sprintf("Calling application service /internal/%d/price", id))
-	response, err := app.Get(fmt.Sprintf("http://application-service:8080/internal/%d/price", id))
-	applicationResponse := ApplicationPriceResponse{}
+func (app *ApplicationClient) GetApplicationInfo(id int32) (ApplicationInfoResponse, error) {
+	log.Debug(fmt.Sprintf("Calling application service /internal/%d/info", id))
+	response, err := app.Get(fmt.Sprintf("http://application-service:8080/internal/%d/info", id))
+	applicationResponse := ApplicationInfoResponse{}
 	if err != nil {
 		return applicationResponse, model.NewRestError(504, "Gateway Timeout", "Application service did not respond ! Error: "+err.Error())
 	}
@@ -41,28 +35,7 @@ func (app *ApplicationClient) GetApplicationPrice(id int32) (ApplicationPriceRes
 		}
 		return applicationResponse, errorResponse
 	}
-	if err := jsonapi.UnmarshalPayload(response.Body, &applicationResponse); err != nil {
-		return applicationResponse, model.NewRestError(500, "Internal Server Error", "Failed to unmarshal application service response ! Error: "+err.Error())
-	}
-	return applicationResponse, nil
-}
-
-func (app *ApplicationClient) GetApplicationOwner(id int32) (ApplicationOwnerResponse, *model.ErrorResponse) {
-	log.Debug(fmt.Sprintf("Calling application service /internal/%d/owner", id))
-	response, err := app.Get(fmt.Sprintf("http://application-service:8080/internal/%d/owner", id))
-	applicationResponse := ApplicationOwnerResponse{}
-	if err != nil {
-		return applicationResponse, model.NewRestError(504, "Gateway Timeout", "Application service did not respond ! Error: "+err.Error())
-	}
-	defer response.Body.Close()
-	if response.StatusCode != http.StatusOK {
-		errorResponse, err := UnmarshalErrors(response.Body)
-		if err != nil {
-			return applicationResponse, model.NewRestError(500, "Internal Server Error", "Failed to unmarshal application service response ! Error: "+err.Error())
-		}
-		return applicationResponse, errorResponse
-	}
-	if err := jsonapi.UnmarshalPayload(response.Body, &applicationResponse); err != nil {
+	if err := json.NewDecoder(response.Body).Decode(&applicationResponse); err != nil {
 		return applicationResponse, model.NewRestError(500, "Internal Server Error", "Failed to unmarshal application service response ! Error: "+err.Error())
 	}
 	return applicationResponse, nil

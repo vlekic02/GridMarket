@@ -179,18 +179,18 @@ type TestApplicationHttpClient struct {
 }
 
 func (tahc *TestApplicationHttpClient) Get(url string) (resp *http.Response, err error) {
-	if url == "http://application-service:8080/internal/3/price" {
-		response := `{"data":{"type":"price","id":"3","attributes":{"price":40.0}}}`
+	if url == "http://application-service:8080/internal/3/info" {
+		response := `{"owner":3,"price":40.0}`
 		var reader io.Reader = strings.NewReader(response)
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(reader)}, nil
 	}
-	if url == "http://application-service:8080/internal/10/price" {
+	if url == "http://application-service:8080/internal/10/info" {
 		response := `{"errors":[{"title":"Not found","status":"404","detail":"Specified application not found !"}]}`
 		var reader io.Reader = strings.NewReader(response)
 		return &http.Response{StatusCode: 404, Body: io.NopCloser(reader)}, nil
 	}
-	if url == "http://application-service:8080/internal/1/owner" {
-		response := `{"data":{"type":"user","id":"3"}}`
+	if url == "http://application-service:8080/internal/1/info" {
+		response := `{"owner":3,"price":10.2}`
 		var reader io.Reader = strings.NewReader(response)
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(reader)}, nil
 	}

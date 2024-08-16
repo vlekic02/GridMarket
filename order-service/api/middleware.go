@@ -92,14 +92,13 @@ func (service *AppService) ValidateGetOrdersQuery() gin.HandlerFunc {
 				return
 			}
 			if !currentUser.IsAdmin() {
-				response, err := service.AppClient.GetApplicationOwner(int32(id))
+				response, err := service.AppClient.GetApplicationInfo(int32(id))
 				if err != nil {
 					ctx.Error(err)
 					ctx.Abort()
 					return
 				}
-				ownerId, _ := strconv.Atoi(response.Id)
-				if currentUser.Id != int32(ownerId) {
+				if currentUser.Id != response.Owner {
 					ctx.Error(model.NewRestError(403, "Unauthorized", "You don't have permission to see orders of this application"))
 					ctx.Abort()
 					return
