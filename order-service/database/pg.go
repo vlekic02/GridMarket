@@ -15,7 +15,7 @@ type postgres struct {
 }
 
 func (pg *postgres) GetAllOrders() ([]*model.Order, error) {
-	query := `SELECT * FROM "order"`
+	query := `SELECT * FROM grid_order`
 	rows, err := pg.db.Query(context.Background(), query)
 	if err != nil {
 		return nil, err
@@ -28,7 +28,7 @@ func (pg *postgres) GetAllOrders() ([]*model.Order, error) {
 }
 
 func (pg *postgres) InsertOrder(or model.OrderRequest) error {
-	query := `INSERT INTO "order" VALUES (default, @user, @application, @date, @method)`
+	query := `INSERT INTO grid_order VALUES (default, @user, @application, @date, @method)`
 	args := pgx.NamedArgs{
 		"user":        or.User,
 		"application": or.Application,
@@ -40,7 +40,7 @@ func (pg *postgres) InsertOrder(or model.OrderRequest) error {
 }
 
 func (pg *postgres) GetOrdersByUser(userId int32) ([]*model.Order, error) {
-	query := `SELECT * FROM "order" WHERE "user" = @user`
+	query := `SELECT * FROM grid_order WHERE "user" = @user`
 	args := pgx.NamedArgs{
 		"user": userId,
 	}
@@ -56,7 +56,7 @@ func (pg *postgres) GetOrdersByUser(userId int32) ([]*model.Order, error) {
 }
 
 func (pg *postgres) GetOrdersByApplication(applicationId int32) ([]*model.Order, error) {
-	query := `SELECT * FROM "order" WHERE application = @app`
+	query := `SELECT * FROM grid_order WHERE application = @app`
 	args := pgx.NamedArgs{
 		"app": applicationId,
 	}
@@ -80,9 +80,9 @@ func rowToOrder(row pgx.CollectableRow) (*model.Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	order.ID = values[0].(int32)
-	order.User = &model.User{ID: values[1].(int32)}
-	order.Application = &model.Application{ID: values[2].(int32)}
+	order.Id = values[0].(int32)
+	order.User = &model.User{Id: values[1].(int32)}
+	order.Application = &model.Application{Id: values[2].(int32)}
 	order.Date = values[3].(time.Time)
 	order.Method = model.GetPaymentMethodByName(values[4].(string))
 	return order, nil

@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"order-service/client"
 	log "order-service/logging"
 	"order-service/model"
 
@@ -36,7 +35,7 @@ func JsonLogger() gin.HandlerFunc {
 func ValidateOrder() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		orderRequest := new(model.OrderRequest)
-		if err := ctx.ShouldBindBodyWithJSON(&orderRequest); err != nil {
+		if err := ctx.ShouldBindBodyWithJSON(orderRequest); err != nil {
 			ctx.Error(model.NewRestError(400, "Bad Request", "Failed to process order request data"))
 			ctx.Abort()
 			return
@@ -64,7 +63,7 @@ func ExtractUserInfo() gin.HandlerFunc {
 	}
 }
 
-func ValidateGetOrdersQuery(app client.ApplicationClient) gin.HandlerFunc {
+func (service *AppService) ValidateGetOrdersQuery() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		currentUser := ctx.Keys["userInfo"].(*model.UserInfo)
 		userQuery := ctx.Query("user")
@@ -93,13 +92,13 @@ func ValidateGetOrdersQuery(app client.ApplicationClient) gin.HandlerFunc {
 				return
 			}
 			if !currentUser.IsAdmin() {
-				response, err := app.GetApplicationOwner(int32(id))
+				response, err := service.AppClient.GetApplicationOwner(int32(id))
 				if err != nil {
 					ctx.Error(err)
 					ctx.Abort()
 					return
 				}
-				ownerId, _ := strconv.Atoi(response.ID)
+				ownerId, _ := strconv.Atoi(response.Id)
 				if currentUser.Id != int32(ownerId) {
 					ctx.Error(model.NewRestError(403, "Unauthorized", "You don't have permission to see orders of this application"))
 					ctx.Abort()

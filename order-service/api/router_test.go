@@ -19,80 +19,99 @@ import (
 	"github.com/google/jsonapi"
 )
 
-func TestShouldReturn400IfInvalidQuery(t *testing.T) {
-	testCases := []string{"/v1/orders/?user=test", "/v1/orders/?application=test"}
+func TestShouldReturn4xxCodeForInvalidRequest(t *testing.T) {
+	testCases := []struct {
+		name           string
+		url            string
+		expectedStatus int
+	}{
+		{
+			name:           "Invalid query with user=test",
+			url:            "/v1/orders/?user=test",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "Invalid query with application=test",
+			url:            "/v1/orders/?application=test",
+			expectedStatus: http.StatusBadRequest,
+		},
+		{
+			name:           "Invalid user ID",
+			url:            "/v1/orders/?user=2",
+			expectedStatus: http.StatusForbidden,
+		},
+		{
+			name:           "Invalid application publisher",
+			url:            "/v1/orders/?application=1",
+			expectedStatus: http.StatusForbidden,
+		},
+	}
 	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
-	for _, url := range testCases {
-		router := api.InitRouter(testApplicationClient, client.DefaultUserClient)
-		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", url, nil)
-		req.Header.Set("grid-user", user)
-		router.ServeHTTP(w, req)
-		if w.Code != http.StatusBadRequest {
-			t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusBadRequest)
-		}
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
+			w := httptest.NewRecorder()
+			req, _ := http.NewRequest("GET", tc.url, nil)
+			req.Header.Set("grid-user", user)
+			router.ServeHTTP(w, req)
+
+			if w.Code != tc.expectedStatus {
+				t.Errorf("Unexpected status code: got %d want %d", w.Code, tc.expectedStatus)
+			}
+		})
 	}
 }
 
-func TestShouldReturn403IfInvalidUser(t *testing.T) {
-	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
-	router := api.InitRouter(testApplicationClient, client.DefaultUserClient)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/orders/?user=2", nil)
-	req.Header.Set("grid-user", user)
-	router.ServeHTTP(w, req)
-	if w.Code != http.StatusForbidden {
-		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusForbidden)
+func TestShouldReturnAllOrders(t *testing.T) {
+	testCases := []struct {
+		name string
+		url  string
+		user string
+		len  int
+	}{
+		{
+			name: "Should return all orders for user (USER)",
+			url:  "/v1/orders/",
+			user: `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`,
+			len:  2,
+		},
+		{
+			name: "Should return all orders for user (ADMIN)",
+			url:  "/v1/orders/?user=3",
+			user: `{"id":1,"name":"","surname":"", "username": "", "role":"ADMIN", "balance":10}`,
+			len:  1,
+		},
+		{
+			name: "Should return all orders for application (ADMIN)",
+			url:  "/v1/orders/?application=3",
+			user: `{"id":1,"name":"","surname":"", "username": "", "role":"ADMIN", "balance":10}`,
+			len:  1,
+		},
+		{
+			name: "Should return all orders for application (PUBLISHER)",
+			url:  "/v1/orders/?application=1",
+			user: `{"id":3,"name":"","surname":"", "username": "", "role":"", "balance":10}`,
+			len:  2,
+		},
 	}
-}
 
-func TestShouldReturn403IfInvalidAppPublisher(t *testing.T) {
-	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
-	router := api.InitRouter(testApplicationClient, client.DefaultUserClient)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/orders/?application=1", nil)
-	req.Header.Set("grid-user", user)
-	router.ServeHTTP(w, req)
-	if w.Code != http.StatusForbidden {
-		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusForbidden)
-	}
-}
-
-func TestShouldReturnAllOrdersForUser(t *testing.T) {
-	user := `{"id":1,"name":"","surname":"", "username": "", "role":"", "balance":10}`
-	database.InitDb(database.InitMockDb())
-	router := api.InitRouter(testApplicationClient, client.DefaultUserClient)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/orders/", nil)
-	req.Header.Set("grid-user", user)
-	router.ServeHTTP(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
-	}
-	result, _ := jsonapi.UnmarshalManyPayload(w.Result().Body, reflect.TypeOf(new(model.Order)))
-	expected := 2
-	actual := len(result)
-	if actual != expected {
-		t.Errorf("Unexpected returned array length: got %d want %d", actual, expected)
-	}
-}
-
-func TestShouldReturnAllOrdersForApplication(t *testing.T) {
-	user := `{"id":1,"name":"","surname":"", "username": "", "role":"ADMIN", "balance":10}`
-	database.InitDb(database.InitMockDb())
-	router := api.InitRouter(testApplicationClient, client.DefaultUserClient)
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("GET", "/v1/orders/?application=3", nil)
-	req.Header.Set("grid-user", user)
-	router.ServeHTTP(w, req)
-	if w.Code != http.StatusOK {
-		t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
-	}
-	result, _ := jsonapi.UnmarshalManyPayload(w.Result().Body, reflect.TypeOf(new(model.Order)))
-	expected := 1
-	actual := len(result)
-	if actual != expected {
-		t.Errorf("Unexpected returned array length: got %d want %d", actual, expected)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			database.InitDb(database.InitMockDb())
+			router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
+			w := httptest.NewRecorder()
+			req, _ := http.NewRequest("GET", tc.url, nil)
+			req.Header.Set("grid-user", tc.user)
+			router.ServeHTTP(w, req)
+			if w.Code != http.StatusOK {
+				t.Errorf("Unexpected status code: got %d want %d", w.Code, http.StatusOK)
+			}
+			result, _ := jsonapi.UnmarshalManyPayload(w.Result().Body, reflect.TypeOf(new(model.Order)))
+			actual := len(result)
+			if actual != tc.len {
+				t.Errorf("Unexpected returned array length: got %d want %d", actual, tc.len)
+			}
+		})
 	}
 }
 
@@ -143,7 +162,7 @@ func constructJsonReader(in interface{}) (io.Reader, error) {
 }
 
 func setupPostOrdersRouter(request map[string]any, t *testing.T) (*gin.Engine, *httptest.ResponseRecorder, *http.Request) {
-	router := api.InitRouter(testApplicationClient, client.DefaultUserClient)
+	router := api.InitRouter(api.AppService{AppClient: &testApplicationClient})
 	w := httptest.NewRecorder()
 	body, err := constructJsonReader(request)
 	if err != nil {
