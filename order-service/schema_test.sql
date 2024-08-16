@@ -5,7 +5,7 @@ BEGIN
     END IF;
 END$$;
 
-CREATE TABLE IF NOT EXISTS "order" (
+CREATE TABLE IF NOT EXISTS grid_order (
     order_id SERIAL PRIMARY KEY,
     "user" INTEGER NOT NULL,
     application INTEGER NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS "order" (
     method payment_method NOT NULL
 );
 
-INSERT INTO "order" VALUES (
+INSERT INTO grid_order VALUES (
     DEFAULT,
     2,
     2,
@@ -21,7 +21,7 @@ INSERT INTO "order" VALUES (
     'BALANCE'
 );
 
-INSERT INTO "order" VALUES (
+INSERT INTO grid_order VALUES (
     DEFAULT,
     1,
     2,
@@ -29,7 +29,7 @@ INSERT INTO "order" VALUES (
     'BALANCE'
 );
 
-INSERT INTO "order" VALUES (
+INSERT INTO grid_order VALUES (
     DEFAULT,
     3,
     3,
@@ -37,7 +37,7 @@ INSERT INTO "order" VALUES (
     'PAYPAL'
 );
 
-INSERT INTO "order" VALUES (
+INSERT INTO grid_order VALUES (
     DEFAULT,
     5,
     5,
