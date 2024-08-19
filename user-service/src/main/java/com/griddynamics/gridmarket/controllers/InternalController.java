@@ -1,6 +1,6 @@
 package com.griddynamics.gridmarket.controllers;
 
-import com.griddynamics.gridmarket.http.request.UserPayRequest;
+import com.griddynamics.gridmarket.http.request.UserTransactionRequest;
 import com.griddynamics.gridmarket.models.internal.UserInternalDto;
 import com.griddynamics.gridmarket.services.UserService;
 import org.springframework.http.MediaType;
@@ -26,8 +26,8 @@ public class InternalController {
     return new UserInternalDto(userService.getUserByUsername(username));
   }
 
-  @PostMapping(value = "/{id}/pay")
-  public void proceedPayment(@RequestBody UserPayRequest request) {
+  @PostMapping(value = "/transaction")
+  public void proceedTransaction(@RequestBody UserTransactionRequest request) {
     System.out.println(request);
   }
 }
