@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	log "order-service/logging"
+	"os"
 
 	"cloud.google.com/go/pubsub"
 )
@@ -13,16 +14,29 @@ const (
 	topicID   = "order"
 )
 
-var Msg gcpPubsub
+var Msg *gcpPubsub
 
 type gcpPubsub struct {
-	client     pubsub.Client
+	client     *pubsub.Client
 	orderTopic *pubsub.Topic
 }
 
 type successOrderEvent struct {
 	User        int32 `json:"user"`
 	Application int32 `json:"application"`
+}
+
+func InitPubSub() error {
+	err := os.Setenv("PUBSUB_EMULATOR_HOST", "pub-sub:8085")
+	if err != nil {
+		return nil
+	}
+	client, err := pubsub.NewClient(context.Background(), projectID)
+	if err != nil {
+		return err
+	}
+	Msg = &gcpPubsub{client: client}
+	return nil
 }
 
 func (gcp *gcpPubsub) PublishSuccessOrder(userId int32, applicationId int32) {
