@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.controllers;
 
+import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationInfo;
 import com.griddynamics.gridmarket.services.ApplicationService;
@@ -26,6 +27,9 @@ public class InternalController {
       @RequestParam("ownership") long userId
   ) {
     Application application = applicationService.getApplicationById(id);
+    if (!application.isVerified()) {
+      throw new NotFoundException("Specified application is not found");
+    }
     boolean ownership = applicationService.checkApplicationOwnership(userId, id);
     return new ApplicationInfo(
         application.getPublisher().getId(),
