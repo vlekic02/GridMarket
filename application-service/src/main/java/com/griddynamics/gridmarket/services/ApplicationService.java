@@ -98,6 +98,10 @@ public class ApplicationService {
     return applicationRepository.findReviewsByApplication(application);
   }
 
+  public boolean checkApplicationOwnership(long userId, long applicationId) {
+    return applicationRepository.hasApplicationOwnership(userId, applicationId);
+  }
+
   public void handleApplicationUpload(String token, MultipartFile file) {
     ApplicationMetadata applicationMetadata = tokenMap.get(token);
     tokenMap.remove(token);

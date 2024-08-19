@@ -1,5 +1,5 @@
 package com.griddynamics.gridmarket.models;
 
-public record ApplicationInfo(long owner, double price) {
+public record ApplicationInfo(long owner, double price, boolean ownership) {
 
 }

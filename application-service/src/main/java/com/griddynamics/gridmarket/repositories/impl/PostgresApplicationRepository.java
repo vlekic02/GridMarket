@@ -10,6 +10,7 @@ import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
+import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -250,6 +251,20 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         userId
     );
     return !reviews.isEmpty();
+  }
+
+  @Override
+  public boolean hasApplicationOwnership(long userId, long applicationId) {
+    return Boolean.TRUE.equals(template.query(
+        """
+            SELECT 1
+            FROM ownership
+            WHERE  grid_user = ? AND application = ?
+            """,
+        ResultSet::next,
+        userId,
+        applicationId
+    ));
   }
 
   @Override
