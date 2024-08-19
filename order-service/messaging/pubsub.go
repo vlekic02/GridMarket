@@ -14,7 +14,11 @@ const (
 	topicID   = "order"
 )
 
-var Msg *gcpPubsub
+var Msg messageBroker
+
+type messageBroker interface {
+	PublishSuccessOrder(userId int32, applicationId int32)
+}
 
 type gcpPubsub struct {
 	client     *pubsub.Client
