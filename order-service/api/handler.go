@@ -82,6 +82,6 @@ func (service *AppService) CreateOrder() gin.HandlerFunc {
 			return
 		}
 		messaging.Msg.PublishSuccessOrder(orderRequest.User, orderRequest.Application)
-		ctx.JSON(200, applicationInfo)
+		ctx.Status(200)
 	}
 }
