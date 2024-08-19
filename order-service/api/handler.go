@@ -81,8 +81,8 @@ func (service *AppService) CreateOrder() gin.HandlerFunc {
 			ctx.Error(err)
 			return
 		}
-		messaging.Msg.PublishSuccessOrder(orderRequest.User, orderRequest.Application)
 		database.Db.InsertOrder(*orderRequest)
+		messaging.Msg.PublishSuccessOrder(orderRequest.User, orderRequest.Application)
 		ctx.Status(200)
 	}
 }
