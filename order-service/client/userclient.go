@@ -29,7 +29,7 @@ func (uc *UserClient) MakeTransaction(request UserTransactionRequest) error {
 	}
 	response, err := uc.Post("http://user-service:8080/internal/users/transaction", "application/json", bytes.NewReader(buf))
 	if err != nil {
-		return model.NewRestError(504, "Gateway Timeout", "Application service did not respond ! Error: "+err.Error())
+		return model.NewRestError(504, "Gateway Timeout", "User service did not respond ! Error: "+err.Error())
 	}
 	defer response.Body.Close()
 	if response.StatusCode == http.StatusOK {
