@@ -4,6 +4,7 @@ import (
 	"order-service/client"
 	"order-service/database"
 	log "order-service/logging"
+	"order-service/messaging"
 	"order-service/model"
 
 	"github.com/gin-gonic/gin"
@@ -61,7 +62,7 @@ func (service *AppService) CreateOrder() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		request, _ := ctx.Get("orderRequest")
 		orderRequest := request.(*model.OrderRequest)
-		applicationInfo, err := service.AppClient.GetApplicationInfo(orderRequest.Application)
+		applicationInfo, err := service.AppClient.GetApplicationInfo(orderRequest.Application, orderRequest.User)
 		if err != nil {
 			log.Error("Error while fetching application service", "error", err)
 			ctx.Error(err)
@@ -71,6 +72,16 @@ func (service *AppService) CreateOrder() gin.HandlerFunc {
 			ctx.Error(model.NewRestError(400, "Bad Request", "You can't purchase your own application"))
 			return
 		}
+		if applicationInfo.Ownership {
+			ctx.Error(model.NewRestError(409, "Conflict", "You already own this application"))
+			return
+		}
+		err = service.UserClient.MakeTransaction(client.UserTransactionRequest{Payer: orderRequest.User, Payee: applicationInfo.Owner, Amount: applicationInfo.Price})
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+		messaging.Msg.PublishSuccessOrder(orderRequest.User, orderRequest.Application)
 		ctx.JSON(200, applicationInfo)
 	}
 }

@@ -16,13 +16,14 @@ type ApplicationClient struct {
 }
 
 type ApplicationInfoResponse struct {
-	Price float64 `json:"price"`
-	Owner int32   `json:"owner"`
+	Price     float64 `json:"price"`
+	Owner     int32   `json:"owner"`
+	Ownership bool    `json:"ownership"`
 }
 
-func (app *ApplicationClient) GetApplicationInfo(id int32) (ApplicationInfoResponse, error) {
-	log.Debug(fmt.Sprintf("Calling application service /internal/%d/info", id))
-	response, err := app.Get(fmt.Sprintf("http://application-service:8080/internal/%d/info", id))
+func (app *ApplicationClient) GetApplicationInfo(appId int32, userId int32) (ApplicationInfoResponse, error) {
+	log.Debug(fmt.Sprintf("Calling application service /internal/%d/info?ownership=%d", appId, userId))
+	response, err := app.Get(fmt.Sprintf("http://application-service:8080/internal/%d/info?ownership=%d", appId, userId))
 	applicationResponse := ApplicationInfoResponse{}
 	if err != nil {
 		return applicationResponse, model.NewRestError(504, "Gateway Timeout", "Application service did not respond ! Error: "+err.Error())

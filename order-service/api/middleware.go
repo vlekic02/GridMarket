@@ -92,7 +92,7 @@ func (service *AppService) ValidateGetOrdersQuery() gin.HandlerFunc {
 				return
 			}
 			if !currentUser.IsAdmin() {
-				response, err := service.AppClient.GetApplicationInfo(int32(id))
+				response, err := service.AppClient.GetApplicationInfo(int32(id), currentUser.Id)
 				if err != nil {
 					ctx.Error(err)
 					ctx.Abort()
