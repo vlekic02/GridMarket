@@ -9,6 +9,7 @@ import (
 	"order-service/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/jsonapi"
 )
 
 func JsonLogger() gin.HandlerFunc {
@@ -34,9 +35,9 @@ func JsonLogger() gin.HandlerFunc {
 func ValidateOrder() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		orderRequest := new(model.OrderRequest)
-		if err := ctx.ShouldBindBodyWithJSON(&orderRequest); err != nil {
-			errorResponse := model.NewRestError(400, "Bad Request", "Failed to process order request data")
-			ctx.AbortWithStatusJSON(400, errorResponse)
+		if err := ctx.ShouldBindBodyWithJSON(orderRequest); err != nil {
+			ctx.Error(model.NewRestError(400, "Bad Request", "Failed to process order request data"))
+			ctx.Abort()
 			return
 		}
 		value, ok := ctx.Get("userInfo")
@@ -59,6 +60,62 @@ func ExtractUserInfo() gin.HandlerFunc {
 		} else {
 			ctx.Set("userInfo", userInfo)
 		}
+	}
+}
+
+func (service *AppService) ValidateGetOrdersQuery() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		currentUser := ctx.Keys["userInfo"].(*model.UserInfo)
+		userQuery := ctx.Query("user")
+		if userQuery != "" {
+			id, err := strconv.Atoi(userQuery)
+			if err != nil {
+				ctx.Error(model.NewRestError(400, "Bad Request", "User ID must be a number"))
+				ctx.Abort()
+				return
+			}
+			if id != int(currentUser.Id) && !currentUser.IsAdmin() {
+				ctx.Error(model.NewRestError(403, "Unauthorized", "You don't have permission to see orders of another user"))
+				ctx.Abort()
+				return
+			}
+			ctx.Set("userId", id)
+			return
+		}
+
+		applicationQuery := ctx.Query("application")
+		if applicationQuery != "" {
+			id, err := strconv.Atoi(applicationQuery)
+			if err != nil {
+				ctx.Error(model.NewRestError(400, "Bad Request", "Application ID must be a number"))
+				ctx.Abort()
+				return
+			}
+			if !currentUser.IsAdmin() {
+				response, err := service.AppClient.GetApplicationOwner(int32(id))
+				if err != nil {
+					ctx.Error(err)
+					ctx.Abort()
+					return
+				}
+				ownerId, _ := strconv.Atoi(response.Id)
+				if currentUser.Id != int32(ownerId) {
+					ctx.Error(model.NewRestError(403, "Unauthorized", "You don't have permission to see orders of this application"))
+					ctx.Abort()
+					return
+				}
+			}
+			ctx.Set("applicationId", id)
+			return
+		}
+
+		ctx.Set("userId", int(currentUser.Id))
+	}
+}
+
+func JsonApiMiddleware() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Writer.Header().Set("Content-Type", jsonapi.MediaType)
 	}
 }
 

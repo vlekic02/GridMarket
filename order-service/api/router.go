@@ -3,9 +3,6 @@ package api
 import (
 	"log/slog"
 
-	"order-service/client"
-	"order-service/controller/order"
-
 	"order-service/logging"
 
 	"order-service/docs"
@@ -17,10 +14,10 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
-func InitRouter(cApp client.ApplicationClient) *gin.Engine {
+func InitRouter(service AppService) *gin.Engine {
 	app := gin.New()
 
-	app.Use(gin.Recovery(), ErrorHandler(), JsonLogger())
+	app.Use(gin.Recovery(), ErrorHandler(), JsonLogger(), JsonApiMiddleware())
 
 	if gin.Mode() == "debug" {
 		logging.SetLevel(slog.LevelDebug)
@@ -29,8 +26,8 @@ func InitRouter(cApp client.ApplicationClient) *gin.Engine {
 	docs.SwaggerInfo.BasePath = "/v1/orders"
 	v1 := app.Group("v1/orders", ExtractUserInfo())
 	{
-		v1.GET("/", order.GetAllOrders)
-		v1.POST("/", ValidateOrder(), order.CreateOrder(cApp))
+		v1.GET("/", service.ValidateGetOrdersQuery(), GetAllOrders())
+		v1.POST("/", ValidateOrder(), service.CreateOrder())
 	}
 	app.GET("/swagger-ui/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	return app

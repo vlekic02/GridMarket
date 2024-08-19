@@ -18,7 +18,7 @@ func main() {
 	}
 	defer postgres.Close()
 	database.InitDb(postgres)
-	router := api.InitRouter(client.DefaultApplicationClient)
+	router := api.InitRouter(api.AppService{AppClient: &client.DefaultApplicationClient})
 	if err := router.Run(":8080"); err != nil {
 		log.Fatal("Failed to initialize web server !", "error", err)
 	}
