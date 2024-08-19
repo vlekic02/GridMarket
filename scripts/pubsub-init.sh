@@ -32,6 +32,7 @@ createTopics() {
 createSubscriptions() {
   python3 subscriber.py gridmarket-dev create user user-subscription
   python3 subscriber.py gridmarket-dev create user user-application-subscription
+  python3 subscriber.py gridmarket-dev create order order-subscription
 }
 
 main "$@"
