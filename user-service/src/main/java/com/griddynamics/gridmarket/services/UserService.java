@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.services;
 
+import com.griddynamics.gridmarket.exceptions.InsufficientFoundsException;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
 import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
 import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
@@ -16,6 +17,7 @@ import java.util.Collection;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService {
@@ -99,6 +101,14 @@ public class UserService {
     if (usernameChanged) {
       UsernameChangeEvent event = new UsernameChangeEvent(user.getUsername(), request.username());
       pubSubService.publishUsernameChange(event);
+    }
+  }
+
+  @Transactional
+  public void makeTransaction(long payerId, long payeeId, double amount) {
+    User user = getUserById(payerId);
+    if (user.getBalance().getAmount() < amount) {
+      throw new InsufficientFoundsException();
     }
   }
 }
