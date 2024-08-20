@@ -17,7 +17,7 @@ const (
 var Msg messageBroker
 
 type messageBroker interface {
-	PublishSuccessOrder(userId int32, applicationId int32)
+	PublishSuccessOrder(userId int32, applicationId int32) (string, error)
 }
 
 type gcpPubsub struct {
@@ -43,7 +43,7 @@ func InitPubSub() error {
 	return nil
 }
 
-func (gcp *gcpPubsub) PublishSuccessOrder(userId int32, applicationId int32) {
+func (gcp *gcpPubsub) PublishSuccessOrder(userId int32, applicationId int32) (string, error) {
 	if gcp.orderTopic == nil {
 		gcp.orderTopic = gcp.client.Topic(topicID)
 	}
@@ -52,5 +52,5 @@ func (gcp *gcpPubsub) PublishSuccessOrder(userId int32, applicationId int32) {
 	if err != nil {
 		log.Error("Failed to marshal success order event !", "error", err)
 	}
-	gcp.orderTopic.Publish(context.Background(), &pubsub.Message{Data: eventBytes, Attributes: map[string]string{"event": "order_success"}})
+	return gcp.orderTopic.Publish(context.Background(), &pubsub.Message{Data: eventBytes, Attributes: map[string]string{"event": "order_success"}}).Get(context.Background())
 }

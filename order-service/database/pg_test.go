@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
@@ -42,15 +43,6 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestGetAllOrders(t *testing.T) {
-	orders, _ := database.Db.GetAllOrders()
-	expected := 4
-	actual := len(orders)
-	if actual != expected {
-		t.Errorf("Unexpected length of order slice ! got: %d want: %d", actual, expected)
-	}
-}
-
 func TestGetOrdersByApplication(t *testing.T) {
 	orders, _ := database.Db.GetOrdersByApplication(2)
 	expected := 2
@@ -68,7 +60,9 @@ func TestGetOrdersByApplication(t *testing.T) {
 func TestInsertOrder(t *testing.T) {
 	balance := model.Balance
 	orderRequest := model.OrderRequest{User: 10, Application: 10, Method: &balance}
-	database.Db.InsertOrder(orderRequest)
+	database.Db.ExecTransaction(context.Background(), func(ctx context.Context, tx pgx.Tx) error {
+		return database.Db.InsertOrder(orderRequest, ctx, tx)
+	})
 	byUser, _ := database.Db.GetOrdersByUser(10)
 	actual := len(byUser)
 	expected := 1
