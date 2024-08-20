@@ -110,5 +110,7 @@ public class UserService {
     if (user.getBalance().getAmount() < amount) {
       throw new InsufficientFoundsException();
     }
+    userRepository.subtractBalance(payerId, amount);
+    userRepository.addBalance(payeeId, amount);
   }
 }

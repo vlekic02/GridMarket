@@ -118,4 +118,30 @@ public class PostgresUserRepository implements UserRepository {
         user.getId()
     );
   }
+
+  @Override
+  public void addBalance(long id, double amount) {
+    template.update(
+        """
+            UPDATE grid_user
+            SET balance = balance + ?
+            WHERE user_id = ?
+            """,
+        amount,
+        id
+    );
+  }
+
+  @Override
+  public void subtractBalance(long id, double amount) {
+    template.update(
+        """
+            UPDATE grid_user
+            SET balance = balance - ?
+            WHERE user_id = ?
+            """,
+        amount,
+        id
+    );
+  }
 }
