@@ -28,6 +28,6 @@ public class InternalController {
 
   @PostMapping(value = "/transaction")
   public void proceedTransaction(@RequestBody UserTransactionRequest request) {
-    System.out.println(request);
+    userService.makeTransaction(request.payer(), request.payee(), request.amount());
   }
 }
