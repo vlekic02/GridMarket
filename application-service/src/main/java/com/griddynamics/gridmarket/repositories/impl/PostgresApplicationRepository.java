@@ -323,4 +323,16 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         null
     );
   }
+
+  @Override
+  public void addApplicationOwnership(long userId, long applicationId) {
+    template.update(
+        """
+            INSERT INTO ownership
+            VALUES (?, ?)
+            """,
+        userId,
+        applicationId
+    );
+  }
 }
