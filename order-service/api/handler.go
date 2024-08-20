@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"order-service/client"
 	"order-service/database"
 	log "order-service/logging"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/jsonapi"
+	"github.com/jackc/pgx/v5"
 )
 
 type AppService struct {
@@ -81,8 +83,23 @@ func (service *AppService) CreateOrder() gin.HandlerFunc {
 			ctx.Error(err)
 			return
 		}
-		database.Db.InsertOrder(*orderRequest)
-		messaging.Msg.PublishSuccessOrder(orderRequest.User, orderRequest.Application)
+		err = database.Db.ExecTransaction(ctx, func(ctx context.Context, tx pgx.Tx) error {
+			err = database.Db.InsertOrder(*orderRequest, ctx, tx)
+			if err != nil {
+				return err
+			}
+			msgId, err := messaging.Msg.PublishSuccessOrder(orderRequest.User, orderRequest.Application)
+			if err != nil {
+				return err
+			}
+			log.Debug("Successfily published order success event", "id", msgId)
+			return nil
+		})
+		if err != nil {
+			log.Error("Error while executing transaction !", "error", err)
+			ctx.Error(err)
+			return
+		}
 		ctx.Status(200)
 	}
 }
