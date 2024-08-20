@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	log "order-service/logging"
 	"order-service/model"
 	"os"
 	"time"
@@ -14,20 +15,7 @@ type postgres struct {
 	db *pgxpool.Pool
 }
 
-func (pg *postgres) GetAllOrders() ([]*model.Order, error) {
-	query := `SELECT * FROM grid_order`
-	rows, err := pg.db.Query(context.Background(), query)
-	if err != nil {
-		return nil, err
-	}
-	orders, err := pgx.CollectRows[*model.Order](rows, rowToOrder)
-	if err != nil {
-		return nil, err
-	}
-	return orders, nil
-}
-
-func (pg *postgres) InsertOrder(or model.OrderRequest) error {
+func (pg *postgres) InsertOrder(or model.OrderRequest, ctx context.Context, tx pgx.Tx) error {
 	query := `INSERT INTO grid_order VALUES (default, @user, @application, @date, @method)`
 	args := pgx.NamedArgs{
 		"user":        or.User,
@@ -35,7 +23,7 @@ func (pg *postgres) InsertOrder(or model.OrderRequest) error {
 		"date":        time.Now(),
 		"method":      or.Method.String(),
 	}
-	_, err := pg.db.Exec(context.Background(), query, args)
+	_, err := tx.Exec(ctx, query, args)
 	return err
 }
 
@@ -69,6 +57,26 @@ func (pg *postgres) GetOrdersByApplication(applicationId int32) ([]*model.Order,
 		return nil, err
 	}
 	return orders, nil
+}
+
+func (pg *postgres) ExecTransaction(ctx context.Context, fn func(ctx context.Context, tx pgx.Tx) error) (err error) {
+	tx, err := pg.db.Begin(ctx)
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			rollbackErr := tx.Rollback(ctx)
+			if rollbackErr != nil {
+				log.Error("Failed to rollback transaction !", "error", rollbackErr)
+			}
+		} else {
+			err = tx.Commit(ctx)
+		}
+	}()
+
+	return fn(ctx, tx)
 }
 
 func (pg *postgres) Close() {

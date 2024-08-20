@@ -18,6 +18,6 @@ type OrderAttributes struct {
 }
 
 type OrderRelations struct {
-	User        int32 `json:"user"`
-	Application int32 `json:"application"`
+	User        model.User        `json:"user"`
+	Application model.Application `json:"application"`
 }

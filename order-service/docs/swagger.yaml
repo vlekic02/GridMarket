@@ -1,4 +1,30 @@
 definitions:
+  docs.Order:
+    properties:
+      attributes:
+        $ref: '#/definitions/docs.OrderAttributes'
+      id:
+        type: integer
+      relationships:
+        $ref: '#/definitions/docs.OrderRelations'
+      type:
+        example: order
+        type: string
+    type: object
+  docs.OrderAttributes:
+    properties:
+      date:
+        type: string
+      method:
+        $ref: '#/definitions/model.PaymentMethod'
+    type: object
+  docs.OrderRelations:
+    properties:
+      application:
+        $ref: '#/definitions/model.Application'
+      user:
+        $ref: '#/definitions/model.User'
+    type: object
   jsonapi.ErrorObject:
     properties:
       code:
@@ -28,6 +54,11 @@ definitions:
           purposes of localization.
         type: string
     type: object
+  model.Application:
+    properties:
+      id:
+        type: integer
+    type: object
   model.ErrorResponse:
     properties:
       errors:
@@ -50,7 +81,6 @@ definitions:
     required:
     - application
     - method
-    - user
     type: object
   model.PaymentMethod:
     enum:
@@ -60,6 +90,11 @@ definitions:
     x-enum-varnames:
     - Balance
     - Paypal
+  model.User:
+    properties:
+      id:
+        type: integer
+    type: object
 info:
   contact: {}
   description: Order-service api documentation
@@ -68,12 +103,23 @@ info:
 paths:
   /v1/orders/:
     get:
+      parameters:
+      - description: User id
+        in: query
+        name: user
+        type: integer
+      - description: Application id
+        in: query
+        name: application
+        type: integer
       produces:
-      - text/plain
+      - application/vnd.api+json
       responses:
         "200":
           description: OK
-      summary: Returns hello
+          schema:
+            $ref: '#/definitions/docs.Order'
+      summary: Returns orders
       tags:
       - Order
     post:

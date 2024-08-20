@@ -14,11 +14,9 @@ import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.GridUserInfo;
-import com.griddynamics.gridmarket.models.Price;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
-import com.griddynamics.jacksonjsonapi.models.Resource;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
@@ -100,18 +98,8 @@ public class ApplicationService {
     return applicationRepository.findReviewsByApplication(application);
   }
 
-  public Price getApplicationPriceById(long id) {
-    Application application = getApplicationById(id);
-    if (!application.isVerified()) {
-      throw new NotFoundException("Specified application not found !");
-    }
-    double price = application.getRealPrice();
-    return new Price(id, price);
-  }
-
-  public Resource getApplicationOwnerById(long id) {
-    Application application = getApplicationById(id);
-    return application.getPublisher();
+  public boolean checkApplicationOwnership(long userId, long applicationId) {
+    return applicationRepository.hasApplicationOwnership(userId, applicationId);
   }
 
   public void handleApplicationUpload(String token, MultipartFile file) {

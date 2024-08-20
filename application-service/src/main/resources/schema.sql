@@ -33,9 +33,10 @@ CREATE TABLE IF NOT EXISTS sellable_application (
 )@@
 
 CREATE TABLE IF NOT EXISTS ownership (
-  "user" INTEGER,
+  grid_user INTEGER,
   application INTEGER,
-  PRIMARY KEY ("user", application)
+  PRIMARY KEY (grid_user, application),
+  FOREIGN KEY (application) REFERENCES application(application_id) ON DELETE CASCADE
 )@@
 
 CREATE TABLE IF NOT EXISTS review (

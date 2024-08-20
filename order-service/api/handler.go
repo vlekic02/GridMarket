@@ -1,25 +1,29 @@
 package api
 
 import (
+	"context"
 	"order-service/client"
 	"order-service/database"
 	log "order-service/logging"
+	"order-service/messaging"
 	"order-service/model"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/jsonapi"
+	"github.com/jackc/pgx/v5"
 )
 
 type AppService struct {
-	AppClient *client.ApplicationClient
+	AppClient  *client.ApplicationClient
+	UserClient *client.UserClient
 }
 
 // @Summary	Returns orders
 // @Tags		Order
 // @Produce	application/vnd.api+json
-// @Param		user		query	int	false
-// @Param		application	query	int	false
-// @Success	200
+// @Param		user		query		int	false	"User id"
+// @Param		application	query		int	false	"Application id"
+// @Success	200			{object}	docs.Order
 // @Router		/v1/orders/ [get]
 func GetAllOrders() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
@@ -60,13 +64,42 @@ func (service *AppService) CreateOrder() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		request, _ := ctx.Get("orderRequest")
 		orderRequest := request.(*model.OrderRequest)
-		applicationPrice, err := service.AppClient.GetApplicationPrice(orderRequest.Application)
+		applicationInfo, err := service.AppClient.GetApplicationInfo(orderRequest.Application, orderRequest.User)
 		if err != nil {
 			log.Error("Error while fetching application service", "error", err)
 			ctx.Error(err)
 			return
 		}
-		payload, _ := jsonapi.Marshal(&applicationPrice)
-		ctx.JSON(200, payload)
+		if applicationInfo.Owner == orderRequest.User {
+			ctx.Error(model.NewRestError(400, "Bad Request", "You can't purchase your own application"))
+			return
+		}
+		if applicationInfo.Ownership {
+			ctx.Error(model.NewRestError(409, "Conflict", "You already own this application"))
+			return
+		}
+		err = service.UserClient.MakeTransaction(client.UserTransactionRequest{Payer: orderRequest.User, Payee: applicationInfo.Owner, Amount: applicationInfo.Price})
+		if err != nil {
+			ctx.Error(err)
+			return
+		}
+		err = database.Db.ExecTransaction(ctx, func(ctx context.Context, tx pgx.Tx) error {
+			err = database.Db.InsertOrder(*orderRequest, ctx, tx)
+			if err != nil {
+				return err
+			}
+			msgId, err := messaging.Msg.PublishSuccessOrder(orderRequest.User, orderRequest.Application)
+			if err != nil {
+				return err
+			}
+			log.Debug("Successfily published order success event", "id", msgId)
+			return nil
+		})
+		if err != nil {
+			log.Error("Error while executing transaction !", "error", err)
+			ctx.Error(err)
+			return
+		}
+		ctx.Status(200)
 	}
 }

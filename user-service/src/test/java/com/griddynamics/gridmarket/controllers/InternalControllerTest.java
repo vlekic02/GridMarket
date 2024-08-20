@@ -3,7 +3,9 @@ package com.griddynamics.gridmarket.controllers;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.griddynamics.gridmarket.exceptions.InsufficientFoundsException;
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.http.request.UserTransactionRequest;
 import com.griddynamics.gridmarket.models.internal.UserInternalDto;
 import com.griddynamics.gridmarket.repositories.impl.PostgresUserRepository;
 import com.griddynamics.gridmarket.services.UserService;
@@ -75,5 +77,31 @@ class InternalControllerTest {
   void shouldThrowIfUserWithUsernameDoesntExist() {
     assertThrows(NotFoundException.class,
         () -> internalController.getUserByUsername("notExisting"));
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 10)",
+      "insert into grid_user values (2, 'test', 'test', 'testUsername', 1, 10)"
+  })
+  void shouldCorrectlyMakeTransaction() {
+    var request = new UserTransactionRequest(1, 2, 5);
+    internalController.proceedTransaction(request);
+    double firstBalance = internalController.getUserByUsername("test").getBalance();
+    double secondBalance = internalController.getUserByUsername("testUsername").getBalance();
+    assertTrue(firstBalance == 5 && secondBalance == 15);
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into role values (1, 'MEMBER')",
+      "insert into grid_user values (1, 'test', 'test', 'test', 1, 10)",
+      "insert into grid_user values (2, 'test', 'test', 'testUsername', 1, 10)"
+  })
+  void shouldFailTransactionIfInsufficientFounds() {
+    var request = new UserTransactionRequest(1, 2, 15);
+    assertThrows(InsufficientFoundsException.class,
+        () -> internalController.proceedTransaction(request));
   }
 }

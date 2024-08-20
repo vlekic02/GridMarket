@@ -23,4 +23,8 @@ public interface UserRepository {
   void deleteUser(long id);
 
   void save(User user);
+
+  void addBalance(long id, double amount);
+
+  int subtractBalance(long id, double amount);
 }

@@ -35,4 +35,14 @@ public class WebExceptionHandler {
         exception.getMessage()
     );
   }
+
+  @ExceptionHandler(InsufficientFoundsException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ErrorResource handleInsufficientFoundsException(InsufficientFoundsException exception) {
+    return ErrorResource.of(
+        "InsufficientFounds",
+        HttpStatus.BAD_REQUEST.value(),
+        "You don't have enough founds for this payment"
+    );
+  }
 }

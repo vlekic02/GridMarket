@@ -1,8 +1,11 @@
 package database
 
 import (
+	"context"
 	"order-service/model"
 	"time"
+
+	"github.com/jackc/pgx/v5"
 )
 
 type mockdb struct {
@@ -22,10 +25,7 @@ func InitMockDb() *mockdb {
 	return &mockdb{lastId: 5, orders: orders}
 }
 
-func (m *mockdb) GetAllOrders() ([]*model.Order, error) {
-	return m.orders, nil
-}
-func (m *mockdb) InsertOrder(or model.OrderRequest) error {
+func (m *mockdb) InsertOrder(or model.OrderRequest, ctx context.Context, tx pgx.Tx) error {
 	last := m.lastId
 	m.lastId = m.lastId + 1
 	m.orders = append(m.orders, &model.Order{Id: last, User: &model.User{Id: or.User}, Application: &model.Application{Id: or.Application}, Date: time.Now(), Method: *or.Method})
@@ -52,4 +52,8 @@ func (m *mockdb) GetOrdersByApplication(applicationId int32) ([]*model.Order, er
 
 func (m *mockdb) Close() {
 
+}
+
+func (m *mockdb) ExecTransaction(ctx context.Context, fn func(ctx context.Context, tx pgx.Tx) error) (err error) {
+	return fn(ctx, nil)
 }

@@ -18,15 +18,32 @@ const docTemplate = `{
         "/v1/orders/": {
             "get": {
                 "produces": [
-                    "text/plain"
+                    "application/vnd.api+json"
                 ],
                 "tags": [
                     "Order"
                 ],
-                "summary": "Returns hello",
+                "summary": "Returns orders",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User id",
+                        "name": "user",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "Application id",
+                        "name": "application",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/docs.Order"
+                        }
                     }
                 }
             },
@@ -85,6 +102,46 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "docs.Order": {
+            "type": "object",
+            "properties": {
+                "attributes": {
+                    "$ref": "#/definitions/docs.OrderAttributes"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "relationships": {
+                    "$ref": "#/definitions/docs.OrderRelations"
+                },
+                "type": {
+                    "type": "string",
+                    "example": "order"
+                }
+            }
+        },
+        "docs.OrderAttributes": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "string"
+                },
+                "method": {
+                    "$ref": "#/definitions/model.PaymentMethod"
+                }
+            }
+        },
+        "docs.OrderRelations": {
+            "type": "object",
+            "properties": {
+                "application": {
+                    "$ref": "#/definitions/model.Application"
+                },
+                "user": {
+                    "$ref": "#/definitions/model.User"
+                }
+            }
+        },
         "jsonapi.ErrorObject": {
             "type": "object",
             "properties": {
@@ -115,6 +172,14 @@ const docTemplate = `{
                 }
             }
         },
+        "model.Application": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "model.ErrorResponse": {
             "type": "object",
             "properties": {
@@ -130,8 +195,7 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "application",
-                "method",
-                "user"
+                "method"
             ],
             "properties": {
                 "application": {
@@ -163,6 +227,14 @@ const docTemplate = `{
                 "Balance",
                 "Paypal"
             ]
+        },
+        "model.User": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
         }
     }
 }`

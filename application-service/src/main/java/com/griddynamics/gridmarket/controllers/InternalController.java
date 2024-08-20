@@ -1,12 +1,14 @@
 package com.griddynamics.gridmarket.controllers;
 
-import com.griddynamics.gridmarket.http.response.DataResponse;
-import com.griddynamics.gridmarket.models.Price;
+import com.griddynamics.gridmarket.exceptions.NotFoundException;
+import com.griddynamics.gridmarket.models.Application;
+import com.griddynamics.gridmarket.models.ApplicationInfo;
 import com.griddynamics.gridmarket.services.ApplicationService;
-import com.griddynamics.jacksonjsonapi.models.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequestMapping("/internal")
@@ -19,13 +21,20 @@ public class InternalController {
     this.applicationService = applicationService;
   }
 
-  @GetMapping(value = "/{id}/price", produces = "application/vnd.api+json")
-  public DataResponse<Price> getApplicationPriceById(@PathVariable long id) {
-    return DataResponse.of(applicationService.getApplicationPriceById(id));
-  }
-
-  @GetMapping(value = "/{id}/owner", produces = "application/vnd.api+json")
-  public DataResponse<Resource> getApplicationOwnerById(@PathVariable long id) {
-    return DataResponse.of(applicationService.getApplicationOwnerById(id));
+  @GetMapping(value = "/{id}/info", produces = MediaType.APPLICATION_JSON_VALUE)
+  public ApplicationInfo getApplicationInfoById(
+      @PathVariable long id,
+      @RequestParam("ownership") long userId
+  ) {
+    Application application = applicationService.getApplicationById(id);
+    if (!application.isVerified()) {
+      throw new NotFoundException("Specified application is not found");
+    }
+    boolean ownership = applicationService.checkApplicationOwnership(userId, id);
+    return new ApplicationInfo(
+        application.getPublisher().getId(),
+        application.getRealPrice(),
+        ownership
+    );
   }
 }
