@@ -1,10 +1,10 @@
 package com.griddynamics.gridmarket.controllers;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.exceptions.NotFoundException;
-import com.griddynamics.gridmarket.models.Price;
+import com.griddynamics.gridmarket.models.ApplicationInfo;
 import com.griddynamics.gridmarket.repositories.impl.PostgresApplicationRepository;
 import com.griddynamics.gridmarket.services.ApplicationService;
 import org.junit.jupiter.api.AfterEach;
@@ -52,12 +52,31 @@ class InternalControllerTest {
 
   @Test
   @Sql(statements = {
-      "insert into application values (1, 'Test', null, 'path', 1, 20, null)",
+      "insert into application values (1, 'Test', null, 'path', 2, 20, null)",
       "insert into sellable_application values (1, default, default)"
   })
-  void shouldReturnCorrectPriceForApplication() {
-    Price price = internalController.getApplicationPriceById(1).getData();
-    assertEquals(20, price.getPrice());
+  void shouldCorrectlyReturnAppInfo() {
+    ApplicationInfo applicationInfo = internalController.getApplicationInfoById(1, 5);
+    assertTrue(
+        applicationInfo.owner() == 2
+            && applicationInfo.price() == 20
+            && !applicationInfo.ownership()
+    );
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, 'path', 2, 20, null)",
+      "insert into sellable_application values (1, default, default)",
+      "insert into ownership values (2, 1)"
+  })
+  void shouldCorrectlyReturnOwnership() {
+    ApplicationInfo applicationInfo = internalController.getApplicationInfoById(1, 2);
+    assertTrue(
+        applicationInfo.owner() == 2
+            && applicationInfo.price() == 20
+            && applicationInfo.ownership()
+    );
   }
 
   @Test
@@ -65,6 +84,6 @@ class InternalControllerTest {
       "insert into application values (1, 'Test', null, 'path', 1, 20, null)"
   })
   void shouldThrowIfApplicationIsNotVerified() {
-    assertThrows(NotFoundException.class, () -> internalController.getApplicationPriceById(1));
+    assertThrows(NotFoundException.class, () -> internalController.getApplicationInfoById(1, 5));
   }
 }

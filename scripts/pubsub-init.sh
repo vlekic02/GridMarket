@@ -26,11 +26,13 @@ createTopics() {
   pip install -r requirements.txt
   export PUBSUB_EMULATOR_HOST=localhost:8085
   python3 publisher.py gridmarket-dev create user
+  python3 publisher.py gridmarket-dev create order
 }
 
 createSubscriptions() {
   python3 subscriber.py gridmarket-dev create user user-subscription
   python3 subscriber.py gridmarket-dev create user user-application-subscription
+  python3 subscriber.py gridmarket-dev create order order-subscription
 }
 
 main "$@"

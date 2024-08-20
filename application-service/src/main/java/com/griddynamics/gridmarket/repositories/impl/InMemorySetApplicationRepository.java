@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class InMemorySetApplicationRepository implements ApplicationRepository {
 
+  private final Map<Long, Set<Long>> ownership;
   private final Map<Long, DateRange> verificationPeriod;
   private final List<Application> applications;
   private final List<Discount> discounts;
@@ -56,6 +58,7 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
         new Review(4, 4, 8, null, 4)
     ));
     lastApplicationId = 4;
+    this.ownership = new HashMap<>();
   }
 
   @Override
@@ -156,6 +159,15 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
     return reviews.stream()
         .anyMatch(review -> review.getApplication().getId() == applicationId
             && review.getAuthor().getId() == userId);
+  }
+
+  @Override
+  public boolean hasApplicationOwnership(long userId, long applicationId) {
+    Set<Long> applications = ownership.get(userId);
+    if (applications == null) {
+      return false;
+    }
+    return applications.contains(applicationId);
   }
 
   @Override

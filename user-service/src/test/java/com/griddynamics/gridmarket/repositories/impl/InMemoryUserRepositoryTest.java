@@ -8,15 +8,15 @@ import com.griddynamics.gridmarket.models.User;
 import com.griddynamics.gridmarket.repositories.UserRepository;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class InMemoryUserRepositoryTest {
 
   private static UserRepository userRepository;
 
-  @BeforeAll
-  static void setup() {
+  @BeforeEach
+  void setup() {
     userRepository = new InMemoryUserRepository();
   }
 
@@ -54,5 +54,26 @@ class InMemoryUserRepositoryTest {
             && "TestUsername".equals(user.getUsername())
             && user.getRole().getId() == 1
     );
+  }
+
+  @Test
+  void shouldCorrectlyDeleteUser() {
+    userRepository.deleteUser(1);
+    Optional<User> userOptional = userRepository.findById(1);
+    assertTrue(userOptional.isEmpty());
+  }
+
+  @Test
+  void shouldCorrectlyAddBalance() {
+    userRepository.addBalance(1, 10);
+    User user = userRepository.findById(1).get();
+    assertEquals(1510, user.getBalance().getAmount());
+  }
+
+  @Test
+  void shouldCorrectlySubtractBalance() {
+    userRepository.subtractBalance(1, 10);
+    User user = userRepository.findById(1).get();
+    assertEquals(1490, user.getBalance().getAmount());
   }
 }

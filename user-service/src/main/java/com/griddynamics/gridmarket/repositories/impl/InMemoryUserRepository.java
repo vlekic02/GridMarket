@@ -72,4 +72,30 @@ public class InMemoryUserRepository implements UserRepository {
     deleteUser(user.getId());
     users.add(user);
   }
+
+  @Override
+  public void addBalance(long id, double amount) {
+    findById(id).ifPresent(user -> {
+      User newUser = user.builder()
+          .setBalance(user.getBalance().getAmount() + amount)
+          .build();
+      deleteUser(id);
+      users.add(newUser);
+    });
+  }
+
+  @Override
+  public int subtractBalance(long id, double amount) {
+    return findById(id)
+        .filter(user -> user.getBalance().getAmount() >= amount)
+        .map(user -> {
+          User newUser = user.builder()
+              .setBalance(user.getBalance().getAmount() - amount)
+              .build();
+          deleteUser(id);
+          users.add(newUser);
+          return 1;
+        })
+        .orElse(0);
+  }
 }

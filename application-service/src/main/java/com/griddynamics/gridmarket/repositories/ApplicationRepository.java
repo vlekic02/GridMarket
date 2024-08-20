@@ -37,6 +37,8 @@ public interface ApplicationRepository {
 
   boolean alreadyMadeReview(long userId, long applicationId);
 
+  boolean hasApplicationOwnership(long userId, long applicationId);
+
   void deleteReviewById(long id);
 
   Path deleteApplicationById(long id);
