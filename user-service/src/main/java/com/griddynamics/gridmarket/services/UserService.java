@@ -106,11 +106,10 @@ public class UserService {
 
   @Transactional
   public void makeTransaction(long payerId, long payeeId, double amount) {
-    User user = getUserById(payerId);
-    if (user.getBalance().getAmount() < amount) {
+    int updatedCount = userRepository.subtractBalance(payerId, amount);
+    if (updatedCount < 1) {
       throw new InsufficientFoundsException();
     }
-    userRepository.subtractBalance(payerId, amount);
     userRepository.addBalance(payeeId, amount);
   }
 }

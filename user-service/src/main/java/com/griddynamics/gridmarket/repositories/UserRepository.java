@@ -26,5 +26,5 @@ public interface UserRepository {
 
   void addBalance(long id, double amount);
 
-  void subtractBalance(long id, double amount);
+  int subtractBalance(long id, double amount);
 }

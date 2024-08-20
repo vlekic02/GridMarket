@@ -133,15 +133,16 @@ public class PostgresUserRepository implements UserRepository {
   }
 
   @Override
-  public void subtractBalance(long id, double amount) {
-    template.update(
+  public int subtractBalance(long id, double amount) {
+    return template.update(
         """
             UPDATE grid_user
             SET balance = balance - ?
-            WHERE user_id = ?
+            WHERE user_id = ? AND balance > ?
             """,
         amount,
-        id
+        id,
+        amount
     );
   }
 }
