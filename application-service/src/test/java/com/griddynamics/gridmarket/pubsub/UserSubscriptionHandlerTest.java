@@ -52,9 +52,9 @@ class UserSubscriptionHandlerTest {
   TopicAdminClient topicAdminClient;
   @Autowired
   SubscriptionAdminClient subscriptionAdminClient;
-  UserSubscriptionHandler userSubscriptionHandler;
+  SubscriptionHandler userSubscriptionHandler;
   PubSubAdmin admin;
-  UserListener userListenerSpy;
+  Listener userListenerSpy;
   ApplicationService applicationService;
 
   @DynamicPropertySource
@@ -72,9 +72,10 @@ class UserSubscriptionHandlerTest {
     applicationService = new ApplicationService(new InMemorySetApplicationRepository(),
         storageService,
         "");
-    userListenerSpy = spy(new UserListener(applicationService));
-    userSubscriptionHandler = new UserSubscriptionHandler(template, new ObjectMapper(),
-        userListenerSpy);
+    userListenerSpy = spy(new Listener(applicationService));
+    userSubscriptionHandler = new SubscriptionHandler(template, new ObjectMapper(),
+        userListenerSpy, "user-application-subscription", Map.of("user_deletion",
+        UserDeletionEvent.class));
   }
 
   @AfterEach

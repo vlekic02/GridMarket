@@ -5,29 +5,29 @@ import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.pubsub.v1.PubsubMessage;
 import com.griddynamics.gridmarket.pubsub.event.GenericEvent;
-import com.griddynamics.gridmarket.pubsub.event.UserDeletionEvent;
 import java.io.IOException;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Component;
 
-@Component
-public class UserSubscriptionHandler {
+public class SubscriptionHandler {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(UserSubscriptionHandler.class);
-  private static final String SUBSCRIPTION_NAME = "user-application-subscription";
+  private static final Logger LOGGER = LoggerFactory.getLogger(SubscriptionHandler.class);
   private final ObjectMapper objectMapper;
   private final Map<String, Class<? extends GenericEvent>> payloadTypes;
   private final ListenerAdapter listenerAdapter;
 
-  public UserSubscriptionHandler(PubSubTemplate template, ObjectMapper objectMapper,
-      @Qualifier("userListener") ListenerAdapter listenerAdapter) {
+  public SubscriptionHandler(
+      PubSubTemplate template,
+      ObjectMapper objectMapper,
+      ListenerAdapter listenerAdapter,
+      String subscriptionName,
+      Map<String, Class<? extends GenericEvent>> payloadTypes
+  ) {
     this.objectMapper = objectMapper;
-    payloadTypes = Map.of("user_deletion", UserDeletionEvent.class);
+    this.payloadTypes = payloadTypes;
     this.listenerAdapter = listenerAdapter;
-    template.subscribe(SUBSCRIPTION_NAME, this::handle);
+    template.subscribe(subscriptionName, this::handle);
   }
 
   private void handle(BasicAcknowledgeablePubsubMessage basicAcknowledgeablePubsubMessage) {

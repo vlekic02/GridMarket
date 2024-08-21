@@ -120,4 +120,10 @@ class InMemorySetApplicationRepositoryTest {
     List<Review> applicationReview = applicationRepository.findReviewsByApplication(application);
     assertThat(applicationReview).isEmpty();
   }
+
+  @Test
+  void shouldCorrectlyAddOwnership() {
+    applicationRepository.addApplicationOwnership(1, 1);
+    assertTrue(applicationRepository.hasApplicationOwnership(1, 1));
+  }
 }

@@ -46,4 +46,6 @@ public interface ApplicationRepository {
   void deleteApplicationsByUser(long userId);
 
   void saveApplication(ApplicationMetadata metadata, String path);
+
+  void addApplicationOwnership(long userId, long applicationId);
 }

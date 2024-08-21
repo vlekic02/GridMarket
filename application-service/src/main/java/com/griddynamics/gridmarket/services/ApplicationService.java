@@ -16,6 +16,7 @@ import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
+import com.griddynamics.gridmarket.pubsub.event.OrderSuccessEvent;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -79,6 +80,7 @@ public class ApplicationService {
 
   public FileSystemResource pullApplication(long id, GridUserInfo userInfo) {
     Application application = getApplicationById(id, userInfo);
+    // TODO: ownership check
     return storageService.getFileByPath(application.getPath());
   }
 
@@ -206,5 +208,9 @@ public class ApplicationService {
     } else {
       applicationRepository.removeVerification(id);
     }
+  }
+
+  public void handleOrderSuccess(OrderSuccessEvent event) {
+    applicationRepository.addApplicationOwnership(event.user(), event.application());
   }
 }

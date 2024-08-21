@@ -332,4 +332,13 @@ class PostgresApplicationRepositoryTest {
             && updatedApp.getOriginalPrice() == 15
     );
   }
+
+  @Test
+  @Sql(statements = {
+      "insert into application values (1, 'Test', null, '/path/test', 1, 20, default)"
+  })
+  void shouldCorrectlyAddApplicationOwnership() {
+    applicationRepository.addApplicationOwnership(1, 1);
+    assertTrue(applicationRepository.hasApplicationOwnership(1, 1));
+  }
 }
