@@ -1,6 +1,3 @@
-server:
-  port: 9000
-oauth-client-id: "gridmarket-public-client"
 management:
   metrics:
     distribution:
