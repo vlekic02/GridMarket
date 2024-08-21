@@ -114,7 +114,7 @@ services:
     ports:
       - 9411:9411
     environment:
-      - STORAGE_TYPE=mysql
+      - STORAGE_TYPE=mem
     networks:
       - service-net
 networks:
