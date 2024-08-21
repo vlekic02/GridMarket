@@ -1,5 +1,12 @@
 oauth-redirect-uri: "https://oauth.pstmn.io/v1/callback"
 oauth-issuer: http://auth-service:9000/
+management:
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  tracing:
+    sampling:
+      probability: 1
 spring:
   cloud:
     gcp:
