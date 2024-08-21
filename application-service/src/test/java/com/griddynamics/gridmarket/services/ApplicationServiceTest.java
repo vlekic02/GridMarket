@@ -24,6 +24,7 @@ import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
+import com.griddynamics.gridmarket.pubsub.event.OrderSuccessEvent;
 import com.griddynamics.gridmarket.repositories.impl.InMemorySetApplicationRepository;
 import com.griddynamics.gridmarket.utils.GridUserBuilder;
 import java.nio.charset.StandardCharsets;
@@ -39,6 +40,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
@@ -66,11 +68,21 @@ class ApplicationServiceTest {
     );
   }
 
+  private static Stream<GridUserInfo> getPullApplicationUserInfo() {
+    return Stream.of(
+        GridUserBuilder.adminUser().setId(10).build(), // ADMIN
+        GridUserBuilder.memberUser().setId(3).build(),  // App publisher
+        GridUserBuilder.memberUser().setId(8).build() // Have purchased an app
+    );
+  }
+
   @BeforeEach
   void setup() {
     lenient().when(storageService.save(any(MultipartFile.class), anyString(), anyLong()))
         .thenReturn(
             Path.of("test"));
+    lenient().when(storageService.getFileByPath(anyString()))
+        .thenReturn(new FileSystemResource("test"));
     applicationService = new ApplicationService(new InMemorySetApplicationRepository(),
         storageService,
         "test");
@@ -323,5 +335,20 @@ class ApplicationServiceTest {
     applicationService.updateApplication(2, applicationUpdateRequest, userInfo);
     Application application = applicationService.getApplicationById(2);
     assertFalse(application.isVerified());
+  }
+
+  @Test
+  void shouldThrowIfUnauthorizedUserTryToPullApplication() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().setId(1).build();
+    assertThrows(UnauthorizedException.class,
+        () -> applicationService.pullApplication(2, userInfo));
+  }
+
+  @ParameterizedTest
+  @MethodSource("getPullApplicationUserInfo")
+  void shouldCorrectlyPullApplication(GridUserInfo userInfo) {
+    applicationService.handleOrderSuccess(new OrderSuccessEvent(8, 2));
+    FileSystemResource systemResource = applicationService.pullApplication(2, userInfo);
+    assertEquals("test", systemResource.getPath());
   }
 }
