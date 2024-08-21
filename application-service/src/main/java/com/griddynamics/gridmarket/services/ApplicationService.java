@@ -80,7 +80,12 @@ public class ApplicationService {
 
   public FileSystemResource pullApplication(long id, GridUserInfo userInfo) {
     Application application = getApplicationById(id, userInfo);
-    // TODO: ownership check
+    if (isNotAdmin(userInfo)
+        && application.getPublisher().getId() != userInfo.id()
+        && !checkApplicationOwnership(userInfo.id(), id)
+    ) {
+      throw new UnauthorizedException("You don't have permission to pull this application");
+    }
     return storageService.getFileByPath(application.getPath());
   }
 
