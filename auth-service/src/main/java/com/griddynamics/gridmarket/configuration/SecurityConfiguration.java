@@ -86,6 +86,7 @@ public class SecurityConfiguration {
     http.authorizeHttpRequests((authorize) -> authorize
             .requestMatchers("/img/**").permitAll()
             .requestMatchers("/register").permitAll()
+            .requestMatchers("/actuator/**").permitAll()
             .anyRequest().authenticated()
         )
         .formLogin(form -> form.loginPage("/login").permitAll())

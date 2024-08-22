@@ -1,6 +1,6 @@
 spring:
   application:
-    name: user-service
+    name: gateway-service
 management:
   metrics:
     distribution:
@@ -15,6 +15,3 @@ management:
     web:
       exposure:
         include: [ 'prometheus', 'health' ]
-springdoc:
-  api-docs:
-    path: /user/v3/api-docs
