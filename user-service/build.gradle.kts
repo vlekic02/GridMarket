@@ -50,6 +50,8 @@ dependencies {
     implementation("com.google.cloud:spring-cloud-gcp-starter-pubsub")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    implementation("io.micrometer:micrometer-tracing-bridge-brave")
+    implementation("io.zipkin.reporter2:zipkin-reporter-brave")
     implementation("com.griddynamics:jackson-jsonapi:1.0")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
     implementation("org.springframework.boot:spring-boot-starter-data-jdbc")

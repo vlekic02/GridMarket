@@ -109,6 +109,14 @@ services:
     command: ./init.sh
     networks:
       - service-net
+  zipkin:
+    image: openzipkin/zipkin
+    ports:
+      - 9411:9411
+    environment:
+      - STORAGE_TYPE=mem
+    networks:
+      - service-net
   prometheus:
     image: prom/prometheus
     command: --config.file=/etc/prometheus/prometheus.yml
