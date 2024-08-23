@@ -25,6 +25,7 @@ public class SecurityConfiguration {
   @Bean
   public SecurityWebFilterChain filterChain(ServerHttpSecurity http) throws Exception {
     http.authorizeExchange(authorize -> authorize
+            .pathMatchers("/actuator/**").permitAll()
             .anyExchange().authenticated()
         )
         .oauth2ResourceServer((oauth2) -> oauth2.jwt(

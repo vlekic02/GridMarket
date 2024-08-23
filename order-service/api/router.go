@@ -8,6 +8,7 @@ import (
 	"order-service/docs"
 
 	"github.com/gin-gonic/gin"
+	"github.com/penglongli/gin-metrics/ginmetrics"
 
 	swaggerFiles "github.com/swaggo/files"
 
@@ -16,6 +17,10 @@ import (
 
 func InitRouter(service AppService) *gin.Engine {
 	app := gin.New()
+
+	m := ginmetrics.GetMonitor()
+	m.SetMetricPath("/metrics")
+	m.Use(app)
 
 	app.Use(gin.Recovery(), ErrorHandler(), JsonLogger(), JsonApiMiddleware())
 
