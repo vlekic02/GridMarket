@@ -175,30 +175,34 @@ public class ApplicationService {
     if (application.getPublisher().getId() != userInfo.id() && isNotAdmin(userInfo)) {
       throw new UnauthorizedException("You don't have permission to update this app");
     }
-    Application.Builder applicatioBuilder = application.builder();
+    Application.Builder applicationBuilder = application.builder();
     if (request.name() != null && !request.name().isEmpty()) {
       Optional<Application> applicationOptional = applicationRepository.findByName(request.name());
       if (applicationOptional.isPresent()) {
         throw new UnprocessableEntityException(
             "Application with name " + request.name() + " already exist");
       }
-      applicatioBuilder.setName(request.name());
+      applicationBuilder.setName(request.name());
     }
     String description = request.description();
     if (description != null) {
-      applicatioBuilder.setDescription(description.isEmpty() ? null : description);
+      applicationBuilder.setDescription(description.isEmpty() ? null : description);
     }
     if (request.price() != null) {
-      applicatioBuilder.setOriginalPrice(request.price());
+      applicationBuilder.setOriginalPrice(request.price());
     }
     if (request.discountId() != null) {
-      Discount discount = applicationRepository.findDiscountById(request.discountId())
-          .filter(d -> d.getUser().getId() == userInfo.id())
-          .orElseThrow(() -> new UnprocessableEntityException("Provided discount doesn't exist"));
-      applicatioBuilder.setDiscount(discount);
+      if (request.discountId() == -1) {
+        applicationBuilder.setDiscount(null);
+      } else {
+        Discount discount = applicationRepository.findDiscountById(request.discountId())
+            .filter(d -> d.getUser().getId() == userInfo.id())
+            .orElseThrow(() -> new UnprocessableEntityException("Provided discount doesn't exist"));
+        applicationBuilder.setDiscount(discount);
+      }
     }
-    if (applicatioBuilder.isChanged()) {
-      applicationRepository.save(applicatioBuilder.build());
+    if (applicationBuilder.isChanged()) {
+      applicationRepository.save(applicationBuilder.build());
     }
     if (request.verify() != null) {
       handleVerification(application.getId(), request.verify());
