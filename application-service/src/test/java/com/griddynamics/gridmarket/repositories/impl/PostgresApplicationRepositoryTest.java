@@ -8,7 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
+import com.griddynamics.gridmarket.mappers.DiscountRowMapper;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Discount;
@@ -173,7 +175,7 @@ class PostgresApplicationRepositoryTest {
 
   @Test
   @Sql(statements = {
-      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null)",
+      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null, 1)",
       "insert into application values (1, 'Test', null, 'path', 1, 20, 1)"
   })
   void shouldCorrectlyReturnApplicationWithDiscount() {
@@ -279,7 +281,7 @@ class PostgresApplicationRepositoryTest {
 
   @Test
   @Sql(statements = {
-      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null)"
+      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null, 1)"
   })
   void shouldCorrectlyFindDiscountById() {
     Discount discount = applicationRepository.findDiscountById(1).get();
@@ -340,5 +342,27 @@ class PostgresApplicationRepositoryTest {
   void shouldCorrectlyAddApplicationOwnership() {
     applicationRepository.addApplicationOwnership(1, 1);
     assertTrue(applicationRepository.hasApplicationOwnership(1, 1));
+  }
+
+  @Test
+  void shouldCorrectlyCreateDiscount() {
+    var request = new DiscountCreateRequest("TestInsert",
+        "PERCENTAGE", 20D, null, null);
+    applicationRepository.createDiscount(request, 1);
+    Discount discount = template.query(
+        """
+            SELECT discount_id, name AS discount_name, type, "value", start_date, end_date,
+            grid_user
+            FROM discount
+            WHERE name = 'TestInsert'
+            """,
+        new DiscountRowMapper()
+    ).get(0);
+    assertTrue(
+        discount.getName().equals("TestInsert")
+            && discount.getUser().getId() == 1
+            && discount.getValue() == 20D
+            && discount.getDiscountType() == Type.PERCENTAGE
+    );
   }
 }

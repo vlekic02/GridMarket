@@ -112,7 +112,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
     Stream<Application> applicationStream = template.queryForStream(
         """
             SELECT discount_id, discount.name AS discount_name,
-             type, "value", start_date, end_date, application.*,
+             type, "value", start_date, end_date, grid_user, application.*,
              EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
@@ -134,7 +134,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
     Stream<Application> applicationStream = template.queryForStream(
         """
             SELECT discount_id, discount.name AS discount_name,
-             type, "value", start_date, end_date, application.*,
+             type, "value", start_date, end_date, grid_user, application.*,
              EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
@@ -155,7 +155,8 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   public Optional<Discount> findDiscountById(long id) {
     Stream<Discount> discountStream = template.queryForStream(
         """
-            SELECT discount_id, name AS discount_name, type, "value", start_date, end_date
+            SELECT discount_id, name AS discount_name, type, "value", start_date, end_date,
+            grid_user
             FROM discount
             WHERE discount_id = ?
             """,
