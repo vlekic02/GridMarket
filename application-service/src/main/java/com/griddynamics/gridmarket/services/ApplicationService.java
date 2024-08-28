@@ -193,6 +193,7 @@ public class ApplicationService {
     }
     if (request.discountId() != null) {
       Discount discount = applicationRepository.findDiscountById(request.discountId())
+          .filter(d -> d.getUser().getId() == userInfo.id())
           .orElseThrow(() -> new UnprocessableEntityException("Provided discount doesn't exist"));
       applicatioBuilder.setDiscount(discount);
     }
