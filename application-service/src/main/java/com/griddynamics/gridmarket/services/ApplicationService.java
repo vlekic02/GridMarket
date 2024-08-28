@@ -8,6 +8,7 @@ import com.griddynamics.gridmarket.exceptions.UnauthorizedException;
 import com.griddynamics.gridmarket.exceptions.UnprocessableEntityException;
 import com.griddynamics.gridmarket.http.request.ApplicationUpdateRequest;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.http.request.VerifyRequest;
 import com.griddynamics.gridmarket.models.Application;
@@ -217,5 +218,9 @@ public class ApplicationService {
 
   public void handleOrderSuccess(OrderSuccessEvent event) {
     applicationRepository.addApplicationOwnership(event.user(), event.application());
+  }
+
+  public void createDiscount(DiscountCreateRequest request, GridUserInfo userInfo) {
+    applicationRepository.createDiscount(request, userInfo.id());
   }
 }

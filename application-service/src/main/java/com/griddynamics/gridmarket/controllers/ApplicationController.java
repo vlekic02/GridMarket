@@ -3,6 +3,7 @@ package com.griddynamics.gridmarket.controllers;
 import com.griddynamics.gridmarket.annotations.AdminAccess;
 import com.griddynamics.gridmarket.http.request.ApplicationUpdateRequest;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
 import com.griddynamics.gridmarket.models.Application;
@@ -149,5 +150,15 @@ public class ApplicationController {
   @AdminAccess
   public void deleteReview(@PathVariable long id) {
     applicationService.deleteReview(id);
+  }
+
+  @Operation(summary = "Creates a discount")
+  @PostMapping("/discounts")
+  @ResponseStatus(HttpStatus.CREATED)
+  public void createDiscount(
+      @RequestBody @Valid DiscountCreateRequest request,
+      GridUserInfo userInfo
+  ) {
+    applicationService.createDiscount(request, userInfo);
   }
 }
