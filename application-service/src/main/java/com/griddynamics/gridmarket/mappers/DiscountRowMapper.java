@@ -23,11 +23,12 @@ public class DiscountRowMapper implements RowMapper<Discount> {
     LocalDateTime startTime = startTimestamp == null ? null : startTimestamp.toLocalDateTime();
     Timestamp endTimestamp = resultSet.getTimestamp("end_date");
     LocalDateTime endTime = endTimestamp == null ? null : endTimestamp.toLocalDateTime();
+    long userId = resultSet.getLong("grid_user");
     if (startTime == null || endTime == null) {
-      return Discount.unlimited(discountId, discountName, discountType, value);
+      return Discount.unlimited(discountId, discountName, discountType, value, userId);
     } else {
       return Discount.withTimeFrame(discountId, discountName, discountType, value, startTime,
-          endTime);
+          endTime, userId);
     }
   }
 }

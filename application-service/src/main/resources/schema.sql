@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS discount (
   type discount_type NOT NULL,
   value DECIMAL NOT NULL CHECK (value > 0),
   start_date TIMESTAMP,
-  end_date TIMESTAMP
+  end_date TIMESTAMP,
+  grid_user INTEGER NOT NULL
 )@@
 
 CREATE TABLE IF NOT EXISTS application (
