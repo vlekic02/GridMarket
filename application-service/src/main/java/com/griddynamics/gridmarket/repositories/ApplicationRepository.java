@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.repositories;
 
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
@@ -48,4 +49,6 @@ public interface ApplicationRepository {
   void saveApplication(ApplicationMetadata metadata, String path);
 
   void addApplicationOwnership(long userId, long applicationId);
+
+  void createDiscount(DiscountCreateRequest request, long userId);
 }

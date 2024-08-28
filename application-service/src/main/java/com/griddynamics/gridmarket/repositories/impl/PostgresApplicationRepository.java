@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.repositories.impl;
 
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.mappers.ApplicationRowMapper;
 import com.griddynamics.gridmarket.mappers.DiscountRowMapper;
@@ -333,6 +334,22 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             """,
         userId,
         applicationId
+    );
+  }
+
+  @Override
+  public void createDiscount(DiscountCreateRequest request, long userId) {
+    template.update(
+        """
+            INSERT INTO discount
+            VALUES (DEFAULT, ?, ?::discount_type, ?, ?, ?, ?)
+            """,
+        request.name(),
+        request.type(),
+        request.value(),
+        request.startTime(),
+        request.endTime(),
+        userId
     );
   }
 }
