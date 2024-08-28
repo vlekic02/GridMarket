@@ -36,7 +36,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
     return template.query(
         """
             SELECT discount_id, discount.name AS discount_name,
-             type, "value", start_date, end_date, application.*,
+             type, "value", start_date, end_date, grid_user, application.*,
              EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
@@ -54,7 +54,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         """
             SELECT * FROM (
               SELECT discount_id, discount.name AS discount_name,
-              type, "value", start_date, end_date, application.*,
+              type, "value", start_date, end_date, grid_user, application.*,
               EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
@@ -80,7 +80,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         """
             SELECT * FROM (
               SELECT discount_id, discount.name AS discount_name,
-              type, "value", start_date, end_date, application.*,
+              type, "value", start_date, end_date, grid_user, application.*,
               EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
