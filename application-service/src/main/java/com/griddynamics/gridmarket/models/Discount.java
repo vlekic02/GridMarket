@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.models;
 
+import com.griddynamics.jacksonjsonapi.annotations.JsonRelation;
 import com.griddynamics.jacksonjsonapi.models.Resource;
 import java.time.LocalDateTime;
 import java.util.function.DoubleBinaryOperator;
@@ -57,6 +58,7 @@ public class Discount extends Resource {
     return type.calculatePrice(value, price);
   }
 
+  @JsonRelation
   public Resource getUser() {
     return user;
   }
