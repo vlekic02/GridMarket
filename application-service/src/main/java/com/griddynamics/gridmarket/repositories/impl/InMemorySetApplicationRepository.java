@@ -228,6 +228,18 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
     ));
   }
 
+  @Override
+  public List<Discount> findAllDiscountsForUser(long userId) {
+    return discounts.stream()
+        .filter(discount -> discount.getUser().getId() == userId)
+        .toList();
+  }
+
+  @Override
+  public void deleteDiscount(long discountId) {
+    discounts.removeIf(discount -> discount.getId() == discountId);
+  }
+
   private record DateRange(LocalDateTime startTime, LocalDateTime endTime) {
 
     public static DateRange empty() {

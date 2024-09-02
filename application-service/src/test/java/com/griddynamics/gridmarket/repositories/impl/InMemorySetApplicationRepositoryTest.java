@@ -7,9 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
+import com.griddynamics.gridmarket.models.Discount;
+import com.griddynamics.gridmarket.models.Discount.Type;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
@@ -125,5 +128,32 @@ class InMemorySetApplicationRepositoryTest {
   void shouldCorrectlyAddOwnership() {
     applicationRepository.addApplicationOwnership(1, 1);
     assertTrue(applicationRepository.hasApplicationOwnership(1, 1));
+  }
+
+  @Test
+  void shouldCorrectlyReturnAllDiscountsByUser() {
+    List<Discount> discounts = applicationRepository.findAllDiscountsForUser(1);
+    assertThat(discounts).hasSize(1);
+  }
+
+  @Test
+  void shouldCorrectlyCreateDiscountForUser() {
+    var request = new DiscountCreateRequest("TestInsert",
+        "PERCENTAGE", 20D, null, null);
+    applicationRepository.createDiscount(request, 2);
+    Discount discount = applicationRepository.findAllDiscountsForUser(2).get(0);
+    assertTrue(
+        discount.getName().equals("TestInsert")
+            && discount.getUser().getId() == 2
+            && discount.getValue() == 20D
+            && discount.getDiscountType() == Type.PERCENTAGE
+    );
+  }
+
+  @Test
+  void shouldCorrectlyDeleteDiscount() {
+    applicationRepository.deleteDiscount(1);
+    Optional<Discount> discountOptional = applicationRepository.findDiscountById(1);
+    assertTrue(discountOptional.isEmpty());
   }
 }

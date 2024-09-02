@@ -353,4 +353,28 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         userId
     );
   }
+
+  @Override
+  public List<Discount> findAllDiscountsForUser(long userId) {
+    return template.query(
+        """
+            SELECT discount_id, name AS discount_name, type, value, start_date, end_date, grid_user
+            FROM discount
+            WHERE grid_user = ?
+            """,
+        new DiscountRowMapper(),
+        userId
+    );
+  }
+
+  @Override
+  public void deleteDiscount(long discountId) {
+    template.update(
+        """
+            DELETE FROM discount
+            WHERE discount_id = ?
+            """,
+        discountId
+    );
+  }
 }
