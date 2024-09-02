@@ -228,4 +228,8 @@ public class ApplicationService {
   public void createDiscount(DiscountCreateRequest request, GridUserInfo userInfo) {
     applicationRepository.createDiscount(request, userInfo.id());
   }
+
+  public Collection<Discount> getAllDiscountsForUser(GridUserInfo gridUserInfo) {
+    return applicationRepository.findAllDiscountsForUser(gridUserInfo);
+  }
 }
