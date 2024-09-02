@@ -363,4 +363,23 @@ class ApplicationServiceTest {
     FileSystemResource systemResource = applicationService.pullApplication(2, userInfo);
     assertEquals("test", systemResource.getPath());
   }
+
+  @Test
+  void shouldThrowIfInvalidUserTryToDeleteDiscount() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().setId(2).build();
+    assertThrows(UnauthorizedException.class, () ->
+        applicationService.deleteDiscount(1, userInfo));
+  }
+
+  @Test
+  void shouldCorrectlyDeleteIfUserMadeDiscount() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().setId(1).build();
+    applicationService.deleteDiscount(1, userInfo);
+  }
+
+  @Test
+  void shouldCorrectlyDeleteIfUserIsAdmin() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(10).build();
+    applicationService.deleteDiscount(1, userInfo);
+  }
 }
