@@ -6,7 +6,6 @@ import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.Discount.Type;
-import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
@@ -230,9 +229,9 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   }
 
   @Override
-  public List<Discount> findAllDiscountsForUser(GridUserInfo userInfo) {
+  public List<Discount> findAllDiscountsForUser(long userId) {
     return discounts.stream()
-        .filter(discount -> discount.getUser().getId() == userInfo.id())
+        .filter(discount -> discount.getUser().getId() == userId)
         .toList();
   }
 

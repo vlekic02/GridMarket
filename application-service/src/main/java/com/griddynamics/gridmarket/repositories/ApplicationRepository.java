@@ -5,7 +5,6 @@ import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Discount;
-import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -53,5 +52,5 @@ public interface ApplicationRepository {
 
   void createDiscount(DiscountCreateRequest request, long userId);
 
-  List<Discount> findAllDiscountsForUser(GridUserInfo userInfo);
+  List<Discount> findAllDiscountsForUser(long userId);
 }

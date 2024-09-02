@@ -230,6 +230,6 @@ public class ApplicationService {
   }
 
   public Collection<Discount> getAllDiscountsForUser(GridUserInfo gridUserInfo) {
-    return applicationRepository.findAllDiscountsForUser(gridUserInfo);
+    return applicationRepository.findAllDiscountsForUser(gridUserInfo.id());
   }
 }

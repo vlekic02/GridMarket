@@ -8,7 +8,6 @@ import com.griddynamics.gridmarket.mappers.ReviewRowMapper;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
 import com.griddynamics.gridmarket.models.Discount;
-import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.repositories.ApplicationRepository;
 import java.nio.file.Path;
@@ -356,7 +355,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   }
 
   @Override
-  public List<Discount> findAllDiscountsForUser(GridUserInfo userInfo) {
+  public List<Discount> findAllDiscountsForUser(long userId) {
     return template.query(
         """
             SELECT discount_id, name AS discount_name, type, value, start_date, end_date, grid_user
@@ -364,7 +363,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             WHERE grid_user = ?
             """,
         new DiscountRowMapper(),
-        userInfo.id()
+        userId
     );
   }
 }
