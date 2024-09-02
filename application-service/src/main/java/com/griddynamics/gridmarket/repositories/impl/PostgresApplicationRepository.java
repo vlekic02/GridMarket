@@ -366,4 +366,15 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         userId
     );
   }
+
+  @Override
+  public void deleteDiscount(long discountId) {
+    template.update(
+        """
+            DELETE FROM discount
+            WHERE discount_id = ?
+            """,
+        discountId
+    );
+  }
 }
