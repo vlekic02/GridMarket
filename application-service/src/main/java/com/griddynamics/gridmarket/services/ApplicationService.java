@@ -232,4 +232,13 @@ public class ApplicationService {
   public Collection<Discount> getAllDiscountsForUser(GridUserInfo gridUserInfo) {
     return applicationRepository.findAllDiscountsForUser(gridUserInfo.id());
   }
+
+  public void deleteDiscount(long id, GridUserInfo userInfo) {
+    applicationRepository.findDiscountById(id).ifPresent(discount -> {
+      if (isNotAdmin(userInfo) && discount.getUser().getId() != userInfo.id()) {
+        throw new UnauthorizedException("You don't have permission to delete this discount !");
+      }
+      applicationRepository.deleteDiscount(id);
+    });
+  }
 }

@@ -53,4 +53,6 @@ public interface ApplicationRepository {
   void createDiscount(DiscountCreateRequest request, long userId);
 
   List<Discount> findAllDiscountsForUser(long userId);
+
+  void deleteDiscount(long discountId);
 }

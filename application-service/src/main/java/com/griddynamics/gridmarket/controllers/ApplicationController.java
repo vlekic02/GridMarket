@@ -168,4 +168,11 @@ public class ApplicationController {
   public DataResponse<Collection<Discount>> getAllDiscountsForUser(GridUserInfo userInfo) {
     return DataResponse.of(applicationService.getAllDiscountsForUser(userInfo));
   }
+
+  @Operation(summary = "Delete specific discount by user")
+  @DeleteMapping("/discounts/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteDiscountForUser(@PathVariable long id, GridUserInfo userInfo) {
+    applicationService.deleteDiscount(id, userInfo);
+  }
 }

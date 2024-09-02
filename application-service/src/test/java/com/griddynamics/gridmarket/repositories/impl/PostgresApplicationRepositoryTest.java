@@ -368,4 +368,14 @@ class PostgresApplicationRepositoryTest {
     List<Discount> discounts = applicationRepository.findAllDiscountsForUser(1);
     assertThat(discounts).hasSize(3);
   }
+
+  @Test
+  @Sql(statements = {
+      "insert into discount values (1, 'test discount1', 'PERCENTAGE', 20, null, null, 1)"
+  })
+  void shouldCorrectlyDeleteDiscount() {
+    applicationRepository.deleteDiscount(1);
+    Optional<Discount> discountOptional = applicationRepository.findDiscountById(1);
+    assertTrue(discountOptional.isEmpty());
+  }
 }

@@ -149,4 +149,11 @@ class InMemorySetApplicationRepositoryTest {
             && discount.getDiscountType() == Type.PERCENTAGE
     );
   }
+
+  @Test
+  void shouldCorrectlyDeleteDiscount() {
+    applicationRepository.deleteDiscount(1);
+    Optional<Discount> discountOptional = applicationRepository.findDiscountById(1);
+    assertTrue(discountOptional.isEmpty());
+  }
 }

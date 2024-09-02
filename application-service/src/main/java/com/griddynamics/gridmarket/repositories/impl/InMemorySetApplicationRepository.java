@@ -235,6 +235,11 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
         .toList();
   }
 
+  @Override
+  public void deleteDiscount(long discountId) {
+    discounts.removeIf(discount -> discount.getId() == discountId);
+  }
+
   private record DateRange(LocalDateTime startTime, LocalDateTime endTime) {
 
     public static DateRange empty() {
