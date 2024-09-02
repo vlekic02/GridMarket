@@ -7,6 +7,7 @@ import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
 import com.griddynamics.gridmarket.models.Application;
+import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
@@ -160,5 +161,11 @@ public class ApplicationController {
       GridUserInfo userInfo
   ) {
     applicationService.createDiscount(request, userInfo);
+  }
+
+  @Operation(summary = "List all discounts for a user")
+  @GetMapping("/discounts")
+  public DataResponse<Collection<Discount>> getAllDiscountsForUser(GridUserInfo userInfo) {
+    return DataResponse.of(applicationService.getAllDiscountsForUser(userInfo));
   }
 }
