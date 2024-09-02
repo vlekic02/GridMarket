@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
@@ -173,7 +174,7 @@ class PostgresApplicationRepositoryTest {
 
   @Test
   @Sql(statements = {
-      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null)",
+      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null, 1)",
       "insert into application values (1, 'Test', null, 'path', 1, 20, 1)"
   })
   void shouldCorrectlyReturnApplicationWithDiscount() {
@@ -279,7 +280,7 @@ class PostgresApplicationRepositoryTest {
 
   @Test
   @Sql(statements = {
-      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null)"
+      "insert into discount values (1, 'test discount', 'PERCENTAGE', 20, null, null, 1)"
   })
   void shouldCorrectlyFindDiscountById() {
     Discount discount = applicationRepository.findDiscountById(1).get();
@@ -340,5 +341,41 @@ class PostgresApplicationRepositoryTest {
   void shouldCorrectlyAddApplicationOwnership() {
     applicationRepository.addApplicationOwnership(1, 1);
     assertTrue(applicationRepository.hasApplicationOwnership(1, 1));
+  }
+
+  @Test
+  void shouldCorrectlyCreateDiscount() {
+    var request = new DiscountCreateRequest("TestInsert",
+        "PERCENTAGE", 20D, null, null);
+    applicationRepository.createDiscount(request, 1);
+    Discount discount = applicationRepository.findAllDiscountsForUser(1).get(0);
+    assertTrue(
+        discount.getName().equals("TestInsert")
+            && discount.getUser().getId() == 1
+            && discount.getValue() == 20D
+            && discount.getDiscountType() == Type.PERCENTAGE
+    );
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into discount values (1, 'test discount1', 'PERCENTAGE', 20, null, null, 1)",
+      "insert into discount values (2, 'test discount2', 'PERCENTAGE', 20, null, null, 1)",
+      "insert into discount values (3, 'test discount3', 'PERCENTAGE', 20, null, null, 1)",
+      "insert into discount values (4, 'test discount4', 'PERCENTAGE', 20, null, null, 2)"
+  })
+  void shouldCorrectlyListAllDiscountsForUser() {
+    List<Discount> discounts = applicationRepository.findAllDiscountsForUser(1);
+    assertThat(discounts).hasSize(3);
+  }
+
+  @Test
+  @Sql(statements = {
+      "insert into discount values (1, 'test discount1', 'PERCENTAGE', 20, null, null, 1)"
+  })
+  void shouldCorrectlyDeleteDiscount() {
+    applicationRepository.deleteDiscount(1);
+    Optional<Discount> discountOptional = applicationRepository.findDiscountById(1);
+    assertTrue(discountOptional.isEmpty());
   }
 }

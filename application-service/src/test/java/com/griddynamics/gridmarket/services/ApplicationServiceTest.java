@@ -3,6 +3,7 @@ package com.griddynamics.gridmarket.services;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -289,14 +290,25 @@ class ApplicationServiceTest {
   void shouldCorrectlyUpdateApplication() {
     GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
     ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest("TestName",
-        "TestDesc", 10D, null, null);
+        "TestDesc", 10D, 1L, null);
     applicationService.updateApplication(2, applicationUpdateRequest, userInfo);
     Application application = applicationService.getApplicationById(2);
     assertTrue(
         "TestName".equals(application.getName())
             && "TestDesc".equals(application.getDescription())
             && application.getOriginalPrice() == 10
+            && application.getDiscount().getId() == 1
     );
+  }
+
+  @Test
+  void shouldCorrectlyRemoveApplicationDiscount() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(1).build();
+    ApplicationUpdateRequest applicationUpdateRequest = new ApplicationUpdateRequest(null,
+        null, null, 1L, null);
+    applicationService.updateApplication(1, applicationUpdateRequest, userInfo);
+    Application application = applicationService.getApplicationById(2);
+    assertNull(application.getDiscount());
   }
 
   @Test
@@ -350,5 +362,24 @@ class ApplicationServiceTest {
     applicationService.handleOrderSuccess(new OrderSuccessEvent(8, 2));
     FileSystemResource systemResource = applicationService.pullApplication(2, userInfo);
     assertEquals("test", systemResource.getPath());
+  }
+
+  @Test
+  void shouldThrowIfInvalidUserTryToDeleteDiscount() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().setId(2).build();
+    assertThrows(UnauthorizedException.class, () ->
+        applicationService.deleteDiscount(1, userInfo));
+  }
+
+  @Test
+  void shouldCorrectlyDeleteIfUserMadeDiscount() {
+    GridUserInfo userInfo = GridUserBuilder.memberUser().setId(1).build();
+    applicationService.deleteDiscount(1, userInfo);
+  }
+
+  @Test
+  void shouldCorrectlyDeleteIfUserIsAdmin() {
+    GridUserInfo userInfo = GridUserBuilder.adminUser().setId(10).build();
+    applicationService.deleteDiscount(1, userInfo);
   }
 }

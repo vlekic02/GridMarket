@@ -3,9 +3,11 @@ package com.griddynamics.gridmarket.controllers;
 import com.griddynamics.gridmarket.annotations.AdminAccess;
 import com.griddynamics.gridmarket.http.request.ApplicationUpdateRequest;
 import com.griddynamics.gridmarket.http.request.ApplicationUploadRequest;
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.http.response.DataResponse;
 import com.griddynamics.gridmarket.models.Application;
+import com.griddynamics.gridmarket.models.Discount;
 import com.griddynamics.gridmarket.models.GridUserInfo;
 import com.griddynamics.gridmarket.models.Review;
 import com.griddynamics.gridmarket.models.SignedUrl;
@@ -149,5 +151,28 @@ public class ApplicationController {
   @AdminAccess
   public void deleteReview(@PathVariable long id) {
     applicationService.deleteReview(id);
+  }
+
+  @Operation(summary = "Creates a discount")
+  @PostMapping("/discounts")
+  @ResponseStatus(HttpStatus.CREATED)
+  public void createDiscount(
+      @RequestBody @Valid DiscountCreateRequest request,
+      GridUserInfo userInfo
+  ) {
+    applicationService.createDiscount(request, userInfo);
+  }
+
+  @Operation(summary = "List all discounts for a user")
+  @GetMapping("/discounts")
+  public DataResponse<Collection<Discount>> getAllDiscountsForUser(GridUserInfo userInfo) {
+    return DataResponse.of(applicationService.getAllDiscountsForUser(userInfo));
+  }
+
+  @Operation(summary = "Delete specific discount by user")
+  @DeleteMapping("/discounts/{id}")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void deleteDiscountForUser(@PathVariable long id, GridUserInfo userInfo) {
+    applicationService.deleteDiscount(id, userInfo);
   }
 }

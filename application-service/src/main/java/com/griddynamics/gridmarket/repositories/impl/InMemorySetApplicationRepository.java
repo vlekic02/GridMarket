@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.repositories.impl;
 
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.models.Application;
 import com.griddynamics.gridmarket.models.ApplicationMetadata;
@@ -32,12 +33,14 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   private final List<Review> reviews;
   private long lastApplicationId;
   private long lastReviewId;
+  private long lastDiscountId;
 
   public InMemorySetApplicationRepository() {
     this.verificationPeriod = new HashMap<>();
     this.discounts = new ArrayList<>(List.of(
-        Discount.unlimited(1, "Black friday", Type.PERCENTAGE, 20)
+        Discount.unlimited(1, "Black friday", Type.PERCENTAGE, 20, 1)
     ));
+    lastDiscountId = 1;
     this.applications = new ArrayList<>(Arrays.asList(
         new Application(1, "Test", null, "/system/path",
             findDiscountById(1).orElseThrow(),
@@ -210,6 +213,31 @@ public class InMemorySetApplicationRepository implements ApplicationRepository {
   public void addApplicationOwnership(long userId, long applicationId) {
     ownership.computeIfAbsent(userId, (key) -> new HashSet<>())
         .add(applicationId);
+  }
+
+  @Override
+  public void createDiscount(DiscountCreateRequest request, long userId) {
+    discounts.add(new Discount(
+        ++lastDiscountId,
+        request.name(),
+        Discount.Type.valueOf(request.type()),
+        request.value(),
+        request.startTime(),
+        request.endTime(),
+        userId
+    ));
+  }
+
+  @Override
+  public List<Discount> findAllDiscountsForUser(long userId) {
+    return discounts.stream()
+        .filter(discount -> discount.getUser().getId() == userId)
+        .toList();
+  }
+
+  @Override
+  public void deleteDiscount(long discountId) {
+    discounts.removeIf(discount -> discount.getId() == discountId);
   }
 
   private record DateRange(LocalDateTime startTime, LocalDateTime endTime) {

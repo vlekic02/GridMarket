@@ -1,5 +1,6 @@
 package com.griddynamics.gridmarket.repositories.impl;
 
+import com.griddynamics.gridmarket.http.request.DiscountCreateRequest;
 import com.griddynamics.gridmarket.http.request.ReviewCreateRequest;
 import com.griddynamics.gridmarket.mappers.ApplicationRowMapper;
 import com.griddynamics.gridmarket.mappers.DiscountRowMapper;
@@ -35,7 +36,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
     return template.query(
         """
             SELECT discount_id, discount.name AS discount_name,
-             type, "value", start_date, end_date, application.*,
+             type, "value", start_date, end_date, grid_user, application.*,
              EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
@@ -53,7 +54,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         """
             SELECT * FROM (
               SELECT discount_id, discount.name AS discount_name,
-              type, "value", start_date, end_date, application.*,
+              type, "value", start_date, end_date, grid_user, application.*,
               EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
@@ -79,7 +80,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
         """
             SELECT * FROM (
               SELECT discount_id, discount.name AS discount_name,
-              type, "value", start_date, end_date, application.*,
+              type, "value", start_date, end_date, grid_user, application.*,
               EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
@@ -111,7 +112,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
     Stream<Application> applicationStream = template.queryForStream(
         """
             SELECT discount_id, discount.name AS discount_name,
-             type, "value", start_date, end_date, application.*,
+             type, "value", start_date, end_date, grid_user, application.*,
              EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
@@ -133,7 +134,7 @@ public class PostgresApplicationRepository implements ApplicationRepository {
     Stream<Application> applicationStream = template.queryForStream(
         """
             SELECT discount_id, discount.name AS discount_name,
-             type, "value", start_date, end_date, application.*,
+             type, "value", start_date, end_date, grid_user, application.*,
              EXISTS(
               SELECT 1 FROM sellable_application
               WHERE application = application.application_id
@@ -154,7 +155,8 @@ public class PostgresApplicationRepository implements ApplicationRepository {
   public Optional<Discount> findDiscountById(long id) {
     Stream<Discount> discountStream = template.queryForStream(
         """
-            SELECT discount_id, name AS discount_name, type, "value", start_date, end_date
+            SELECT discount_id, name AS discount_name, type, "value", start_date, end_date,
+            grid_user
             FROM discount
             WHERE discount_id = ?
             """,
@@ -333,6 +335,46 @@ public class PostgresApplicationRepository implements ApplicationRepository {
             """,
         userId,
         applicationId
+    );
+  }
+
+  @Override
+  public void createDiscount(DiscountCreateRequest request, long userId) {
+    template.update(
+        """
+            INSERT INTO discount
+            VALUES (DEFAULT, ?, ?::discount_type, ?, ?, ?, ?)
+            """,
+        request.name(),
+        request.type(),
+        request.value(),
+        request.startTime(),
+        request.endTime(),
+        userId
+    );
+  }
+
+  @Override
+  public List<Discount> findAllDiscountsForUser(long userId) {
+    return template.query(
+        """
+            SELECT discount_id, name AS discount_name, type, value, start_date, end_date, grid_user
+            FROM discount
+            WHERE grid_user = ?
+            """,
+        new DiscountRowMapper(),
+        userId
+    );
+  }
+
+  @Override
+  public void deleteDiscount(long discountId) {
+    template.update(
+        """
+            DELETE FROM discount
+            WHERE discount_id = ?
+            """,
+        discountId
     );
   }
 }
