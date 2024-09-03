@@ -1,0 +1,29 @@
+oauth-redirect-uri: "https://oauth.pstmn.io/v1/callback"
+oauth-issuer: http://auth-service:9000/
+management:
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans
+  tracing:
+    sampling:
+      probability: 1
+spring:
+  cloud:
+    gcp:
+      pubsub:
+        project-id: gridmarket-dev
+        emulator-host: pub-sub:8085
+        publisher:
+          retry:
+            initial-retry-delay-seconds: 0.6
+            initial-rpc-timeout-seconds: 1
+            retry-delay-multiplier: 2
+            total-timeout-seconds: 600
+            max-rpc-timeout-seconds: 600
+  datasource:
+    url: jdbc:postgresql://auth-db:5432/gridmarket
+    username: grid
+    password: grid
+logging:
+  level:
+    root: DEBUG

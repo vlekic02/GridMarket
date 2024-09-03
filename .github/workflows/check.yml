@@ -1,0 +1,98 @@
+name: GridMarket pull request check
+
+on:
+  pull_request:
+
+permissions:
+  pull-requests: read
+  contents: read
+
+jobs:
+  check:
+    name: Run checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4.1.6
+
+      - name: Detect changes
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            application:
+              - 'application-service/**'
+            user:
+              - 'user-service/**'
+            order:
+              - 'order-service/**'
+            gateway:
+              - 'gateway-service/**'
+            auth:
+              - 'auth-service/**'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4.2.1
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'gradle'
+
+      - name: Setup local dependencies
+        run: |
+          cd jackson-jsonapi/
+          chmod +x ./gradlew
+          ./gradlew publishToMavenLocal
+          cd ../test-utils/
+          chmod +x ./gradlew
+          ./gradlew publishToMavenLocal
+
+      - name: Application service check
+        if: steps.filter.outputs.application == 'true'
+        working-directory: ./application-service
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+
+      - name: Setup GO
+        if: steps.filter.outputs.order == 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.4'
+          cache-dependency-path: |
+            order-service/go.sum
+
+      - name: Order service check
+        if: steps.filter.outputs.order == 'true'
+        working-directory: ./order-service
+        run: |
+          test -z $(gofmt -l .)
+          go test ./...  -coverprofile=coverage.out -covermode=atomic -coverpkg=$(go list ./... | grep -v -e '^order-service$' -e '^order-service/logging$' -e '^order-service/model$' | sed 'H;1h;$!d;x;y/\n/,/')
+
+      - name: Check order-service test coverage
+        if: steps.filter.outputs.order == 'true'
+        uses: vladopajic/go-test-coverage@v2.10.1
+        with:
+          profile: ./order-service/coverage.out
+          threshold-total: 80
+
+      - name: Gateway service check
+        if: steps.filter.outputs.gateway == 'true'
+        working-directory: ./gateway-service
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+
+      - name: User service check
+        if: steps.filter.outputs.user == 'true'
+        working-directory: ./user-service
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build
+
+      - name: Auth service check
+        if: steps.filter.outputs.auth == 'true'
+        working-directory: ./auth-service
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build

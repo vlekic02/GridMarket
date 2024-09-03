@@ -1,0 +1,15 @@
+name: gridmarket-prod
+services:
+  application-service:
+    image: "application-service:1.0-SNAPSHOT"
+    ports:
+      - 8080:8080
+    networks:
+      - service-net
+      - application-net
+    environment:
+      - "SPRING_PROFILES_ACTIVE=prod"
+
+networks:
+  service-net:
+  application-net:
